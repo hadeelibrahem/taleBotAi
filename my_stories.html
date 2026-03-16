@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaleBot AI · My Stories</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- إضافة Font Awesome للأيقونات -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-image: url("imags/background.jpg");
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            margin: 0;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .sidebar-soft {
+    position: relative;
+    background: url('imags/background.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    border-right: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+        /* ===== قسم القصص مع تدرج بنفسجي ناعم ===== */
+        .stories-bg {
+            position: relative;
+            background: linear-gradient(145deg, #ffffff 0%, #88a1d6 100%);
+            backdrop-filter: blur(4px);
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        /* حاوية النجوم - أوضح */
+        .stars-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        /* تصميم النجوم - أوضح وأجمل */
+        .star {
+            position: absolute;
+            color: #ffffff;
+            font-size: 24px;
+            opacity: 0.6;
+            animation: float 6s infinite ease-in-out;
+            filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.8));
+        }
+
+        .star.small {
+            font-size: 16px;
+            opacity: 0.5;
+        }
+
+        .star.medium {
+            font-size: 22px;
+            opacity: 0.7;
+        }
+
+        .star.large {
+            font-size: 32px;
+            opacity: 0.4;
+        }
+
+        /* تنويع ألوان النجوم */
+        .star:nth-child(3n) { color: #ffe9b0; }  /* ذهبي فاتح */
+        .star:nth-child(3n+1) { color: #ffffff; }  /* أبيض */
+        .star:nth-child(3n+2) { color: #e0d0ff; }  /* لافندر */
+
+        /* حركة ناعمة للنجوم */
+        @keyframes float {
+            0% { 
+                transform: translateY(0) rotate(0deg);
+                opacity: 0.4;
+            }
+            50% { 
+                transform: translateY(-8px) rotate(3deg);
+                opacity: 0.8;
+            }
+            100% { 
+                transform: translateY(0) rotate(0deg);
+                opacity: 0.4;
+            }
+        }
+
+        /* اللوجو كخلفية - أوضح */
+        .logo-watermark {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url('imags/logo.jfif');
+            background-repeat: repeat;
+            background-size: 180px 180px;
+            background-position: 30px 30px;
+            opacity: 0.15;
+            pointer-events: none;
+            z-index: 2;
+            filter: blur(1px) brightness(1.1);
+            mix-blend-mode: overlay;
+        }
+
+        /* طبقة إضافية للوجو في الزاوية - أوضح */
+        .logo-corner {
+            position: absolute;
+            bottom: 25px;
+            right: 25px;
+            width: 130px;
+            height: 130px;
+            background-image: url('imags/logo.jfif');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            opacity: 0.35;
+            pointer-events: none;
+            z-index: 3;
+            filter: drop-shadow(0 0 20px rgba(168, 85, 247, 0.4)) blur(0.5px);
+            transform: rotate(-5deg);
+        }
+
+        /* كروت القصص - تصميم مثل الصورة */
+        .story-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            transition: all 0.3s ease;
+            border-radius: 28px;
+            box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.15);
+            position: relative;
+            z-index: 10;
+            overflow: hidden;
+        }
+
+        .story-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.98);
+            box-shadow: 0 25px 40px -12px rgba(139, 92, 246, 0.35);
+            border-color: rgba(255, 255, 255, 1);
+        }
+
+        /* صورة القصة */
+        .story-card .story-image {
+            height: 140px;
+            border-radius: 20px;
+            overflow: hidden;
+            margin-bottom: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 5px 15px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .story-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .story-card:hover img {
+            transform: scale(1.1);
+        }
+
+        /* عنوان القصة */
+        .story-card h3 {
+            font-weight: 800;
+            color: #2d1b4e;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            padding: 0 4px;
+        }
+
+        /* معلومات القصة */
+        .story-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 4px;
+            font-size: 0.75rem;
+        }
+
+        .story-info span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(255, 255, 255, 0.6);
+            padding: 4px 10px;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(2px);
+        }
+
+        .story-info .genre {
+            color: #8b5cf6;
+            font-weight: 600;
+        }
+
+        .story-info .moral {
+            color: #ec4899;
+            font-weight: 600;
+        }
+
+        .main-container {
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+        }
+
+        .insight-panel {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.95);
+            border-radius: 30px;
+            position: relative;
+            z-index: 10;
+            box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.15);
+        }
+
+        /* تعديل ألوان النص */
+        .stories-bg h2 {
+            color: #2d1b4e !important;
+            text-shadow: 0 2px 8px rgba(255, 255, 255, 0.6);
+            font-weight: 800;
+        }
+
+        .stories-bg .library-text {
+            color: #4a3a6e !important;
+            font-weight: 500;
+        }
+
+        .stories-bg .stories-count {
+            background: rgba(255, 255, 255, 0.6) !important;
+            color: #5b3b8c !important;
+            border-color: rgba(255, 255, 255, 0.8) !important;
+            font-weight: 600;
+            backdrop-filter: blur(4px);
+        }
+
+        .stories-bg > *:not(.stars-container):not(.logo-watermark):not(.logo-corner) {
+            position: relative;
+            z-index: 10;
+        }
+
+        /* تحسين مظهر البحث */
+        .search-input {
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            border-radius: 16px;
+            padding: 12px 16px 12px 40px;
+            width: 100%;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .search-input:focus {
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 0 0 4px rgba(168, 85, 247, 0.2);
+            outline: none;
+        }
+
+        /* تحسين مظهر أزرار التنقل */
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            border-radius: 20px;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .nav-link.active {
+            background: linear-gradient(90deg, #a855f7, #ec4899);
+            color: white;
+            box-shadow: 0 10px 20px -8px rgba(168, 85, 247, 0.4);
+        }
+
+        .nav-link:not(.active) {
+            color: #6b5b8e;
+        }
+
+        .nav-link:not(.active):hover {
+            background: rgba(255, 255, 255, 0.6);
+            color: #2d1b4e;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        
+        <!-- القائمة الجانبية -->
+        <aside class="w-72 flex flex-col justify-between sidebar-soft p-7">
+            <div>
+                <div class="flex items-center gap-3 mb-12">
+                    <div class="w-11 h-11 rounded-2xl overflow-hidden shadow-lg border-2 border-white/60">
+                        <img src="imags/logo.jpg" alt="TaleBot AI" class="w-full h-full object-cover">
+                    </div>
+                    <span class="text-2xl font-extrabold bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent">
+                        TaleBot AI
+                    </span>
+                </div>
+
+                <nav class="space-y-2">
+                    <a href="#" class="nav-link">
+                        <span>📊</span> Dashboard
+                    </a>
+                    <a href="#" class="nav-link active">
+                        <span>📚</span> My Stories
+                    </a>
+                    <a href="#" class="nav-link">
+                        <span>✨</span> Create Story
+                    </a>
+                    <a href="#" class="nav-link">
+                        <span>📈</span> Analytics
+                    </a>
+                    <a href="#" class="nav-link">
+                        <span>⚙️</span> Settings
+                    </a>
+                </nav>
+            </div>
+
+            <div class="bg-white/60 p-4 rounded-3xl border border-white/80 flex items-center gap-4 shadow-lg backdrop-blur-sm">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center text-white font-bold text-lg shadow-md border-2 border-white/60">
+                    SJ
+                </div>
+                <div>
+                    <h4 class="font-bold text-gray-800">Sarah Johnson</h4>
+                    <p class="text-xs text-purple-600 font-semibold bg-white/60 px-2 py-0.5 rounded-full inline-block mt-1 border border-white/80">✨ Premium Plan</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- القسم الرئيسي -->
+        <main class="flex-1 stories-bg p-8 overflow-y-auto">
+            
+            <!-- اللوجو كخلفية متكررة -->
+            <div class="logo-watermark"></div>
+            
+            <!-- اللوجو في الزاوية -->
+            <div class="logo-corner"></div>
+            
+            <!-- حاوية النجوم - أكثر وضوحاً -->
+            <div class="stars-container">
+                <!-- نجوم كبيرة -->
+                <i class="star large fa-solid fa-star" style="top: 5%; left: 10%;"></i>
+                <i class="star large fa-solid fa-star" style="top: 15%; left: 85%;"></i>
+                <i class="star large fa-solid fa-star" style="top: 30%; left: 70%;"></i>
+                <i class="star large fa-solid fa-star" style="top: 50%; left: 20%;"></i>
+                <i class="star large fa-solid fa-star" style="top: 75%; left: 90%;"></i>
+                <i class="star large fa-solid fa-star" style="top: 90%; left: 40%;"></i>
+                
+                <!-- نجوم متوسطة -->
+                <i class="star medium fa-solid fa-star" style="top: 10%; left: 35%;"></i>
+                <i class="star medium fa-solid fa-star" style="top: 22%; left: 55%;"></i>
+                <i class="star medium fa-solid fa-star" style="top: 38%; left: 15%;"></i>
+                <i class="star medium fa-solid fa-star" style="top: 45%; left: 75%;"></i>
+                <i class="star medium fa-solid fa-star" style="top: 60%; left: 30%;"></i>
+                <i class="star medium fa-solid fa-star" style="top: 80%; left: 60%;"></i>
+                
+                <!-- نجوم صغيرة -->
+                <i class="star small fa-regular fa-star" style="top: 8%; left: 92%;"></i>
+                <i class="star small fa-regular fa-star" style="top: 25%; left: 8%;"></i>
+                <i class="star small fa-regular fa-star" style="top: 42%; left: 88%;"></i>
+                <i class="star small fa-regular fa-star" style="top: 58%; left: 45%;"></i>
+                <i class="star small fa-regular fa-star" style="top: 72%; left: 15%;"></i>
+                <i class="star small fa-regular fa-star" style="top: 88%; left: 70%;"></i>
+            </div>
+
+            <!-- الهيدر -->
+            <div class="flex justify-between items-start mb-8 relative z-10">
+                <div>
+                    <h2 class="text-4xl font-extrabold mb-2">My Magical Stories</h2>
+                    <div class="flex items-center gap-4 mt-1">
+                        <span class="library-text">🌸 Sarah's Storyscape Library</span>
+                        <span class="stories-count px-4 py-1.5 rounded-full text-xs font-bold shadow-sm border backdrop-blur-sm">12 Stories</span>
+                    </div>
+                </div>
+
+                <!-- لوحة Parent's Insights -->
+                <div class="insight-panel p-6 w-80 shadow-xl">
+                    <h3 class="font-bold text-gray-700 text-lg mb-4 flex items-center justify-between">
+                        Parent's Insights
+                        <span class="text-2xl">📘</span>
+                    </h3>
+                    <div class="space-y-4">
+                        <div class="relative">
+                            <span class="absolute left-3 top-3.5 text-gray-400">🔍</span>
+                            <input type="text" placeholder="Find a story..." 
+                                   class="search-input">
+                        </div>
+                        <select class="w-full bg-white/70 border-0 rounded-2xl px-4 py-3 text-sm text-gray-600 focus:outline-none focus:ring-4 ring-purple-200/50 shadow-inner">
+                            <option>📖 All Genres</option>
+                            <option>🐉 Fantasy</option>
+                            <option>🚀 Adventure</option>
+                            <option>🪄 Fairy Tale</option>
+                        </select>
+                    </div>
+                    <div class="mt-5 pt-3 border-t border-white/60">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-600">🤖 AI Engine Status</span>
+                            <span class="text-xs bg-green-200/80 text-green-700 px-3 py-1 rounded-full font-semibold">Library up-to-date</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- شبكة القصص -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 auto-rows-fr relative z-10">
+                
+                <!-- The Dragon's Picnic -->
+                <div class="story-card p-3">
+                    <div class="story-image">
+                        <img src="https://picsum.photos/seed/dragon/400/300" alt="Dragon">
+                    </div>
+                    <h3>The Dragon's Picnic</h3>
+                    <div class="story-info">
+                        <span class="genre">🐉 Fantasy</span>
+                        <span class="moral">❤️ Kindness</span>
+                    </div>
+                </div>
+
+                <!-- Mia and the Moonbeam -->
+                <div class="story-card p-3">
+                    <div class="story-image">
+                        <img src="https://picsum.photos/seed/mia/400/300" alt="Mia">
+                    </div>
+                    <h3>Mia and the Moonbeam</h3>
+                    <div class="story-info">
+                        <span class="genre">🐉 Fantasy</span>
+                        <span class="moral">❤️ Kindness</span>
+                    </div>
+                </div>
+
+                <!-- The Sleepy Elephant -->
+                <div class="story-card p-3">
+                    <div class="story-image">
+                        <img src="https://picsum.photos/seed/elephant/400/300" alt="Elephant">
+                    </div>
+                    <h3>The Sleepy Elephant</h3>
+                    <div class="story-info">
+                        <span class="genre">🐉 Fantasy</span>
+                        <span class="moral">❤️ Kindness</span>
+                    </div>
+                </div>
+
+                <!-- Oliver's Starfish -->
+                <div class="story-card p-3">
+                    <div class="story-image">
+                        <img src="https://picsum.photos/seed/starfish/400/300" alt="Starfish">
+                    </div>
+                    <h3>Oliver's Starfish</h3>
+                    <div class="story-info">
+                        <span class="genre">🐉 Fantasy</span>
+                        <span class="moral">❤️ Kindness</span>
+                    </div>
+                </div>
+
+                <!-- Gears and Giggles -->
+                <div class="story-card p-3">
+                    <div class="story-image">
+                        <img src="https://picsum.photos/seed/gears/400/300" alt="Gears">
+                    </div>
+                    <h3>Gears and Giggles</h3>
+                    <div class="story-info">
+                        <span class="genre">🐉 Fantasy</span>
+                        <span class="moral">❤️ Kindness</span>
+                    </div>
+                </div>
+
+                <!-- The Tiny Pirate -->
+                <div class="story-card p-3">
+                    <div class="story-image">
+                        <img src="https://picsum.photos/seed/pirate/400/300" alt="Pirate">
+                    </div>
+                    <h3>The Tiny Pirate</h3>
+                    <div class="story-info">
+                        <span class="genre">🐉 Fantasy</span>
+                        <span class="moral">❤️ Kindness</span>
+                    </div>
+                </div>
+
+                <!-- The Cloud Castle -->
+                <div class="story-card p-3">
+                    <div class="story-image">
+                        <img src="https://picsum.photos/seed/cloudcastle/400/300" alt="Cloud Castle">
+                    </div>
+                    <h3>The Cloud Castle</h3>
+                    <div class="story-info">
+                        <span class="genre">🐉 Fantasy</span>
+                        <span class="moral">❤️ Kindness</span>
+                    </div>
+                </div>
+
+                <!-- The Bedtime Detective -->
+                <div class="story-card p-3">
+                    <div class="story-image">
+                        <img src="https://picsum.photos/seed/detective/400/300" alt="Detective">
+                    </div>
+                    <h3>The Bedtime Detective</h3>
+                    <div class="story-info">
+                        <span class="genre">🐉 Fantasy</span>
+                        <span class="moral">❤️ Kindness</span>
+                    </div>
+                </div>
+
+                <!-- Whispering Woods -->
+                <div class="story-card p-3">
+                    <div class="story-image">
+                        <img src="https://picsum.photos/seed/whispering/400/300" alt="Whispering Woods">
+                    </div>
+                    <h3>Whispering Woods</h3>
+                    <div class="story-info">
+                        <span class="genre">🐉 Fantasy</span>
+                        <span class="moral">❤️ Kindness</span>
+                    </div>
+                </div>
+
+                <!-- The Rainbow Key -->
+                <div class="story-card p-3">
+                    <div class="story-image">
+                        <img src="https://picsum.photos/seed/rainbowkey/400/300" alt="Rainbow Key">
+                    </div>
+                    <h3>The Rainbow Key</h3>
+                    <div class="story-info">
+                        <span class="genre">🐉 Fantasy</span>
+                        <span class="moral">❤️ Kindness</span>
+                    </div>
+                </div>
+
+                <!-- Sarah's Clockwork Castle -->
+                <div class="story-card p-3">
+                    <div class="story-image">
+                        <img src="https://picsum.photos/seed/clockwork/400/300" alt="Clockwork Castle">
+                    </div>
+                    <h3>Sarah's Clockwork Castle</h3>
+                    <div class="story-info">
+                        <span class="genre">🐉 Fantasy</span>
+                        <span class="moral">❤️ Kindness</span>
+                    </div>
+                </div>
+
+                <!-- The Flying Bathtastic -->
+                <div class="story-card p-3">
+                    <div class="story-image">
+                        <img src="https://picsum.photos/seed/bathtastic/400/300" alt="Flying Bathtastic">
+                    </div>
+                    <h3>The Flying Bathtastic</h3>
+                    <div class="story-info">
+                        <span class="genre">🐉 Fantasy</span>
+                        <span class="moral">❤️ Kindness</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div class="mt-10 flex justify-center items-center gap-6 relative z-10">
+                <button class="px-5 py-2 rounded-full bg-white/70 border border-white text-sm font-semibold text-purple-600 hover:bg-purple-100 transition shadow-sm">← Previous</button>
+                <span class="text-sm font-semibold text-indigo-900 bg-white/50 px-4 py-2 rounded-full border border-white/70">Page 1 of 1</span>
+                <button class="px-5 py-2 rounded-full bg-white/70 border border-white text-sm font-semibold text-purple-600 hover:bg-purple-100 transition shadow-sm">Next →</button>
+            </div>
+        </main>
+    </div>
+
+</body>
+</html>

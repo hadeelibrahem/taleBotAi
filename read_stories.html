@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✨ TaleBot AI · Story Reader ✨</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-image: url("imags/background.jpg");
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            margin: 0;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .sidebar-soft {
+            position: relative;
+            background: url('imags/background.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            border-right: 1px solid rgba(255, 255, 255, 0.6);
+        }
+
+        .stories-bg {
+            position: relative;
+            background: linear-gradient(145deg, #ffffff 0%, #88a1d6 100%);
+            backdrop-filter: blur(4px);
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .stars-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        .star {
+            position: absolute;
+            color: #ffffff;
+            font-size: 24px;
+            opacity: 0.6;
+            animation: float 6s infinite ease-in-out;
+            filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.8));
+        }
+
+        .star.small { font-size: 16px; opacity: 0.5; }
+        .star.medium { font-size: 22px; opacity: 0.7; }
+        .star.large { font-size: 32px; opacity: 0.4; }
+
+        .star:nth-child(3n) { color: #ffe9b0; }
+        .star:nth-child(3n+1) { color: #ffffff; }
+        .star:nth-child(3n+2) { color: #e0d0ff; }
+
+        @keyframes float {
+            0% { transform: translateY(0) rotate(0deg); opacity: 0.4; }
+            50% { transform: translateY(-8px) rotate(3deg); opacity: 0.8; }
+            100% { transform: translateY(0) rotate(0deg); opacity: 0.4; }
+        }
+
+        .logo-watermark {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url('imags/logo.jfif');
+            background-repeat: repeat;
+            background-size: 180px 180px;
+            background-position: 30px 30px;
+            opacity: 0.15;
+            pointer-events: none;
+            z-index: 2;
+            filter: blur(1px) brightness(1.1);
+            mix-blend-mode: overlay;
+        }
+
+        .logo-corner {
+            position: absolute;
+            bottom: 25px;
+            right: 25px;
+            width: 130px;
+            height: 130px;
+            background-image: url('imags/logo.jfif');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            opacity: 0.35;
+            pointer-events: none;
+            z-index: 3;
+            filter: drop-shadow(0 0 20px rgba(168, 85, 247, 0.4)) blur(0.5px);
+            transform: rotate(-5deg);
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            border-radius: 20px;
+            transition: all 0.2s;
+            font-weight: 500;
+            font-size: 16px;
+        }
+
+        .nav-link.active {
+            background: linear-gradient(90deg, #a855f7, #ec4899);
+            color: white;
+            box-shadow: 0 10px 20px -8px rgba(168, 85, 247, 0.4);
+        }
+
+        .nav-link:not(.active) {
+            color: #6b5b8e;
+        }
+
+        .nav-link:not(.active):hover {
+            background: rgba(255, 255, 255, 0.6);
+            color: #2d1b4e;
+        }
+
+        .cute-book {
+            width: 100%;
+            height: 500px;
+            background: #fff9f0;
+            border-radius: 30px 15px 15px 30px;
+            box-shadow: 15px 15px 30px rgba(139, 92, 246, 0.2), -8px 0 15px rgba(192, 132, 252, 0.3) inset;
+            position: relative;
+            overflow: hidden;
+            border: 4px solid white;
+            transition: all 0.4s ease;
+        }
+
+        .cute-book::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -8px;
+            width: 15px;
+            height: 100%;
+            background: linear-gradient(90deg, #f9a8d4, #c084fc);
+            border-radius: 10px 0 0 10px;
+        }
+
+        .cute-pages {
+            height: 100%;
+            width: 100%;
+            padding: 25px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .page-image {
+            width: 100%;
+            height: 200px;
+            border-radius: 25px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            border: 4px solid white;
+            box-shadow: 0 10px 25px -8px rgba(139, 92, 246, 0.5);
+        }
+
+        .page-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .page-image:hover img {
+            transform: scale(1.05);
+        }
+
+        .cute-chapter-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #be5f8a;
+            margin-bottom: 15px;
+            background: rgba(255, 240, 245, 0.9);
+            padding: 10px 18px;
+            border-radius: 60px;
+            border: 2px dashed #f9a8d4;
+        }
+
+        .cute-story-text {
+            font-size: 16px;
+            line-height: 1.8;
+            color: #4a3a6e;
+            background: rgba(255, 250, 240, 0.8);
+            padding: 20px;
+            border-radius: 30px;
+            border: 3px solid white;
+            flex: 1;
+        }
+
+        .page-indicator {
+            position: absolute;
+            bottom: 15px;
+            right: 25px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 6px 16px;
+            border-radius: 60px;
+            font-weight: 700;
+            color: #be5f8a;
+            border: 2px solid #f9a8d4;
+            font-size: 14px;
+            z-index: 20;
+        }
+
+        .cute-page-btn {
+            width: 50px;
+            height: 50px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            color: #ec4899;
+            box-shadow: 0 8px 20px rgba(236, 72, 153, 0.25);
+            cursor: pointer;
+            border: 3px solid #f9a8d4;
+            transition: all 0.3s;
+        }
+
+        .cute-page-btn:hover {
+            background: #f9a8d4;
+            color: white;
+            transform: scale(1.15);
+        }
+
+        .cute-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border-radius: 30px;
+            padding: 18px;
+            border: 2px solid white;
+            box-shadow: 0 15px 30px -10px rgba(139, 92, 246, 0.2);
+            margin-bottom: 15px;
+        }
+
+        .cute-card-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #be5f8a;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 2px dashed #f9a8d4;
+            padding-bottom: 6px;
+        }
+
+        .cute-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: white;
+            border-radius: 40px;
+            font-weight: 600;
+            color: #a1557a;
+            border: 2px solid #ffe4f0;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s;
+        }
+
+        .cute-btn i {
+            font-size: 14px;
+        }
+
+        .cute-btn:hover {
+            background: #f9a8d4;
+            color: white;
+        }
+
+        .cute-btn.speaking {
+            background: #8b5cf6;
+            color: white;
+            animation: pulse 1s infinite;
+        }
+
+        .cute-btn.loading {
+            background: #c084fc;
+            color: white;
+            cursor: wait;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+
+        .voice-options {
+            display: flex;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .voice-option-btn {
+            flex: 1;
+            padding: 6px 8px;
+            border-radius: 30px;
+            font-size: 11px;
+            font-weight: 600;
+            background: white;
+            border: 2px solid #ffe4f0;
+            color: #a1557a;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .voice-option-btn i {
+            font-size: 12px;
+        }
+
+        .voice-option-btn:hover {
+            background: #f9a8d4;
+            color: white;
+            border-color: #f9a8d4;
+        }
+
+        .voice-option-btn.active {
+            background: #8b5cf6;
+            color: white;
+            border-color: #8b5cf6;
+        }
+
+        .voice-option-btn.recording {
+            background: #ef4444;
+            color: white;
+            border-color: #ef4444;
+            animation: pulse 1s infinite;
+        }
+
+        .cute-stars {
+            display: flex;
+            gap: 4px;
+            font-size: 24px;
+            color: #fbbf24;
+            margin: 8px 0;
+        }
+
+        .cute-progress {
+            height: 8px;
+            background: #ffe4f0;
+            border-radius: 60px;
+            overflow: hidden;
+            border: 2px solid white;
+            margin: 10px 0;
+        }
+
+        .cute-progress-fill {
+            height: 100%;
+            width: 75%;
+            background: linear-gradient(90deg, #f472b6, #c084fc);
+        }
+
+        .cute-badge {
+            background: #f9a8d4;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 60px;
+            font-weight: 600;
+            font-size: 13px;
+            border: 2px solid white;
+        }
+
+        .breadcrumb-cute {
+            color: #8b5cf6;
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 5px;
+            background: rgba(255, 255, 255, 0.5);
+            padding: 5px 15px;
+            border-radius: 60px;
+            display: inline-block;
+            border: 2px dashed #f9a8d4;
+        }
+
+        h1 {
+            font-size: 36px;
+            font-weight: 800;
+            color: #2d1b4e;
+            margin-bottom: 5px;
+        }
+
+        h2 {
+            font-size: 20px;
+            font-weight: 600;
+            color: #8b5cf6;
+            margin-bottom: 20px;
+        }
+
+        .main-container {
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+        }
+
+        .stories-bg h2 {
+            color: #2d1b4e !important;
+            text-shadow: 0 2px 8px rgba(255, 255, 255, 0.6);
+            font-weight: 800;
+        }
+
+        .stories-bg > *:not(.stars-container):not(.logo-watermark):not(.logo-corner) {
+            position: relative;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        
+        <!-- Sidebar -->
+        <aside class="w-72 flex flex-col justify-between sidebar-soft p-7">
+            <div>
+                <div class="flex items-center gap-3 mb-12">
+                    <div class="w-11 h-11 rounded-2xl overflow-hidden shadow-lg border-2 border-white/60">
+                        <img src="imags/logo.jpg" alt="TaleBot AI" class="w-full h-full object-cover">
+                    </div>
+                    <span class="text-2xl font-extrabold bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent">
+                        TaleBot AI
+                    </span>
+                </div>
+
+                <nav class="space-y-2">
+                    <a href="#" class="nav-link"><span>📊</span> Dashboard</a>
+                    <a href="#" class="nav-link"><span>📚</span> My Stories</a>
+                    <a href="#" class="nav-link active"><span>✨</span> Create Story</a>
+                    <a href="#" class="nav-link"><span>📈</span> Analytics</a>
+                    <a href="#" class="nav-link"><span>⚙️</span> Settings</a>
+                </nav>
+            </div>
+
+            <div class="bg-white/60 p-4 rounded-3xl border border-white/80 flex items-center gap-4 shadow-lg backdrop-blur-sm">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center text-white font-bold text-lg shadow-md border-2 border-white/60">
+                    SJ
+                </div>
+                <div>
+                    <h4 class="font-bold text-gray-800">Sarah Johnson</h4>
+                    <p class="text-xs text-purple-600 font-semibold bg-white/60 px-2 py-0.5 rounded-full inline-block mt-1 border border-white/80">✨ Premium Plan</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 stories-bg p-8 overflow-y-auto">
+            
+            <div class="logo-watermark"></div>
+            <div class="logo-corner"></div>
+            <div class="stars-container">
+                <i class="star large fa-solid fa-star" style="top: 5%; left: 10%;"></i>
+                <i class="star large fa-solid fa-star" style="top: 15%; left: 85%;"></i>
+                <i class="star large fa-solid fa-star" style="top: 30%; left: 70%;"></i>
+                <i class="star medium fa-solid fa-star" style="top: 10%; left: 35%;"></i>
+                <i class="star medium fa-solid fa-star" style="top: 45%; left: 75%;"></i>
+                <i class="star small fa-regular fa-star" style="top: 8%; left: 92%;"></i>
+                <i class="star small fa-regular fa-star" style="top: 72%; left: 15%;"></i>
+            </div>
+
+            <div class="max-w-7xl mx-auto relative z-10">
+
+                <!-- Header -->
+                <div class="mb-6">
+                    <div class="breadcrumb-cute">
+                        <i class="fa-regular fa-folder-open mr-2"></i>
+                        Sarah's Adventures 
+                        <i class="fa-solid fa-chevron-right mx-2 text-pink-300"></i> 
+                        The Magical Clockwork Castle
+                    </div>
+                    <h1>Story Reader & Editor</h1>
+                    <h2><i class="fa-regular fa-bookmark mr-2 text-pink-400"></i> Chapter 1: The Curious Key</h2>
+                </div>
+
+                <!-- Book -->
+                <div class="flex items-center justify-center gap-3 mb-6">
+                    <div class="cute-page-btn" onclick="prevPage()">
+                        <i class="fa-solid fa-chevron-left"></i>
+                    </div>
+                    <div class="cute-book" id="storyBook">
+                        <div class="cute-pages" id="bookPages">
+                            <div id="pageContent"></div>
+                            <div class="page-indicator" id="pageNumber">📖 Page 1 of 5</div>
+                        </div>
+                    </div>
+                    <div class="cute-page-btn" onclick="nextPage()">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </div>
+                </div>
+
+                <!-- Options -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mt-4">
+                    
+                    <!-- Story Controls - مرتب ومنسق -->
+                    <div class="cute-card">
+                        <div class="cute-card-title">
+                            <i class="fa-solid fa-gamepad text-pink-400"></i> Story Controls
+                        </div>
+                        
+                        <!-- الصف الأول: Listen و Download -->
+                        <div class="flex gap-2 mb-3">
+                            <div class="cute-btn flex-1" id="listenBtn" onclick="speakCurrentPage()">
+                                <i class="fa-solid fa-headphones"></i>
+                                <span id="listenText">Listen</span>
+                            </div>
+                            <div class="cute-btn flex-1" id="downloadBtn" onclick="downloadPDF()">
+                                <i class="fa-solid fa-file-pdf"></i>
+                                <span id="downloadText">Download</span>
+                            </div>
+                        </div>
+                        
+                        <!-- خيارات الصوت (Male, Female, My Voice) -->
+                        <div class="voice-options">
+                            <button class="voice-option-btn active" onclick="selectVoiceType('male')" id="voiceMaleBtn">
+                                <i class="fa-solid fa-user-tie"></i> Male
+                            </button>
+                            <button class="voice-option-btn" onclick="selectVoiceType('female')" id="voiceFemaleBtn">
+                                <i class="fa-solid fa-user-nurse"></i> Female
+                            </button>
+                            <button class="voice-option-btn" onclick="selectVoiceType('recorded')" id="voiceRecordBtn">
+                                <i class="fa-solid fa-microphone"></i> My Voice
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Rate this Story -->
+                    <div class="cute-card">
+                        <div class="cute-card-title">
+                            <i class="fa-solid fa-star text-yellow-400"></i> Rate this Story
+                        </div>
+                        <div class="cute-stars">
+                            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-regular fa-star"></i>
+                        </div>
+                        <div class="text-sm text-purple-400">4.5 (234 reviews)</div>
+                    </div>
+
+                    <!-- Parent's Insights -->
+                    <div class="cute-card">
+                        <div class="cute-card-title">
+                            <i class="fa-solid fa-chart-simple text-purple-400"></i> Parent's Insights
+                        </div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-purple-600">Reading Time</span>
+                            <span class="text-2xl font-bold text-pink-400">48 min</span>
+                        </div>
+                        <div class="cute-progress"><div class="cute-progress-fill"></div></div>
+                        <div class="flex justify-between text-xs text-purple-400">
+                            <span>75% completed</span><span>12/16 chapters</span>
+                        </div>
+                    </div>
+
+                    <!-- Editor & Feedback -->
+                    <div class="cute-card">
+                        <div class="cute-card-title">
+                            <i class="fa-regular fa-pen-to-square text-purple-400"></i> Editor & Feedback
+                        </div>
+                        <div class="cute-btn" onclick="alert('Opening text editor ✏️')">
+                            <i class="fa-regular fa-pen-to-square"></i> Edit Text
+                        </div>
+                        <div class="cute-btn" onclick="alert('Added to favorites ❤️')">
+                            <i class="fa-regular fa-heart"></i> Add to Favorites
+                        </div>
+                    </div>
+
+                    <!-- AI Engine Status -->
+                    <div class="cute-card flex flex-col justify-center">
+                        <div class="flex items-center gap-2 mb-2">
+                            <i class="fa-regular fa-circle-check text-green-500 text-xl"></i>
+                            <span class="font-bold text-gray-700">AI Status</span>
+                        </div>
+                        <span class="cute-badge bg-green-400 text-center">Story Complete ✅</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Story pages
+        const pages = [
+            { 
+                title: "✨ The Curious Key", 
+                content: "In the heart of the whispering woods, where the ancient oaks whispered secrets to the wind, lived a young girl named Elara. She had always been curious about the old clockwork castle that stood silent on the hill, its gears frozen in time.",
+                image: "https://picsum.photos/seed/dragon/800/400"
+            },
+            { 
+                title: "🌟 The Hidden Path", 
+                content: "One sunny morning, while chasing a golden butterfly with sparkly wings, Elara stumbled upon a hidden path she had never seen before. The path was covered with glowing moss that sparkled like tiny stars.",
+                image: "https://picsum.photos/seed/forest/800/400"
+            },
+            { 
+                title: "🏰 The Magical Castle", 
+                content: "At the end of the path stood the magnificent clockwork castle. Its towers reached toward the clouds, and intricate gears covered every surface, ticking and turning gently.",
+                image: "https://picsum.photos/seed/castle/800/400"
+            },
+            { 
+                title: "🔑 The Golden Key", 
+                content: "Inside, Elara found a cozy room filled with ticking clocks of all shapes and sizes. In the center, on a velvet cushion, lay a golden key that glowed with warm light.",
+                image: "https://picsum.photos/seed/key/800/400"
+            },
+            { 
+                title: "🌈 The Adventure Begins", 
+                content: "With the key in her hand, the castle magically came to life! Gears began turning and singing, music started playing, and a secret door revealed itself.",
+                image: "https://picsum.photos/seed/magic/800/400"
+            }
+        ];
+
+        let currentPage = 0;
+        let speaking = false;
+        let currentUtterance = null;
+        
+        // Voice options
+        let selectedVoiceType = 'male';
+        let recordedAudio = null;
+        let mediaRecorder = null;
+        let audioChunks = [];
+
+        function updatePage() {
+            const page = pages[currentPage];
+            
+            const pageHTML = `
+                <div class="page-image">
+                    <img src="${page.image}" alt="${page.title}">
+                </div>
+                <div class="cute-chapter-title">
+                    <i class="fa-regular fa-star"></i> ${page.title}
+                </div>
+                <div class="cute-story-text">
+                    <p>${page.content}</p>
+                    <p style="margin-top:15px; color:#c084fc; font-style:italic;">✨ To be continued... ✨</p>
+                </div>
+            `;
+            
+            document.getElementById('pageContent').innerHTML = pageHTML;
+            document.getElementById('pageNumber').textContent = `📖 Page ${currentPage + 1} of ${pages.length}`;
+            
+            if (speaking) {
+                stopSpeaking();
+            }
+        }
+
+        function nextPage() {
+            if (currentPage < pages.length - 1) {
+                currentPage++;
+                updatePage();
+                const book = document.getElementById('storyBook');
+                book.style.transform = 'scale(0.98) rotate(1deg)';
+                setTimeout(() => book.style.transform = 'scale(1) rotate(0deg)', 300);
+            } else {
+                alert('🎉 Congratulations! You finished the story! Want to read the next one?');
+            }
+        }
+
+        function prevPage() {
+            if (currentPage > 0) {
+                currentPage--;
+                updatePage();
+                const book = document.getElementById('storyBook');
+                book.style.transform = 'scale(0.98) rotate(-1deg)';
+                setTimeout(() => book.style.transform = 'scale(1) rotate(0deg)', 300);
+            }
+        }
+
+        function selectVoiceType(type) {
+            selectedVoiceType = type;
+            
+            document.getElementById('voiceMaleBtn').classList.remove('active');
+            document.getElementById('voiceFemaleBtn').classList.remove('active');
+            document.getElementById('voiceRecordBtn').classList.remove('active', 'recording');
+            
+            if (type === 'male') {
+                document.getElementById('voiceMaleBtn').classList.add('active');
+            } else if (type === 'female') {
+                document.getElementById('voiceFemaleBtn').classList.add('active');
+            } else if (type === 'recorded') {
+                document.getElementById('voiceRecordBtn').classList.add('active');
+                startRecording();
+            }
+        }
+
+        async function startRecording() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+                
+                mediaRecorder.ondataavailable = (event) => {
+                    audioChunks.push(event.data);
+                };
+                
+                mediaRecorder.onstop = () => {
+                    recordedAudio = new Blob(audioChunks, { type: 'audio/mp3' });
+                    document.getElementById('voiceRecordBtn').classList.remove('recording');
+                    document.getElementById('voiceRecordBtn').innerHTML = '<i class="fa-solid fa-microphone"></i> My Voice';
+                    alert('✅ Your voice has been recorded! Now the story will be read with your voice.');
+                };
+                
+                mediaRecorder.start();
+                document.getElementById('voiceRecordBtn').classList.add('recording');
+                document.getElementById('voiceRecordBtn').innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Recording...';
+                
+                setTimeout(() => {
+                    if (mediaRecorder && mediaRecorder.state === 'recording') {
+                        mediaRecorder.stop();
+                        mediaRecorder.stream.getTracks().forEach(track => track.stop());
+                    }
+                }, 30000);
+                
+            } catch (error) {
+                console.error('Microphone error:', error);
+                alert('❌ Please allow microphone access to record your voice.');
+            }
+        }
+
+        function speakCurrentPage() {
+            const page = pages[currentPage];
+            const textToSpeak = `${page.title}. ${page.content}`;
+            const listenBtn = document.getElementById('listenBtn');
+            const listenText = document.getElementById('listenText');
+            
+            if (speaking) {
+                stopSpeaking();
+                return;
+            }
+            
+            if (selectedVoiceType === 'recorded' && recordedAudio) {
+                const audio = new Audio(URL.createObjectURL(recordedAudio));
+                audio.play();
+                
+                speaking = true;
+                listenBtn.classList.add('speaking');
+                listenText.textContent = '🔊 Playing...';
+                
+                audio.onended = () => {
+                    speaking = false;
+                    listenBtn.classList.remove('speaking');
+                    listenText.textContent = 'Listen';
+                };
+                
+            } else {
+                if ('speechSynthesis' in window) {
+                    window.speechSynthesis.cancel();
+                    
+                    const utterance = new SpeechSynthesisUtterance(textToSpeak);
+                    const voices = window.speechSynthesis.getVoices();
+                    
+                    if (selectedVoiceType === 'male') {
+                        const maleVoice = voices.find(voice => 
+                            voice.name.includes('Google UK English Male') || 
+                            voice.name.includes('Microsoft David') ||
+                            voice.name.includes('Male')
+                        );
+                        if (maleVoice) utterance.voice = maleVoice;
+                    } else if (selectedVoiceType === 'female') {
+                        const femaleVoice = voices.find(voice => 
+                            voice.name.includes('Google US English') || 
+                            voice.name.includes('Microsoft Zira') ||
+                            voice.name.includes('Female')
+                        );
+                        if (femaleVoice) utterance.voice = femaleVoice;
+                    }
+                    
+                    utterance.rate = 0.9;
+                    utterance.pitch = 1;
+                    utterance.volume = 1;
+                    
+                    utterance.onstart = function() {
+                        speaking = true;
+                        listenBtn.classList.add('speaking');
+                        listenText.textContent = selectedVoiceType === 'male' ? '🔊 Male...' : '🔊 Female...';
+                    };
+                    
+                    utterance.onend = function() {
+                        speaking = false;
+                        listenBtn.classList.remove('speaking');
+                        listenText.textContent = 'Listen';
+                    };
+                    
+                    utterance.onerror = function() {
+                        speaking = false;
+                        listenBtn.classList.remove('speaking');
+                        listenText.textContent = 'Listen';
+                        alert('❌ An error occurred with text-to-speech.');
+                    };
+                    
+                    currentUtterance = utterance;
+                    window.speechSynthesis.speak(utterance);
+                    
+                } else {
+                    alert('❌ Your browser does not support text-to-speech.');
+                }
+            }
+        }
+
+        function stopSpeaking() {
+            if (speaking) {
+                if (selectedVoiceType !== 'recorded') {
+                    window.speechSynthesis.cancel();
+                }
+                speaking = false;
+                const listenBtn = document.getElementById('listenBtn');
+                const listenText = document.getElementById('listenText');
+                listenBtn.classList.remove('speaking');
+                listenText.textContent = 'Listen';
+            }
+        }
+
+        async function downloadPDF() {
+            const downloadBtn = document.getElementById('downloadBtn');
+            const downloadText = document.getElementById('downloadText');
+            const book = document.getElementById('storyBook');
+            
+            try {
+                downloadBtn.classList.add('loading');
+                downloadText.textContent = '⏳ Loading...';
+                
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF({
+                    orientation: 'portrait',
+                    unit: 'px',
+                    format: 'a4'
+                });
+                
+                for (let i = 0; i < pages.length; i++) {
+                    currentPage = i;
+                    updatePage();
+                    
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    
+                    const canvas = await html2canvas(book, {
+                        scale: 2,
+                        backgroundColor: '#fff9f0',
+                        logging: false,
+                        allowTaint: true,
+                        useCORS: true
+                    });
+                    
+                    const imgData = canvas.toDataURL('image/png');
+                    const imgWidth = pdf.internal.pageSize.getWidth();
+                    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                    
+                    if (i > 0) {
+                        pdf.addPage();
+                    }
+                    
+                    pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+                    downloadText.textContent = `⏳ Page ${i + 1}/${pages.length}...`;
+                }
+                
+                pdf.save('magical-story.pdf');
+                downloadBtn.classList.remove('loading');
+                downloadText.textContent = 'Download';
+                alert('✅ Story downloaded successfully!');
+                
+            } catch (error) {
+                console.error('PDF error:', error);
+                downloadBtn.classList.remove('loading');
+                downloadText.textContent = 'Download';
+                alert('❌ Sorry, an error occurred. Please try again.');
+            }
+        }
+
+        window.onload = function() {
+            updatePage();
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.getVoices();
+            }
+        };
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowRight') nextPage();
+            if (e.key === 'ArrowLeft') prevPage();
+        });
+    </script>
+</body>
+</html>
