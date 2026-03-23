@@ -1,5 +1,5 @@
 import React from "react";
-
+import { NavLink } from "react-router-dom";
 export default function Sidebar() {
   return (
     <aside className="w-72 flex flex-col justify-between sidebar-soft p-7">
@@ -18,21 +18,31 @@ export default function Sidebar() {
         </div>
 
         <nav className="space-y-2">
-          <a href="#" className="nav-link">
+           <NavLink to="/" className="nav-link">
+          
             <span>📊</span> Dashboard
-          </a>
-          <a href="#" className="nav-link active">
+          
+          </NavLink>
+           <NavLink to="/stories" className="nav-link">
+        
             <span>📚</span> My Stories
-          </a>
-          <a href="#" className="nav-link">
+         
+          </NavLink>
+           <NavLink to="/reader" className="nav-link">
+         
             <span>✨</span> Create Story
-          </a>
-          <a href="#" className="nav-link">
+         
+          </NavLink>
+          <NavLink to="/analytics" className="nav-link">
+         
             <span>📈</span> Analytics
-          </a>
-          <a href="#" className="nav-link">
+     
+         </NavLink>
+          <NavLink to="/settings" className="nav-link">
+         
             <span>⚙️</span> Settings
-          </a>
+         
+          </NavLink>
         </nav>
       </div>
 

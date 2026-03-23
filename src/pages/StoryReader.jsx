@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
-import Sidebar from "./Sidebar";
-import "./StoryReader.css";
+import Sidebar from "../components/Sidebar";
+import "../styles/StoryReader.css";
 
 const pagesData = [
   {
@@ -269,7 +269,7 @@ export default function StoryReader() {
 
   return (
     <div className="main-container">
-      <Sidebar activeItem="create" />
+<Sidebar activeItem="create" />
 
       <main className="flex-1 stories-bg p-8 overflow-y-auto">
         <div className="logo-watermark"></div>

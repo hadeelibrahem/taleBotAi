@@ -1,0 +1,87 @@
+
+.bear-balloon-wrap {
+  position: fixed;
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+  filter: drop-shadow(0 8px 20px rgba(155, 143, 246, 0.25));
+}
+
+.bear-right { right: 80px; }
+.bear-left  { left:  80px; }
+
+.bear-right {
+  animation: flyUpDownRight 6s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+
+.bear-left {
+  animation: flyUpDownLeft 6s cubic-bezier(0.45, 0, 0.55, 1) 3s infinite;
+}
+
+@keyframes flyUpDownRight {
+  0%        { bottom: -180px; transform: translateX(0px)   rotate(0deg); }
+  35%       { bottom: 70px;   transform: translateX(-10px) rotate(-2deg); }
+  50%       { bottom: 80px;   transform: translateX(8px)   rotate(1.5deg); }
+  65%       { bottom: 70px;   transform: translateX(-6px)  rotate(-1deg); }
+  100%      { bottom: -180px; transform: translateX(0px)   rotate(0deg); }
+}
+
+@keyframes flyUpDownLeft {
+  0%        { bottom: -180px; transform: translateX(0px)  rotate(0deg); }
+  35%       { bottom: 70px;   transform: translateX(10px) rotate(2deg); }
+  50%       { bottom: 80px;   transform: translateX(-8px) rotate(-1.5deg); }
+  65%       { bottom: 70px;   transform: translateX(6px)  rotate(1deg); }
+  100%      { bottom: -180px; transform: translateX(0px)  rotate(0deg); }
+}
+
+
+.balloon {
+  font-size: 2.8rem;
+  line-height: 1;
+  animation: balloonWiggle 2s ease-in-out infinite alternate;
+  transform-origin: bottom center;
+}
+
+@keyframes balloonWiggle {
+  0%   { transform: rotate(-8deg) scale(1); }
+  50%  { transform: rotate(5deg)  scale(1.06); }
+  100% { transform: rotate(-3deg) scale(0.96); }
+}
+
+
+.balloon-string {
+  width: 18px;
+  height: 55px;
+  margin-top: -3px;
+  margin-bottom: -3px;
+  animation: stringWave 2s ease-in-out infinite alternate;
+  transform-origin: top center;
+}
+
+@keyframes stringWave {
+  0%   { transform: skewX(-5deg); }
+  100% { transform: skewX(5deg); }
+}
+
+
+.bear-body {
+  font-size: 2.2rem;
+  line-height: 1;
+  animation: bearSquish 2s ease-in-out infinite alternate;
+  transform-origin: bottom center;
+}
+
+@keyframes bearSquish {
+  0%   { transform: scaleY(1)    scaleX(1)    rotate(-3deg); }
+  50%  { transform: scaleY(1.07) scaleX(0.95) rotate(2deg); }
+  100% { transform: scaleY(0.95) scaleX(1.05) rotate(-1deg); }
+}
+
+@media (max-width: 600px) {
+  .balloon    { font-size: 2rem; }
+  .bear-body  { font-size: 1.7rem; }
+  .bear-right { right: 16px; }
+  .bear-left  { left:  16px; }
+}
