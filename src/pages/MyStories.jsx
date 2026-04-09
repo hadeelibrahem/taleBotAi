@@ -1,9 +1,9 @@
 import React from "react";
-import Sidebar from "./Sidebar";
+import Sidebar from "../components/Sidebar";
 export default function MyStories() {
   return (
     <div className="main-container">
-      {/* القائمة الجانبية */}
+       {/* القائمة الجانبية */}
      <Sidebar />
 
       {/* القسم الرئيسي */}

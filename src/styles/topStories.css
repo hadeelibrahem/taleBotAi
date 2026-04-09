@@ -1,0 +1,121 @@
+.top-stories-section {
+  width: 100%;
+}
+
+.top-stories-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.2rem;
+}
+
+.story-search-input {
+  flex: 1;
+  max-width: 360px;
+  padding: 0.9rem 1rem;
+  border-radius: 14px;
+  border: 1px solid #ece7df;
+  background: #fff;
+  outline: none;
+  font-size: 0.95rem;
+}
+
+.story-notify-btn {
+  width: 46px;
+  height: 46px;
+  border: none;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+}
+
+.top-stories-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.top-story-card {
+  background: #fff;
+  border: 1px solid #eee8e0;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
+  transition: 0.25s ease;
+}
+
+.top-story-card:hover {
+  transform: translateY(-6px);
+}
+
+.top-story-image-wrap {
+  height: 150px;
+  overflow: hidden;
+}
+
+.top-story-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.top-story-content {
+  padding: 1rem;
+}
+
+.top-story-content h3 {
+  font-size: 1rem;
+  margin-bottom: 0.4rem;
+  color: #2e2353;
+}
+
+.top-story-content p {
+  color: #857b97;
+  font-size: 0.9rem;
+  margin-bottom: 0.8rem;
+}
+
+.story-progress-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: #6f6488;
+  margin-bottom: 0.45rem;
+}
+
+.story-progress-bar {
+  width: 100%;
+  height: 6px;
+  background: #f0eaf5;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.story-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #a64dff, #e23ad3);
+  border-radius: 999px;
+}
+
+@media (max-width: 1200px) {
+  .top-stories-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 650px) {
+  .top-stories-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .top-stories-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .story-search-input {
+    max-width: 100%;
+  }
+}
