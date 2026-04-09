@@ -5,6 +5,7 @@ import Dashboard from "./pages/Dashboard";
 import MyStories from "./pages/MyStories";
 import Settings from "./pages/Settings";
 import AnalyticsPage from "./pages/AnalyticsPage";
+import CreateStory from "./pages/createStory";
 
 function App() {
   return (
@@ -16,7 +17,7 @@ function App() {
             <Route path="/" element={<Dashboard />} />
             <Route path="/stories" element={<MyStories />} />
             <Route path="/settings" element={<Settings />} />
-            <Route path="/reader" element={<StoryReader />} />
+            <Route path="/reader" element={<CreateStory />} />
               <Route path="/analytics" element={<AnalyticsPage />} />
           </Routes>
         </div>
