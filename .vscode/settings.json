@@ -1,0 +1,16 @@
+{
+    "sqltools.connections": [
+        {
+            "ssh": "Disabled",
+            "previewLimit": 50,
+            "server": "localhost",
+            "port": 5432,
+            "driver": "PostgreSQL",
+            "name": "TaleBotAI",
+            "database": "postgres",
+            "username": "postgres",
+            "password": "123456",
+            "connectionTimeout": 30
+        }
+    ]
+}
