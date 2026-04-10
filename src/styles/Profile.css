@@ -1,0 +1,777 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+.main-container {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+/* ===== صفحة البروفايل ===== */
+.profile-page {
+  flex: 1;
+  min-width: 0;
+  padding: 24px;
+  background: transparent;
+  overflow-y: auto;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+}
+
+.profile-shell {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Breadcrumb */
+.profile-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: #8f877c;
+  margin-bottom: 16px;
+  padding-left: 4px;
+  background: rgba(255, 255, 255, 0.5);
+  padding: 8px 18px;
+  border-radius: 40px;
+  width: fit-content;
+  max-width: 100%;
+  backdrop-filter: blur(4px);
+}
+
+.crumb-separator {
+  color: #b9b1a7;
+}
+
+.active-crumb {
+  color: #8b5cf6;
+  font-weight: 700;
+}
+
+/* ===== الكارد الرئيسي ===== */
+.profile-card-main {
+  position: relative;
+  width: 100%;
+  background: linear-gradient(180deg, rgba(207, 219, 235, 0.92) 0%, rgba(237, 244, 248, 0.94) 100%);
+  border: 1px solid rgba(232, 224, 214, 0.95);
+  border-radius: 30px;
+  box-shadow: 0 12px 30px rgba(125, 102, 76, 0.10), inset 0 1px 0 rgba(255, 255, 255, 0.75);
+  padding: 24px;
+  backdrop-filter: blur(6px);
+  overflow: visible;
+  margin: 0 auto;
+}
+
+/* زخارف */
+.sparkle {
+  position: absolute;
+  color: #d8c4f4;
+  opacity: 0.8;
+  pointer-events: none;
+  z-index: 1;
+  animation: twinkle 3s infinite;
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.3; transform: scale(0.8); }
+  50% { opacity: 0.8; transform: scale(1.2); }
+}
+
+.sparkle-1 { top: 20px; right: 200px; font-size: 14px; }
+.sparkle-2 { top: 50px; right: 150px; font-size: 20px; animation-delay: 1s; }
+.sparkle-3 { right: 20px; top: 120px; font-size: 18px; animation-delay: 2s; }
+.sparkle-4 { right: 30px; bottom: 30px; font-size: 22px; animation-delay: 0.5s; }
+
+/* ===== الهيدر ===== */
+.profile-header {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.profile-avatar {
+  position: relative;
+  width: 110px;
+  height: 110px;
+  margin: 0 auto 16px;
+}
+
+.profile-avatar img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid white;
+  box-shadow: 0 10px 25px rgba(139, 92, 246, 0.2);
+}
+
+.profile-plan-badge {
+  position: absolute;
+  bottom: 5px;
+  right: -10px;
+  background: linear-gradient(90deg, #f9a8d4, #c084fc);
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 40px;
+  border: 2px solid white;
+  white-space: nowrap;
+}
+
+.profile-name {
+  font-size: 28px;
+  font-weight: 800;
+  color: #2d1b4e;
+  margin: 0 0 8px;
+}
+
+.profile-email {
+  color: #6b5b8e;
+  font-size: 15px;
+  margin: 0 0 4px;
+  word-break: break-word;
+}
+
+.profile-since {
+  color: #8b5cf6;
+  font-size: 13px;
+  margin: 0;
+}
+
+/* ===== إحصائيات القصص ===== */
+.profile-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.stat-card {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(8px);
+  border-radius: 20px;
+  padding: 16px;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 145px;
+}
+
+.stat-card:hover {
+  transform: translateY(-3px);
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 8px 20px rgba(139, 92, 246, 0.15);
+}
+
+.stat-icon {
+  font-size: 32px;
+  margin-bottom: 10px;
+  line-height: 1;
+}
+
+.stat-number {
+  font-size: 28px;
+  font-weight: 800;
+  color: #8b5cf6;
+  line-height: 1.1;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
+}
+
+.stat-label {
+  font-size: 11px;
+  color: #a1557a;
+  line-height: 1.4;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  max-width: 100px;
+}
+
+/* ===== الـ Accordion ===== */
+.profile-accordion {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.accordion-item {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(8px);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  overflow: hidden;
+  transition: all 0.2s;
+}
+
+.accordion-item:hover {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.accordion-btn {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: transparent;
+  border: none;
+  font-size: 16px;
+  font-weight: 700;
+  color: #2d1b4e;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+}
+
+.accordion-btn span i {
+  margin-right: 10px;
+  color: #8b5cf6;
+}
+
+.accordion-btn i:last-child {
+  color: #8b5cf6;
+  font-size: 14px;
+}
+
+.accordion-btn:hover {
+  background: rgba(139, 92, 246, 0.05);
+}
+
+.accordion-panel {
+  padding: 0 20px 20px;
+  border-top: 1px solid rgba(139, 92, 246, 0.15);
+}
+
+/* الأصناف المفضلة */
+.genres-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-top: 16px;
+}
+
+.genre-chip {
+  background: linear-gradient(135deg, #f3e8ff, #ffe4f0);
+  padding: 8px 18px;
+  border-radius: 40px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #8b5cf6;
+  border: 1px solid white;
+  transition: all 0.2s;
+}
+
+.genre-chip:hover {
+  transform: scale(1.03);
+  background: #8b5cf6;
+  color: white;
+}
+
+/* الشارات */
+.badges-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-top: 16px;
+}
+
+.badge-item {
+  background: linear-gradient(135deg, #fff4e8, #fff0f5);
+  padding: 8px 16px;
+  border-radius: 40px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #ec4899;
+  border: 1px solid white;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Weekly Challenge */
+.challenge-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.08), rgba(236, 72, 153, 0.08));
+  border-radius: 20px;
+  padding: 16px;
+  margin-top: 12px;
+}
+
+.challenge-icon {
+  font-size: 48px;
+}
+
+.challenge-info {
+  flex: 1;
+}
+
+.challenge-title {
+  font-weight: 700;
+  color: #2d1b4e;
+  margin-bottom: 10px;
+}
+
+.challenge-progress {
+  margin-bottom: 8px;
+}
+
+.challenge-progress-bar {
+  height: 8px;
+  background: rgba(139, 92, 246, 0.15);
+  border-radius: 40px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+
+.challenge-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #8b5cf6, #ec4899);
+  border-radius: 40px;
+  transition: width 0.3s ease;
+}
+
+.challenge-progress-text {
+  font-size: 12px;
+  color: #8b5cf6;
+  font-weight: 500;
+}
+
+.challenge-reward {
+  font-size: 12px;
+  color: #ec4899;
+}
+
+/* ===== زر المشاركة ===== */
+.profile-share {
+  text-align: center;
+}
+
+.share-btn {
+  background: linear-gradient(90deg, #8b5cf6, #ec4899);
+  border: none;
+  padding: 12px 28px;
+  border-radius: 60px;
+  color: white;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.2s;
+  box-shadow: 0 6px 14px rgba(139, 92, 246, 0.25);
+}
+
+.share-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 24px rgba(139, 92, 246, 0.35);
+}
+
+/* ===== إضافات جديدة ===== */
+
+/* Reading Stats */
+.stats-details {
+  padding: 8px 0;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+  gap: 12px;
+}
+
+.detail-row span {
+  color: #6b5b8e;
+  font-weight: 500;
+}
+
+.detail-row strong {
+  color: #8b5cf6;
+  font-weight: 700;
+  text-align: right;
+}
+
+/* Goals Container */
+.goals-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-top: 8px;
+}
+
+.goal-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: rgba(139, 92, 246, 0.05);
+  border-radius: 20px;
+  padding: 14px;
+}
+
+.goal-icon {
+  font-size: 32px;
+}
+
+.goal-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.goal-title {
+  font-weight: 700;
+  color: #2d1b4e;
+  margin-bottom: 6px;
+  font-size: 14px;
+}
+
+.goal-progress {
+  font-size: 12px;
+  color: #8b5cf6;
+  margin-bottom: 6px;
+}
+
+.goal-progress-bar {
+  height: 6px;
+  background: rgba(139, 92, 246, 0.15);
+  border-radius: 40px;
+  overflow: hidden;
+}
+
+.goal-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #8b5cf6, #ec4899);
+  border-radius: 40px;
+}
+
+/* Favorite Characters */
+.characters-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding-top: 8px;
+}
+
+.character-card {
+  flex: 1;
+  min-width: 100px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 20px;
+  padding: 16px;
+  transition: all 0.2s;
+}
+
+.character-card:hover {
+  transform: translateY(-3px);
+  background: white;
+}
+
+.character-emoji {
+  font-size: 48px;
+  margin-bottom: 8px;
+}
+
+.character-name {
+  font-weight: 700;
+  color: #2d1b4e;
+  font-size: 14px;
+}
+
+.character-story {
+  font-size: 10px;
+  color: #a78ba0;
+  margin-top: 4px;
+}
+
+/* Reading Journal */
+.journal-entry {
+  padding: 8px 0;
+}
+
+.journal-mood {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  color: #6b5b8e;
+}
+
+.mood-emoji {
+  font-size: 24px;
+}
+
+.journal-thought {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: rgba(139, 92, 246, 0.05);
+  border-radius: 20px;
+  padding: 14px;
+  margin-bottom: 16px;
+}
+
+.journal-thought i {
+  color: #8b5cf6;
+  font-size: 18px;
+}
+
+.journal-thought p {
+  margin: 0;
+  font-size: 14px;
+  color: #4a3a6e;
+  font-style: italic;
+}
+
+.journal-btn {
+  width: 100%;
+  background: transparent;
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: 40px;
+  padding: 10px;
+  color: #8b5cf6;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.journal-btn:hover {
+  background: #8b5cf6;
+  color: white;
+  border-color: #8b5cf6;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 1200px) {
+  .profile-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+}
+
+@media (max-width: 900px) {
+  .profile-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .main-container {
+    width: 100%;
+    overflow-x: hidden;
+  }
+
+  .profile-page {
+    padding: 12px;
+    justify-content: center;
+  }
+
+  .profile-shell {
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+  }
+
+  .profile-breadcrumb {
+    margin-left: auto;
+    margin-right: auto;
+    font-size: 13px;
+    gap: 8px;
+    padding: 8px 14px;
+  }
+
+  .profile-card-main {
+    width: 100%;
+    margin: 0 auto;
+    padding: 18px;
+    border-radius: 24px;
+  }
+
+  .profile-name {
+    font-size: 24px;
+  }
+
+  .profile-avatar {
+    width: 90px;
+    height: 90px;
+  }
+
+  .stat-card {
+    min-height: 130px;
+  }
+
+  .stat-number {
+    font-size: 24px;
+  }
+
+  .accordion-btn {
+    padding: 14px 16px;
+    font-size: 15px;
+  }
+
+  .accordion-panel {
+    padding: 0 16px 16px;
+  }
+
+  .challenge-card {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+@media (max-width: 550px) {
+  .profile-page {
+    padding: 10px;
+  }
+
+  .profile-shell {
+    width: 100%;
+  }
+
+  .profile-breadcrumb {
+    margin-left: auto;
+    margin-right: auto;
+    font-size: 12px;
+    padding: 7px 12px;
+  }
+
+  .profile-card-main {
+    padding: 14px;
+    border-radius: 20px;
+  }
+
+  .profile-name {
+    font-size: 20px;
+  }
+
+  .profile-avatar {
+    width: 80px;
+    height: 80px;
+  }
+
+  .profile-stats-grid {
+    gap: 10px;
+  }
+
+  .stat-card {
+    padding: 12px;
+    min-height: 120px;
+  }
+
+  .stat-icon {
+    font-size: 24px;
+  }
+
+  .stat-number {
+    font-size: 20px;
+    min-height: 26px;
+  }
+
+  .stat-label {
+    font-size: 10px;
+    min-height: 28px;
+    max-width: 90px;
+  }
+
+  .accordion-btn {
+    padding: 12px;
+    font-size: 14px;
+  }
+
+  .genre-chip,
+  .badge-item {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+
+  .share-btn {
+    padding: 10px 20px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-stats-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .profile-page {
+    padding: 8px;
+  }
+
+  .profile-card-main {
+    padding: 12px;
+  }
+
+  .profile-breadcrumb {
+    width: fit-content;
+    max-width: 100%;
+  }
+
+  .sparkle {
+    display: none;
+  }
+}
+
+@media (max-width: 550px) {
+  .characters-container {
+    flex-direction: column;
+  }
+
+  .character-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    text-align: left;
+  }
+
+  .character-emoji {
+    font-size: 36px;
+    margin-bottom: 0;
+  }
+
+  .goal-card {
+    flex-direction: column;
+    text-align: center;
+  }
+}
