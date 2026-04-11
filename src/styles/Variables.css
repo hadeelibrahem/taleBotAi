@@ -1,0 +1,22 @@
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap");
+
+:root {
+  --cream: #faf7f4;
+  --shell: rgba(255, 255, 255, 0.92);
+  --border: rgba(220, 210, 200, 0.6);
+  --accent-blue: #6f9ab3;
+  --accent-purple: #9b8ff6;
+  --accent-pink: #ef9ccc;
+  --accent-teal: #7bd8db;
+  --text-dark: #1e1c1a;
+  --text-mid: #5a5754;
+  --text-soft: #9e9a96;
+  --danger: #c58b9c;
+  --toggle-off: #dbd7d3;
+  --toggle-on: linear-gradient(90deg, var(--accent-teal), var(--accent-purple));
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.06);
+  --shadow-deep: 0 20px 60px rgba(0, 0, 0, 0.1);
+  --radius-lg: 1.6vw;
+  --radius-sm: 0.7vw;
+  --radius-pill: 999px;
+}

@@ -57,3 +57,17 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+# TaleBot AI
+
+A React + Vite web application for creating and reading AI-generated children’s stories.
+
+## Features
+- Story creation with AI
+- Story reader with images
+- Voice narration
+- Download story as PDF
+
+## Tech Stack
+- React
+- Vite
+- TailwindCSS

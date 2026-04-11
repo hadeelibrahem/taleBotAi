@@ -1,0 +1,149 @@
+
+.account-card {
+  background: linear-gradient(145deg, rgba(255,255,255,0.9), rgba(248,245,255,0.75));
+  border: 1px solid rgba(155, 143, 246, 0.18);
+}
+
+.account-header {
+  display: flex;
+  align-items: center;
+  gap: 0.8vw;
+  margin-bottom: 1vw;
+}
+
+.account-avatar {
+  width: 2.8vw;
+  height: 2.8vw;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+  color: white;
+  font-family: "Playfair Display", serif;
+  font-size: 1vw;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 14px rgba(111, 154, 179, 0.35);
+  flex-shrink: 0;
+  animation: avatarPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.5s both;
+}
+
+@keyframes avatarPop {
+  from { opacity: 0; transform: scale(0.5); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.account-header-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2vw;
+}
+
+.account-badge {
+  font-size: 0.78vw;
+  color: var(--accent-purple);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  background: rgba(155, 143, 246, 0.1);
+  padding: 0.15vw 0.5vw;
+  border-radius: var(--radius-pill);
+  width: fit-content;
+}
+
+.account-input-wrap { margin-bottom: 0.8vw; }
+
+.subscription-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15vw;
+}
+
+.subscription-tier {
+  font-size: 0.8vw;
+  color: var(--accent-purple);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+
+.password-field-wrap,
+.name-field-wrap {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transform: translateY(-6px);
+  transition:
+    grid-template-rows 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.3s ease,
+    transform 0.3s ease,
+    margin 0.3s ease;
+  margin-bottom: 0;
+  overflow: hidden;
+}
+
+.password-field-wrap > *,
+.name-field-wrap > * {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.password-field-wrap.is-open,
+.name-field-wrap.is-open {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  transform: translateY(0);
+  margin-bottom: 0.8vw;
+}
+
+.set-name-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.3vw;
+  padding: 0.25vw 0.6vw;
+  border-radius: var(--radius-pill);
+  transition: background 0.25s ease, color 0.25s ease, transform 0.2s ease;
+}
+
+.set-name-btn.name-visible {
+  color: #5bbf8a;
+  background: rgba(91, 191, 138, 0.1);
+  font-weight: 600;
+}
+
+.set-name-btn.name-hidden {
+  color: var(--text-soft);
+  background: rgba(0,0,0,0.03);
+}
+
+.set-name-btn:hover { transform: translateY(-1px); }
+
+.set-name-icon {
+  font-size: 0.95vw;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.set-name-btn.name-visible .set-name-icon { transform: scale(1.15); }
+
+.set-name-status {
+  font-size: 0.72vw;
+  opacity: 0.7;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+
+@media (max-width: 1024px) {
+  .account-avatar { width: 40px; height: 40px; font-size: 14px; }
+  .account-badge { font-size: 11px; padding: 2px 8px; }
+  .subscription-tier { font-size: 12px; }
+  .account-header { gap: 12px; margin-bottom: 14px; }
+  .set-name-btn { padding: 4px 8px; gap: 4px; }
+  .set-name-icon { font-size: 14px; }
+  .set-name-status { font-size: 10px; }
+  .password-field-wrap.is-open,
+  .name-field-wrap.is-open { margin-bottom: 10px; }
+}
+
+@media (max-width: 768px) {
+  .account-avatar { width: 36px; height: 36px; font-size: 13px; }
+}
