@@ -1,92 +1,199 @@
-.stat-card {
-  background: #fffdfa;
-  border-radius: 18px;
-  padding: 0.9rem 1rem;
-  height: 105px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
+.dashboard-row {
+  display: flex;
+  gap: 16px;
+  align-items: stretch;
+  width: 100%;
+}
+
+/* ===== AI Insights Hero Card ===== */
+.ai-insights-card {
+  flex: 1;
+  background: linear-gradient(135deg, #e8b4c8 0%, #c9a8e0 50%, #a8b8e8 100%);
+  border-radius: 24px;
+  padding: 2rem;
+  color: white;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  min-height: 300px;
+}
+
+.ai-badge {
+  font-size: 11px;
+  background: rgba(255, 255, 255, 0.25);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  margin-bottom: 1rem;
+  width: fit-content;
+  backdrop-filter: blur(6px);
+}
+
+.ai-insights-card h2 {
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin: 0 0 0.6rem;
+}
+
+.ai-insights-card .sub {
+  font-size: 0.9rem;
+  opacity: 0.9;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 1.5rem;
+}
+
+.btn-primary {
+  background: white;
+  color: #8a6fc7;
+  border: none;
+  border-radius: 14px;
+  padding: 0.7rem 1.3rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+}
+
+.btn-ghost {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: 14px;
+  padding: 0.7rem 1.3rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: transform 0.2s, background 0.2s;
+  backdrop-filter: blur(6px);
+}
+
+.btn-ghost:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* ===== Stats Column ===== */
+.stats-column {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 240px;
+  flex-shrink: 0;
+}
+
+/* ===== Stat Card — Large Premium Version ===== */
+.stat-card {
+  flex: 1;
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 1.4rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 130px;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+  transition: transform 0.2s, box-shadow 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #e8b4c8, #c9a8e0, #a8b8e8);
+  opacity: 0;
+  transition: opacity 0.2s;
 }
 
 .stat-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 16px 30px rgba(0, 0, 0, 0.08);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.1);
 }
 
+.stat-card:hover::before {
+  opacity: 1;
+}
+
+/* Top row: dot + badge */
 .stat-top {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.7rem;
 }
 
 .stat-dot {
-  width: 16px;
-  height: 16px;
-  border-radius: 6px;
-  background: #eef4e8;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 
 .stat-badge {
-  font-size: 0.72rem;
-  color: #6aa84f;
-  background: #f1faec;
-  padding: 0.2rem 0.5rem;
-  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 600;
+  color: #22c55e;
+  background: #dcfce7;
+  padding: 3px 8px;
+  border-radius: 20px;
+  letter-spacing: 0.02em;
 }
 
-.stat-content h3 {
-  margin: 0;
-  font-size: 1.6rem;
-  line-height: 1.1;
-  color: #1f1f1f;
+/* Bottom row: text + icon */
+.stat-content {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.stat-text h3 {
+  font-size: 1.55rem;
   font-weight: 700;
+  color: #1a1a2e;
+  margin: 0 0 2px;
+  line-height: 1.1;
 }
 
-.stat-content p {
-  margin: 0.2rem 0 0;
-  color: #6e6e6e;
-  font-size: 0.82rem;
+.stat-text p {
+  font-size: 0.78rem;
+  color: #94a3b8;
+  margin: 0;
+  font-weight: 500;
 }
 
 .stat-icon {
-  align-self: flex-end;
+  width: 46px;
+  height: 46px;
+  background: linear-gradient(135deg, #f8f4ff, #f0e8ff);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
   font-size: 1.4rem;
+  box-shadow: 0 2px 8px rgba(138, 111, 199, 0.12);
 }
 
-
-@media (max-width: 768px) {
-  .stat-card {
-    height: auto;
-    min-height: 96px;
-    padding: 0.85rem 0.9rem;
-  }
-
-  .stat-content h3 {
-    font-size: 1.35rem;
-  }
-
-  .stat-content p {
-    font-size: 0.8rem;
-  }
-
-  .stat-icon {
-    font-size: 1.2rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .stat-card {
-    border-radius: 16px;
-    padding: 0.8rem;
-  }
-
-  .stat-content h3 {
-    font-size: 1.2rem;
-  }
-
-  .stat-badge {
-    font-size: 0.68rem;
-  }
+/* Make stat cards equal height inside column */
+.stats-column .stat-card {
+  flex: 1;
 }

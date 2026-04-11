@@ -33,6 +33,7 @@
   scrollbar-color: #d7c3ea transparent;
 }
 
+
 .dashboard-main:hover::-webkit-scrollbar-thumb {
   background: #d7c3ea;
 }
@@ -43,7 +44,7 @@
 
 .dashboard-top-section {
   display: grid;
-  grid-template-columns: 1.8fr 1fr;
+  grid-template-columns: 2fr 0.8fr;
   gap: 1.2rem;
   margin-top: 1.2rem;
   align-items: start;

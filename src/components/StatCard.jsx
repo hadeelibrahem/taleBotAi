@@ -9,11 +9,15 @@ function StatCard({ title, subtitle, icon, badge, color }) {
       </div>
 
       <div className="stat-content">
-        <h3>{title}</h3>
-        <p>{subtitle}</p>
-      </div>
+        <div className="stat-text">
+          <h3>{title}</h3>
+          <p>{subtitle}</p>
+        </div>
 
-      <div className="stat-icon">{icon}</div>
+        <div className="stat-icon">
+          <span>{icon}</span>
+        </div>
+      </div>
     </div>
   );
 }
