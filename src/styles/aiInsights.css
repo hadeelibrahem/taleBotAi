@@ -27,13 +27,6 @@
   opacity: 0.95;
 }
 
-.insight-box {
-  margin-top: 0.7rem;
-  padding: 0.85rem 0.95rem;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.13);
-  backdrop-filter: blur(8px);
-}
 
 .insight-box h4 {
   margin: 0 0 0.3rem;
@@ -44,6 +37,22 @@
   margin: 0;
   font-size: 0.88rem;
   line-height: 1.5;
+}
+.insight-box {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #c7b7f3, #e3a8c8, #efc09d);
+  color: rgb(17, 0, 0);
+  transition: 0.3s ease;
+}
+
+.insight-box:hover {
+  background: #ffffff;
+  color: #333;
+  
+  background: linear-gradient(135deg, #c7b7f3, #e3a8c8, #efc09d);
+  transform: translateX(10px);
 }
 
 .generate-story-btn {
@@ -71,7 +80,7 @@
   font-size: 2rem;
   line-height: 1;
 }
-
+ 
 .ai-stats p {
   margin-top: 0.25rem;
   font-size: 0.82rem;
@@ -100,20 +109,9 @@
 }
 
 
-.insight-box {
-  margin-top: 1rem;
-  padding: 1rem;
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.12);
-  backdrop-filter: blur(10px);
-  transition: 0.3s ease;
-}
 
 
-.insight-box:hover {
-  background: rgba(255, 255, 255, 0.2);
-  transform: translateX(5px);
-}
+
 
 
 .generate-btn {
