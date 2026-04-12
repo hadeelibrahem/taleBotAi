@@ -532,8 +532,11 @@ class ComposerStaticInit53b5d56b3b7e3cbac1713e68c8850f6c
 
     public static $classMap = array (
         'App\\Http\\Controllers\\Controller' => __DIR__ . '/../..' . '/app/Http/Controllers/Controller.php',
+        'App\\Http\\Controllers\\StoryController' => __DIR__ . '/../..' . '/app/Http/Controllers/StoryController.php',
+        'App\\Http\\Requests\\GenerateStoryRequest' => __DIR__ . '/../..' . '/app/Http/Requests/GenerateStoryRequest.php',
         'App\\Models\\User' => __DIR__ . '/../..' . '/app/Models/User.php',
         'App\\Providers\\AppServiceProvider' => __DIR__ . '/../..' . '/app/Providers/AppServiceProvider.php',
+        'App\\Services\\AiStoryService' => __DIR__ . '/../..' . '/app/Services/AiStoryService.php',
         'Attribute' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/Attribute.php',
         'Brick\\Math\\BigDecimal' => __DIR__ . '/..' . '/brick/math/src/BigDecimal.php',
         'Brick\\Math\\BigInteger' => __DIR__ . '/..' . '/brick/math/src/BigInteger.php',
