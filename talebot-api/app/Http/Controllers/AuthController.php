@@ -57,6 +57,15 @@ class AuthController extends Controller
         }
 
         $user = User::where('email', $request->email)->firstOrFail();
+
+        if (($user->status ?? 'Active') === 'Banned') {
+            Auth::logout();
+
+            return response()->json([
+                'message' => 'This account has been banned. Please contact support.',
+            ], 403);
+        }
+
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
