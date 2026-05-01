@@ -2,16 +2,12 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Database\Factories\UserFactory;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-class User extends Authenticatable
+class Admin extends Authenticatable
 {
-    /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -20,12 +16,11 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'full_name',
-        'name',
         'email',
         'password',
-        'plan',
+        'role',
         'avatar',
-        'status',
+        'is_active',
     ];
 
     /**
@@ -48,26 +43,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_active' => 'boolean',
         ];
-    }
-
-    public function getNameAttribute(): ?string
-    {
-        return $this->attributes['full_name'] ?? null;
-    }
-
-    public function setNameAttribute(string $value): void
-    {
-        $this->attributes['full_name'] = $value;
-    }
-
-    public function childProfiles()
-    {
-        return $this->hasMany(ChildProfile::class);
-    }
-
-    public function stories()
-    {
-        return $this->hasMany(Story::class);
     }
 }

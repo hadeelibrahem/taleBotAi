@@ -626,3 +626,187 @@ html, body, #root {
     border-radius: 20px;
   }
 }
+/* Premium Section & Switch */
+.premium-toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 15px 0;
+  background: rgba(255, 255, 255, 0.4);
+  padding: 10px 15px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+.premium-label {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #444;
+}
+
+.modern-switch {
+  position: relative;
+  display: inline-block;
+  width: 46px;
+  height: 24px;
+}
+
+.modern-switch input { opacity: 0; width: 0; height: 0; }
+
+.slider.round {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  position: absolute;
+  content: "";
+  height: 18px; width: 18px;
+  left: 3px; bottom: 3px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider { background-color: #ff5e9e; }
+input:checked + .slider:before { transform: translateX(22px); }
+
+/* Custom Upload Card */
+.upload-container {
+  margin-top: 15px;
+  perspective: 1000px;
+}
+
+.custom-upload-card {
+  display: block;
+  border: 2px dashed #d1d5db;
+  border-radius: 18px;
+  padding: 25px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.custom-upload-card:hover {
+  border-color: #ff5e9e;
+  background: #fffafa;
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+}
+
+.hidden-input { display: none; }
+
+.upload-icon-circle {
+  width: 60px;
+  height: 60px;
+  background: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 15px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.upload-icon-anim { width: 35px; opacity: 0.8; }
+
+.upload-text { font-weight: 600; color: #4b5563; margin-bottom: 5px; }
+.upload-text span { color: #ff5e9e; }
+.upload-subtext { font-size: 0.75rem; color: #9ca3af; }
+
+/* Image Preview */
+.image-preview-wrapper {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  margin: 0 auto;
+  border-radius: 15px;
+  overflow: hidden;
+  border: 3px solid white;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.upload-preview-img { width: 100%; height: 100%; object-fit: cover; }
+
+.image-overlay {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.5);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: 0.3s;
+  font-size: 0.75rem;
+}
+
+.image-preview-wrapper:hover .image-overlay { opacity: 1; }
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.error-message {
+  color: #ff4d4d;
+  font-size: 0.85rem;
+  margin-top: 10px;
+  background: #fff0f0;
+  padding: 8px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+/* Final mobile scroll fix: keep this at the end so it wins over older conflicting rules. */
+@media (max-width: 1023px) {
+  html,
+  body,
+  #root {
+    height: auto !important;
+    min-height: 100% !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .create-story-page {
+    display: block !important;
+    height: auto !important;
+    min-height: 100dvh !important;
+    overflow-x: hidden !important;
+    overflow-y: visible !important;
+  }
+
+  .create-story-main {
+    height: auto !important;
+    min-height: 100dvh !important;
+    overflow: visible !important;
+  }
+
+  .create-story-content {
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  .story-builder-layout,
+  .story-form-card,
+  .story-preview-card {
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  .sidebar {
+    height: auto !important;
+    max-height: none !important;
+  }
+}
