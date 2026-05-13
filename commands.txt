@@ -1,0 +1,3 @@
+php artisan tinker
+User::all();
+User::where('email', 'aradi0298@gmail.com')->first();
