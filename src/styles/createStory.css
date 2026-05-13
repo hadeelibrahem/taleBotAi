@@ -1,0 +1,812 @@
+.create-story-page {
+  display: flex;
+  min-height: 100vh;
+  background: #f8f5ff;
+}
+
+.sidebar {
+  width: 260px;
+  min-width: 260px;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
+  flex-shrink: 0;
+  z-index: 20;
+}
+
+.create-story-main {
+  flex: 1;
+  min-height: 100vh;
+  padding: 20px;
+  position: relative;
+  overflow: visible;
+  background:
+    radial-gradient(circle at top left, rgba(210, 181, 255, 0.32), transparent 24%),
+    radial-gradient(circle at top right, rgba(255, 192, 227, 0.30), transparent 22%),
+    radial-gradient(circle at bottom center, rgba(179, 229, 255, 0.24), transparent 24%),
+    linear-gradient(135deg, #f8f5ff 0%, #f4f8ff 50%, #fff5fb 100%);
+}
+/* overlay */
+.create-story-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* content */
+.create-story-content {
+  width: 100%;
+  max-width: 1320px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+  padding-bottom: 30px;
+}
+
+.create-story-topbar {
+  margin-bottom: 20px;
+}
+
+.story-builder-layout {
+  display: grid;
+  grid-template-columns: 1.9fr 0.95fr;
+  gap: 18px;
+  align-items: start;
+}
+
+.story-form-card,
+.story-preview-card {
+  background: rgba(255, 255, 255, 0.62);
+  backdrop-filter: blur(18px);
+  border: 1px solid rgba(208, 185, 238, 0.24);
+  border-radius: 28px;
+  box-shadow: 0 10px 30px rgba(143, 120, 191, 0.12);
+}
+
+.story-form-card {
+  padding: 24px;
+}
+
+.story-preview-card {
+  padding: 22px;
+}
+
+.story-form-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: #2f2342;
+  margin-bottom: 20px;
+}
+
+.top-fields-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+  margin-bottom: 18px;
+}
+
+.single-field-row {
+  margin-bottom: 18px;
+}
+
+.input-with-sticker {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.side-sticker {
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.field-block {
+  flex: 1;
+}
+
+.field-block label {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  color: #2f2342;
+  margin-bottom: 8px;
+}
+
+.field-block input,
+.field-block select {
+  width: 100%;
+  height: 46px;
+  padding: 0 14px;
+  border-radius: 14px;
+  border: 1px solid #d8d3e2;
+  background: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
+  outline: none;
+}
+
+.field-block input::placeholder {
+  color: #a09aa8;
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: #2f2342;
+  margin: 12px 0 14px;
+}
+
+.length-buttons {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.length-btn {
+  min-width: 100px;
+  height: 42px;
+  border-radius: 999px;
+  border: 1px solid #ded7e8;
+  background: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.length-btn.active {
+  background: linear-gradient(135deg, #f0dfff, #edd9ff);
+  border-color: #d2b5ff;
+  box-shadow: 0 6px 16px rgba(191, 142, 255, 0.16);
+}
+
+.genre-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.genre-card {
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(220, 214, 232, 0.95);
+  border-radius: 20px;
+  min-height: 132px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: 0.25s ease;
+}
+
+.genre-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(163, 136, 214, 0.12);
+}
+
+.genre-card.active {
+  background: linear-gradient(180deg, rgba(247, 232, 255, 0.95), rgba(255, 255, 255, 0.9));
+  border-color: #dcb4ff;
+  box-shadow: 0 10px 22px rgba(193, 144, 255, 0.14);
+}
+
+.genre-sticker {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+}
+
+.genre-card p {
+  font-size: 14px;
+  font-weight: 700;
+  color: #2f2342;
+}
+
+.style-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.style-card {
+  min-height: 62px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(220, 214, 232, 0.95);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  cursor: pointer;
+  transition: 0.25s ease;
+}
+
+.style-card.active {
+  background: linear-gradient(180deg, rgba(247, 232, 255, 0.95), rgba(255, 255, 255, 0.9));
+  border-color: #dcb4ff;
+  box-shadow: 0 10px 22px rgba(193, 144, 255, 0.14);
+}
+
+.style-sticker {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.style-card span {
+  font-size: 14px;
+  font-weight: 700;
+  color: #2f2342;
+}
+
+.generate-btn-wrap {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.generate-btn {
+  min-width: 300px;
+  height: 46px;
+  padding: 0 24px;
+  border: none;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #c871ff, #f27ec7);
+  color: white;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 10px 24px rgba(197, 120, 255, 0.24);
+}
+
+.preview-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.preview-header h3 {
+  font-size: 18px;
+  font-weight: 800;
+  color: #2f2342;
+  margin-bottom: 4px;
+}
+
+.preview-header p {
+  font-size: 13px;
+  color: #8b8298;
+}
+
+.preview-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.preview-actions button {
+  height: 38px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid #e4dff0;
+  background: rgba(255, 255, 255, 0.78);
+  cursor: pointer;
+}
+
+.preview-cover {
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(220, 214, 232, 0.95);
+  border-radius: 24px;
+  padding: 18px;
+  text-align: center;
+  margin-bottom: 18px;
+}
+
+.preview-cover img {
+  width: 100%;
+  max-width: 210px;
+  height: auto;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto 14px;
+}
+
+.preview-cover h4 {
+  font-size: 16px;
+  font-weight: 800;
+  color: #2f2342;
+}
+
+.preview-text-box {
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(220, 214, 232, 0.95);
+  border-radius: 20px;
+  padding: 16px;
+}
+
+.preview-text-box h5 {
+  font-size: 15px;
+  font-weight: 800;
+  color: #2f2342;
+  margin-bottom: 10px;
+}
+
+.preview-text-box p {
+  font-size: 14px;
+  line-height: 1.8;
+  color: #544d60;
+}
+
+@media (max-width: 1100px) {
+  .story-builder-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .story-preview-card {
+    margin-top: 10px;
+  }
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100%;
+    min-width: 100%;
+    position: relative;
+    height: auto;
+  }
+
+  .create-story-main {
+    margin-left: 0;
+    width: 100%;
+    padding: 14px;
+  }
+
+  .top-fields-row,
+  .genre-grid,
+  .style-grid {
+    grid-template-columns: 1fr;
+  }
+
+
+  .generate-btn {
+    width: 100%;
+    min-width: 0;
+  }
+}
+html, body, #root {
+  overflow: auto !important;
+  height: auto !important;
+}
+
+/* --- الحل النهائي والشامل للموبايل --- */
+@media (max-width: 1023px) { 
+  /* استهدفنا أقل من 1024px لأن Tailwind يستخدم lg عند 1024px */
+
+  .create-story-page {
+    display: block !important; /* إلغاء الـ flex تماماً لمنع الإزاحة */
+    position: relative;
+    width: 100% !important;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  .sidebar {
+    /* السايدبار في ملف الـ JSX سيتكفل بنفسه، لكن هنا نضمن عدم حجزه لمساحة */
+    display: none !important; 
+  }
+
+  .create-story-main {
+    width: 100% !important;
+    margin-left: 0 !important;
+    padding: 60px 10px 20px 10px !important; /* الـ 60px من فوق لترك مساحة لزر القائمة */
+    min-height: 100vh;
+    box-sizing: border-box;
+  }
+
+  .create-story-content {
+    max-width: 100% !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .story-form-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 20px 15px !important;
+    border-radius: 20px !important;
+    box-shadow: none !important;
+  }
+
+  /* إخفاء أي طبقات خلفية تسبب إزاحة */
+  .create-story-overlay {
+    display: none !important;
+  }
+}
+@media (max-width: 768px) {
+    #root, .App { 
+        display: block !important;
+    }
+}
+
+.genre-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.genre-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  border-color: #c871ff;
+  box-shadow: 0 15px 30px rgba(163, 136, 214, 0.2);
+  background: white;
+}
+
+/* حركة بسيطة للأيقونة داخل الكرت عند التحويم */
+.genre-card:hover .genre-sticker {
+  transform: rotate(5deg) scale(1.1);
+  transition: transform 0.3s ease;
+}
+.style-card {
+  transition: all 0.25s ease;
+}
+
+.style-card:hover {
+  transform: translateX(5px);
+  background: rgba(255, 255, 255, 0.9);
+  border-color: #f27ec7;
+  box-shadow: 4px 4px 15px rgba(242, 126, 199, 0.1);
+}
+.generate-btn {
+  transition: all 0.4s ease;
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.generate-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(197, 120, 255, 0.4);
+  filter: brightness(1.1);
+}
+
+.generate-btn:active {
+  transform: translateY(1px) scale(0.98);
+}
+.field-block input, .field-block select {
+  transition: all 0.3s ease;
+}
+
+.field-block input:focus, .field-block select:focus {
+  border-color: #c871ff;
+  box-shadow: 0 0 0 4px rgba(200, 113, 255, 0.1);
+  background: white;
+}
+.story-form-card, .story-preview-card {
+  transition: box-shadow 0.4s ease;
+}
+
+.story-form-card:hover, .story-preview-card:hover {
+  box-shadow: 0 20px 40px rgba(143, 120, 191, 0.18);
+}
+@keyframes wiggle {
+  0% { transform: rotate(0deg); }
+  25% { transform: rotate(-5deg); }
+  75% { transform: rotate(5deg); }
+  100% { transform: rotate(0deg); }
+}
+
+.genre-card:hover .genre-sticker {
+  animation: wiggle 0.5s ease-in-out infinite;
+}
+/* حركة الظهور من الأسفل مع تلاشي */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* حركة الظهور من الجانب للسايدبار */
+@keyframes fadeInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* حركة التوسع اللطيفة للكروت */
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+/* السايدبار يظهر أولاً من اليسار */
+.sidebar {
+  animation: fadeInLeft 0.8s ease-out forwards;
+}
+
+/* الكرت الأيسر (النموذج) يظهر من الأسفل */
+.story-form-card {
+  opacity: 0; /* يبدأ مخفي */
+  animation: fadeInUp 0.8s ease-out 0.2s forwards;
+}
+
+/* الكرت الأيمن (المعاينة) يظهر بعده بقليل */
+.story-preview-card {
+  opacity: 0;
+  animation: fadeInUp 0.8s ease-out 0.4s forwards;
+}
+
+/* كروت الأنواع (Genres) تظهر بتأثير التوسع */
+.genre-card {
+  opacity: 0;
+  animation: scaleIn 0.5s ease-out forwards;
+}
+
+/* توزيع ظهور كروت الأنواع بالتتابع */
+.genre-card:nth-child(1) { animation-delay: 0.5s; }
+.genre-card:nth-child(2) { animation-delay: 0.6s; }
+.genre-card:nth-child(3) { animation-delay: 0.7s; }
+.genre-card:nth-child(4) { animation-delay: 0.8s; }
+
+/* زر الإنشاء يظهر في النهاية مع نبضة بسيطة لفت الانتباه */
+@keyframes pulseGlow {
+  0% { box-shadow: 0 10px 24px rgba(197, 120, 255, 0.24); }
+  50% { box-shadow: 0 10px 35px rgba(197, 120, 255, 0.6); }
+  100% { box-shadow: 0 10px 24px rgba(197, 120, 255, 0.24); }
+}
+
+.generate-btn {
+  opacity: 0;
+  animation: fadeInUp 0.6s ease-out 1s forwards, pulseGlow 2s infinite 1.6s;
+}
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.create-story-main {
+  background-size: 200% 200%;
+  animation: gradientMove 15s ease infinite;
+}
+/* حل مشكلة الإزاحة البيضاء في الموبايل */
+@media (max-width: 1023px) { 
+  .create-story-page {
+    display: flex;
+    flex-direction: column; /* جعل العناصر تحت بعضها بدل جانب بعض */
+    overflow-x: hidden;
+  }
+
+  .sidebar {
+    position: fixed; /* السايدبار يصبح فوق المحتوى عند فتحه */
+    left: -260px; /* مخفي افتراضياً */
+    transition: 0.3s ease;
+    z-index: 100;
+  }
+
+  /* هذا الكلاس تضيفه عند الضغط على زر القائمة (Menu) */
+  .sidebar.active {
+    left: 0;
+  }
+
+  .create-story-main {
+    margin-left: 0 !important;
+    width: 100% !important;
+    padding: 15px !important;
+  }
+
+  .story-builder-layout {
+    grid-template-columns: 1fr !important; /* إلغاء تقسيم الـ 2 columns */
+  }
+
+  /* إصلاح حجم الفورم في الموبايل */
+  .story-form-card {
+    width: 100%;
+    margin: 0;
+    border-radius: 20px;
+  }
+}
+/* Premium Section & Switch */
+.premium-toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 15px 0;
+  background: rgba(255, 255, 255, 0.4);
+  padding: 10px 15px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+.premium-label {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #444;
+}
+
+.modern-switch {
+  position: relative;
+  display: inline-block;
+  width: 46px;
+  height: 24px;
+}
+
+.modern-switch input { opacity: 0; width: 0; height: 0; }
+
+.slider.round {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  position: absolute;
+  content: "";
+  height: 18px; width: 18px;
+  left: 3px; bottom: 3px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider { background-color: #ff5e9e; }
+input:checked + .slider:before { transform: translateX(22px); }
+
+/* Custom Upload Card */
+.upload-container {
+  margin-top: 15px;
+  perspective: 1000px;
+}
+
+.custom-upload-card {
+  display: block;
+  border: 2px dashed #d1d5db;
+  border-radius: 18px;
+  padding: 25px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.custom-upload-card:hover {
+  border-color: #ff5e9e;
+  background: #fffafa;
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+}
+
+.hidden-input { display: none; }
+
+.upload-icon-circle {
+  width: 60px;
+  height: 60px;
+  background: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 15px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.upload-icon-anim { width: 35px; opacity: 0.8; }
+
+.upload-text { font-weight: 600; color: #4b5563; margin-bottom: 5px; }
+.upload-text span { color: #ff5e9e; }
+.upload-subtext { font-size: 0.75rem; color: #9ca3af; }
+
+/* Image Preview */
+.image-preview-wrapper {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  margin: 0 auto;
+  border-radius: 15px;
+  overflow: hidden;
+  border: 3px solid white;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.upload-preview-img { width: 100%; height: 100%; object-fit: cover; }
+
+.image-overlay {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.5);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: 0.3s;
+  font-size: 0.75rem;
+}
+
+.image-preview-wrapper:hover .image-overlay { opacity: 1; }
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.error-message {
+  color: #ff4d4d;
+  font-size: 0.85rem;
+  margin-top: 10px;
+  background: #fff0f0;
+  padding: 8px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+/* Final mobile scroll fix: keep this at the end so it wins over older conflicting rules. */
+@media (max-width: 1023px) {
+  html,
+  body,
+  #root {
+    height: auto !important;
+    min-height: 100% !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .create-story-page {
+    display: block !important;
+    height: auto !important;
+    min-height: 100dvh !important;
+    overflow-x: hidden !important;
+    overflow-y: visible !important;
+  }
+
+  .create-story-main {
+    height: auto !important;
+    min-height: 100dvh !important;
+    overflow: visible !important;
+  }
+
+  .create-story-content {
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  .story-builder-layout,
+  .story-form-card,
+  .story-preview-card {
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  .sidebar {
+    height: auto !important;
+    max-height: none !important;
+  }
+}
