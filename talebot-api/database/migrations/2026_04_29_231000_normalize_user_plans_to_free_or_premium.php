@@ -8,7 +8,7 @@ return new class extends Migration
     public function up(): void
     {
         DB::table('users')
-            ->whereNotIn('plan', ['free', 'premium'])
+            ->whereNotIn('plan', ['free', 'premium', 'unlimited'])
             ->update(['plan' => 'premium']);
     }
 

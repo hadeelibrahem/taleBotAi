@@ -8,6 +8,7 @@ use App\Models\StoryPage;
 use App\Services\AiStoryService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 
 class StoryController extends Controller
@@ -18,13 +19,21 @@ class StoryController extends Controller
     ): JsonResponse {
         $data = $request->validated();
         $user = $request->user();
-        $isPremium = strtolower((string) ($user?->plan ?? 'free')) === 'premium';
+        $planKey = $this->effectivePlanKey($user);
+        $planLimits = $this->planLimits($planKey);
+        $canUsePremiumCharacter = in_array($planKey, ['premium', 'unlimited'], true);
 
-        if ($request->boolean('use_child_photo') && ! $isPremium) {
+        if ($request->boolean('use_child_photo') && ! $canUsePremiumCharacter) {
             return response()->json([
                 'success' => false,
                 'message' => 'Using a child photo as the story character is available for premium users only.',
             ], 403);
+        }
+
+        $limitResponse = $this->validatePlanLimits($user, $data, $planLimits);
+
+        if ($limitResponse) {
+            return $limitResponse;
         }
 
         if (
@@ -91,5 +100,101 @@ class StoryController extends Controller
                 })->values(),
             ],
         ]);
+    }
+
+    private function validatePlanLimits($user, array $data, array $planLimits): ?JsonResponse
+    {
+        $storyLimit = $planLimits['story_limit'];
+        $imageLimit = $planLimits['image_limit'];
+
+        if ($storyLimit !== null && $user->stories()->count() >= $storyLimit) {
+            return response()->json([
+                'success' => false,
+                'message' => "Your plan allows up to {$storyLimit} stories. Upgrade your plan or ask an admin to increase the limit.",
+            ], 403);
+        }
+
+        if ($imageLimit === null) {
+            return null;
+        }
+
+        $existingImages = StoryPage::query()
+            ->whereHas('story', fn ($query) => $query->where('user_id', $user->id))
+            ->whereNotNull('image_url')
+            ->count();
+        $requestedImages = $this->pagesCountForLength($data['story_length'] ?? 'medium');
+
+        if (($existingImages + $requestedImages) > $imageLimit) {
+            return response()->json([
+                'success' => false,
+                'message' => "Your plan allows up to {$imageLimit} generated images. This story needs {$requestedImages} more images.",
+            ], 403);
+        }
+
+        return null;
+    }
+
+    private function pagesCountForLength(string $storyLength): int
+    {
+        return match ($storyLength) {
+            'short' => 3,
+            'medium' => 5,
+            'long' => 7,
+            default => 4,
+        };
+    }
+
+    private function planLimits(string $planKey): array
+    {
+        $defaults = [
+            'free' => [
+                'story_limit' => 3,
+                'image_limit' => 0,
+            ],
+            'premium' => [
+                'story_limit' => null,
+                'image_limit' => 50,
+            ],
+            'unlimited' => [
+                'story_limit' => null,
+                'image_limit' => null,
+            ],
+        ];
+
+        $planKey = array_key_exists($planKey, $defaults) ? $planKey : 'premium';
+
+        if (! Schema::hasTable('plan_settings')) {
+            return $defaults[$planKey];
+        }
+
+        $settings = DB::table('plan_settings')->where('key', $planKey)->first();
+
+        if (! $settings) {
+            return $defaults[$planKey];
+        }
+
+        return [
+            'story_limit' => $settings->story_limit === null ? null : (int) $settings->story_limit,
+            'image_limit' => $settings->image_limit === null ? null : (int) $settings->image_limit,
+        ];
+    }
+
+    private function effectivePlanKey($user): string
+    {
+        $planKey = strtolower((string) ($user?->plan ?? 'free'));
+
+        if ($planKey === 'free') {
+            return 'free';
+        }
+
+        if ($user?->plan_expires_at && $user->plan_expires_at->isPast()) {
+            return 'free';
+        }
+
+        if (($user?->payment_status ?? 'active') === 'expired') {
+            return 'free';
+        }
+
+        return $planKey;
     }
 }
