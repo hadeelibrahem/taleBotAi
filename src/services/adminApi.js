@@ -149,6 +149,28 @@ export async function updateAdminUserPlan(userId, plan) {
   return result.data || {};
 }
 
+export async function renewAdminUserPlan(userId) {
+  const response = await adminFetch(`/api/payments/users/${userId}/renew`, {
+    method: "POST",
+  });
+
+  const result = await parseJsonResponse(response);
+  return result.data || {};
+}
+
+export async function updatePlanSettings(plan, payload) {
+  const response = await adminFetch(`/api/payments/plans/${plan}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const result = await parseJsonResponse(response);
+  return result.data || null;
+}
+
 export async function fetchAdminUsers() {
   const response = await adminFetch("/api/users");
   const result = await parseJsonResponse(response);

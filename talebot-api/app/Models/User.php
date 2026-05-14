@@ -25,6 +25,11 @@ class User extends Authenticatable
         'email',
         'password',
         'plan',
+        'plan_started_at',
+        'plan_renews_at',
+        'plan_expires_at',
+        'last_payment_at',
+        'payment_status',
         'avatar',
         'status',
     ];
@@ -49,6 +54,10 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'plan_started_at' => 'datetime',
+            'plan_renews_at' => 'datetime',
+            'plan_expires_at' => 'datetime',
+            'last_payment_at' => 'datetime',
         ];
     }
 

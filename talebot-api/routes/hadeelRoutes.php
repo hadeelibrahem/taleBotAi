@@ -25,7 +25,9 @@ Route::middleware(['auth:sanctum', 'admin.token'])->group(function () {
     Route::get('/logs', [AdminLogController::class, 'index']);
     Route::delete('/logs', [AdminLogController::class, 'destroy']);
     Route::get('/payments', [AdminPaymentController::class, 'index']);
+    Route::patch('/payments/plans/{plan}', [AdminPaymentController::class, 'updatePlanSettings']);
     Route::patch('/payments/users/{user}/plan', [AdminPaymentController::class, 'updatePlan']);
+    Route::post('/payments/users/{user}/renew', [AdminPaymentController::class, 'renewSubscription']);
     Route::get('/users', [AdminUserController::class, 'index']);
     Route::get('/users/{user}', [AdminUserController::class, 'show']);
     Route::patch('/users/{user}/status', [AdminUserController::class, 'updateStatus']);

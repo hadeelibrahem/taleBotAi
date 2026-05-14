@@ -377,7 +377,7 @@ export default function Admin() {
       case "logs":
         return <LogsView />;
       case "payments":
-        return <PaymentsView />;
+        return <PaymentsView currentAdmin={currentAdmin} />;
       default:
         return <DashboardView />;
     }
