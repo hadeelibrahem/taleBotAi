@@ -25,12 +25,9 @@ class AdminController extends Controller
         ]);
     }
 
-    public function current(): JsonResponse
+    public function current(Request $request): JsonResponse
     {
-        $admin = Admin::query()
-            ->where('is_active', true)
-            ->orderBy('id')
-            ->first();
+        $admin = $request->user();
 
         return response()->json([
             'success' => true,
@@ -40,10 +37,7 @@ class AdminController extends Controller
 
     public function updateCurrent(Request $request): JsonResponse
     {
-        $admin = Admin::query()
-            ->where('is_active', true)
-            ->orderBy('id')
-            ->first();
+        $admin = $request->user();
 
         if (! $admin) {
             return response()->json([

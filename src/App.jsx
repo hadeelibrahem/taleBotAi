@@ -1,45 +1,36 @@
-/*import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Admin from "./pages/Admin";
-
-function App() {
-  return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Admin />} />
-      </Routes>
-    </BrowserRouter>
-  );
-}
-
-export default App;*/
-
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import LandingPage from "./pages/LandingPage";
+import AboutUs from "./pages/AboutUs";
 import StoryReader from "./pages/StoryReader";
 import Dashboard from "./pages/Dashboard";
 import MyStories from "./pages/MyStories";
 import Settings from "./pages/Settings";
 import AnalyticsPage from "./pages/AnalyticsPage";
 import CreateStory from "./pages/createStory";
-import Profile from "./pages/Profile"; 
+import Profile from "./pages/Profile";
+import Admin from "./pages/Admin";
+import { getAdminToken } from "./services/adminApi";
+
+function AdminRoute() {
+  return getAdminToken() ? <Admin /> : <Navigate to="/" replace />;
+}
 
 function App() {
   return (
     <BrowserRouter>
-      
-
-        <div className="flex-1 p-6">
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/stories" element={<MyStories />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/reader" element={<StoryReader />} />
-            <Route path="/create" element={<CreateStory/>} />
-            <Route path="/analytics" element={<AnalyticsPage />} />
-            <Route path="/profile" element={<Profile />}
-            />
-          </Routes>
-        </div>
-     
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/about" element={<AboutUs />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/stories" element={<MyStories />} />
+        <Route path="/create" element={<CreateStory />} />
+        <Route path="/reader" element={<StoryReader />} />
+        <Route path="/analytics" element={<AnalyticsPage />} />
+        <Route path="/settings" element={<Settings />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/admin" element={<AdminRoute />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
     </BrowserRouter>
   );
 }

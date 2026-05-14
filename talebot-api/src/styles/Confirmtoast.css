@@ -1,0 +1,132 @@
+
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+
+  backdrop-filter: blur(6px);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: overlayFadeIn 0.2s ease both;
+}
+
+@keyframes overlayFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.confirm-box {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px 28px;
+  max-width: 300px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(220, 210, 200, 0.4);
+  animation: boxPop 0.28s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes boxPop {
+  from { opacity: 0; transform: scale(0.9) translateY(8px); }
+  to   { opacity: 1; transform: scale(1)   translateY(0); }
+}
+
+.confirm-title {
+  font-family: "Playfair Display", serif;
+  font-size: 17px;
+  font-weight: 700;
+  color: #1e1c1a;
+  margin: 0 0 8px;
+}
+
+.confirm-msg {
+  font-size: 13px;
+  color: #9e9a96;
+  line-height: 1.55;
+  margin: 0 0 20px;
+}
+
+.confirm-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.confirm-no {
+  border: 1.5px solid rgba(220, 210, 200, 0.9);
+  background: white;
+  color: #6e6b67;
+  border-radius: 999px;
+  padding: 8px 20px;
+  font-size: 13px;
+  font-family: "DM Sans", sans-serif;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.confirm-no:hover {
+  border-color: #9b8ff6;
+  color: #9b8ff6;
+  transform: translateY(-1px);
+}
+
+.confirm-yes {
+  border: none;
+  background: linear-gradient(90deg, #e05555, #c0392b);
+  color: white;
+  border-radius: 999px;
+  padding: 8px 20px;
+  font-size: 13px;
+  font-family: "DM Sans", sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(192, 57, 43, 0.3);
+  transition: all 0.2s ease;
+}
+
+.confirm-yes:hover {
+  background: linear-gradient(90deg, #c0392b, #a93226);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(192, 57, 43, 0.4);
+}
+
+
+.action-toast {
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3000;
+  border-radius: 999px;
+  padding: 12px 28px;
+  font-size: 14px;
+  font-family: "DM Sans", sans-serif;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+  animation: toastSlideUp 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both,
+             toastFadeOut 0.4s ease 2.5s both;
+}
+
+.toast-save {
+  background: linear-gradient(90deg, #7bd8db, #9b8ff6);
+  color: white;
+}
+
+.toast-delete {
+  background: linear-gradient(90deg, #e05555, #c0392b);
+  color: white;
+}
+
+@keyframes toastSlideUp {
+  from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+@keyframes toastFadeOut {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}

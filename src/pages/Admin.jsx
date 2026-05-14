@@ -5,6 +5,7 @@ import {
   BookOpen,
   CheckCheck,
   Image as ImageIcon,
+  LogOut,
   Menu,
   Search,
   ShieldAlert,
@@ -12,6 +13,7 @@ import {
   Users,
   X,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { AnimatePresence, motion as Motion } from "framer-motion";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -24,6 +26,7 @@ import {
   fetchAdminUsers,
   fetchAdmins,
   fetchCurrentAdmin,
+  logoutAdmin,
 } from "@/services/adminApi";
 import DashboardView from "./admin/DashboardView";
 import ProfileView from "./admin/ProfileView";
@@ -38,6 +41,7 @@ import { navItems } from "./admin/data";
 import "../styles/AdminTheme.css";
 
 export default function Admin() {
+  const navigate = useNavigate();
   const [active, setActive] = useState("dashboard");
   const [mobileOpen, setMobileOpen] = useState(false);
   const [currentAdmin, setCurrentAdmin] = useState(null);
@@ -70,13 +74,14 @@ export default function Admin() {
       .catch(() => {
         if (isMounted) {
           setCurrentAdmin(null);
+          logoutAdmin().finally(() => navigate("/", { replace: true }));
         }
       });
 
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [navigate]);
 
   useEffect(() => {
     let ignore = false;
@@ -339,6 +344,11 @@ export default function Admin() {
     }
   }
 
+  async function handleAdminLogout() {
+    await logoutAdmin();
+    navigate("/", { replace: true });
+  }
+
   const adminName = currentAdmin?.name || "Admin Panel";
   const adminEmail = currentAdmin?.email || "No admin account";
   const adminRole = currentAdmin?.role || "Internal Access";
@@ -442,6 +452,11 @@ export default function Admin() {
               </p>
             </div>
           </button>
+
+          <Button className="admin-button admin-button--danger admin-logout-button" onClick={handleAdminLogout}>
+            <LogOut className="admin-button-icon" />
+            Logout
+          </Button>
         </aside>
 
         <div className="admin-main">
@@ -620,6 +635,10 @@ export default function Admin() {
                   <p className="admin-profile-email">{adminEmail}</p>
                 </div>
               </button>
+              <Button className="admin-button admin-button--danger admin-header-logout" onClick={handleAdminLogout}>
+                <LogOut className="admin-button-icon" />
+                Logout
+              </Button>
             </div>
           </header>
 

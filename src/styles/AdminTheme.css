@@ -447,6 +447,16 @@
   transform: translateY(-1px);
 }
 
+.admin-theme .admin-logout-button {
+  width: 100%;
+  margin-top: 0.85rem;
+  justify-content: center;
+}
+
+.admin-theme .admin-header-logout {
+  display: none;
+}
+
 .admin-theme .admin-avatar-chip {
   background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
   color: white;
