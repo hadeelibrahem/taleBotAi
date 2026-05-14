@@ -12,6 +12,12 @@ class AdminAuthController extends Controller
 {
     public function register(Request $request): JsonResponse
     {
+        if (strtolower((string) $request->user()?->role) !== 'super admin') {
+            return response()->json([
+                'message' => 'Only super admins can create admin accounts.',
+            ], 403);
+        }
+
         $validator = Validator::make($request->all(), [
             'full_name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:admins,email'],
@@ -30,7 +36,11 @@ class AdminAuthController extends Controller
             'is_active' => true,
         ]);
 
-        return $this->tokenResponse($admin, 201);
+        return response()->json([
+            'success' => true,
+            'message' => 'Admin account created.',
+            'data' => $this->formatAdmin($admin),
+        ], 201);
     }
 
     public function login(Request $request): JsonResponse

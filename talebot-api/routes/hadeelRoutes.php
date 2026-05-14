@@ -9,14 +9,18 @@ use App\Http\Controllers\AdminStoryController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\StoryController;
 
-Route::post('/stories/generate', [StoryController::class, 'generate']);
 Route::get('/admins/avatar/{path}', [AdminController::class, 'avatar'])->where('path', '.*');
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/stories/generate', [StoryController::class, 'generate']);
+});
 
 Route::middleware(['auth:sanctum', 'admin.token'])->group(function () {
     Route::get('/admins', [AdminController::class, 'index']);
     Route::get('/admins/current', [AdminController::class, 'current']);
     Route::post('/admins/current', [AdminController::class, 'updateCurrent']);
     Route::patch('/admins/current', [AdminController::class, 'updateCurrent']);
+    Route::patch('/admins/{admin}/role', [AdminController::class, 'updateRole']);
     Route::get('/dashboard', [AdminDashboardController::class, 'index']);
     Route::get('/logs', [AdminLogController::class, 'index']);
     Route::delete('/logs', [AdminLogController::class, 'destroy']);

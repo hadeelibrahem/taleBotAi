@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Sidebar from "../components/Sidebar";
 import Topbar from "../components/Topbar";
 import "../styles/createStory.css";
@@ -25,9 +25,45 @@ function CreateStory() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [user, setUser] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("user") || "null");
+    } catch {
+      return null;
+    }
+  }, []);
+  const isPremium = user?.plan?.toLowerCase() === "premium";
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      return;
+    }
+
+    fetch(buildApiUrl("/api/user"), {
+      headers: {
+        Accept: "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((payload) => {
+        if (payload) {
+          localStorage.setItem("user", JSON.stringify(payload));
+          setUser(payload);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
+    if (name === "use_child_photo" && checked && !isPremium) {
+      setError("Using your child's photo as a character is available for premium users only.");
+      return;
+    }
+
     setFormData((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
@@ -48,6 +84,11 @@ function CreateStory() {
     try {
       setLoading(true);
       setError("");
+      if (formData.use_child_photo && !isPremium) {
+        setError("Using your child's photo as a character is available for premium users only.");
+        return;
+      }
+
       const payload = new FormData();
       Object.keys(formData).forEach(key => {
         payload.append(key, key === 'use_child_photo' ? (formData[key] ? "1" : "0") : formData[key]);
@@ -56,7 +97,10 @@ function CreateStory() {
 
       const response = await fetch(buildApiUrl("/api/stories/generate"), {
         method: "POST",
-        headers: { Accept: "application/json" },
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token") || ""}`,
+        },
         body: payload,
       });
       const result = await parseJsonResponse(response);
@@ -185,10 +229,19 @@ function CreateStory() {
               <h4 className="section-title">Premium Character Option</h4>
               <div className="premium-toggle-row">
                 <label className="modern-switch">
-                  <input type="checkbox" name="use_child_photo" checked={formData.use_child_photo} onChange={handleInputChange} />
+                  <input
+                    type="checkbox"
+                    name="use_child_photo"
+                    checked={formData.use_child_photo}
+                    onChange={handleInputChange}
+                    disabled={!isPremium}
+                  />
                   <span className="slider round"></span>
                 </label>
-                <span className="premium-label">Use my child’s photo as character (Premium)</span>
+                <span className="premium-label">
+                  Use my child's photo as character (Premium)
+                  {!isPremium ? " - upgrade required" : ""}
+                </span>
               </div>
 
               {formData.use_child_photo && (

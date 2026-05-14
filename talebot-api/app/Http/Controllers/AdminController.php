@@ -54,14 +54,12 @@ class AdminController extends Controller
                 'max:255',
                 Rule::unique('admins', 'email')->ignore($admin->id),
             ],
-            'role' => ['required', 'string', 'max:100'],
             'avatar' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048'],
             'password' => ['nullable', 'string', 'min:8', 'confirmed'],
         ]);
 
         $admin->full_name = $validated['name'];
         $admin->email = $validated['email'];
-        $admin->role = $validated['role'];
 
         if ($request->hasFile('avatar')) {
             if ($admin->avatar && ! str_starts_with($admin->avatar, 'http') && Storage::disk('public')->exists($admin->avatar)) {
@@ -75,6 +73,37 @@ class AdminController extends Controller
             $admin->password = $validated['password'];
         }
 
+        $admin->save();
+
+        return response()->json([
+            'success' => true,
+            'data' => $this->formatAdmin($admin->fresh()),
+        ]);
+    }
+
+    public function updateRole(Request $request, Admin $admin): JsonResponse
+    {
+        $currentAdmin = $request->user();
+
+        if (strtolower((string) $currentAdmin?->role) !== 'super admin') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Only super admins can change admin roles.',
+            ], 403);
+        }
+
+        if ($currentAdmin->id === $admin->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You cannot change your own role.',
+            ], 422);
+        }
+
+        $validated = $request->validate([
+            'role' => ['required', 'string', Rule::in(['admin', 'super admin'])],
+        ]);
+
+        $admin->role = $validated['role'];
         $admin->save();
 
         return response()->json([

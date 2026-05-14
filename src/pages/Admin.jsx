@@ -367,7 +367,7 @@ export default function Admin() {
       case "profile-settings":
         return <ProfileSettingsView admin={currentAdmin} onAdminUpdated={setCurrentAdmin} />;
       case "admins":
-        return <AdminsView />;
+        return <AdminsView currentAdmin={currentAdmin} />;
       case "users":
         return <UsersView />;
       case "stories":

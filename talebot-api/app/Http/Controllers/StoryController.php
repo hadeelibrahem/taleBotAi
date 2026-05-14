@@ -8,6 +8,7 @@ use App\Models\StoryPage;
 use App\Services\AiStoryService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class StoryController extends Controller
 {
@@ -16,18 +17,33 @@ class StoryController extends Controller
         AiStoryService $aiStoryService
     ): JsonResponse {
         $data = $request->validated();
+        $user = $request->user();
+        $isPremium = strtolower((string) ($user?->plan ?? 'free')) === 'premium';
+
+        if ($request->boolean('use_child_photo') && ! $isPremium) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Using a child photo as the story character is available for premium users only.',
+            ], 403);
+        }
 
         if (
             $request->boolean('use_child_photo') &&
             $request->hasFile('child_photo')
         ) {
-            $data['child_photo_path'] = $request->file('child_photo')->store('child-photos', 'public');
+            $data['child_photo_path'] = $request->file('child_photo')->store('child-photos', 'local');
         }
 
-        $generatedStory = $aiStoryService->generate($data);
+        try {
+            $generatedStory = $aiStoryService->generate($data);
+        } finally {
+            if (!empty($data['child_photo_path'])) {
+                Storage::disk('local')->delete($data['child_photo_path']);
+            }
+        }
 
         $story = DB::transaction(function () use ($data, $generatedStory) {
-            $userId = auth()->id() ?? 1;
+            $userId = auth()->id();
 
             $story = Story::create([
                 'user_id' => $userId,

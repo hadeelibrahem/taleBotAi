@@ -74,7 +74,6 @@ export default function ProfileSettingsView({ admin, onAdminUpdated }) {
       payload.append("_method", "PATCH");
       payload.append("name", form.name.trim());
       payload.append("email", form.email.trim());
-      payload.append("role", form.role.trim());
 
       if (avatarFile) {
         payload.append("avatar", avatarFile);
@@ -126,7 +125,8 @@ export default function ProfileSettingsView({ admin, onAdminUpdated }) {
 
               <label className="admin-field-group">
                 <span className="admin-field-label">Role</span>
-                <Input value={form.role} onChange={(event) => updateField("role", event.target.value)} required />
+                <Input value={form.role} disabled readOnly />
+                <span className="admin-field-help">Roles can only be changed by system-level admin management.</span>
               </label>
 
               <div className="admin-avatar-upload-row">
