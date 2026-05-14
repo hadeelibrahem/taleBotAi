@@ -8,7 +8,10 @@ html, body {
   padding: 0;
   overflow-x: hidden;
 }
+.filter-chip{
 
+  color: #7f67c8;
+}
 .analytics-layout {
   display: flex;
   min-height: 100vh;
@@ -17,7 +20,7 @@ html, body {
   overflow-x: hidden;
 }
 
-/* ✅ Sidebar ثابت */
+
 .analytics-layout > .sidebar,
 .analytics-layout > aside,
 .analytics-layout > nav {

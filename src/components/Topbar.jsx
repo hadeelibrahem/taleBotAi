@@ -1,30 +1,128 @@
-import { useState } from "react";
+import { useMemo, useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "../styles/Topbar.css";
 
-function Topbar() {
+function Topbar({ stories = [], notifications = [] }) {
   const [showSearch, setShowSearch] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [query, setQuery] = useState("");
+  const [localNotifs, setLocalNotifs] = useState(notifications);
+  const navigate = useNavigate();
+  const notifRef = useRef(null);
+
+
+  useEffect(() => {
+    setLocalNotifs(notifications);
+  }, [notifications]);
+
+ 
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (notifRef.current && !notifRef.current.contains(e.target)) {
+        setShowNotifications(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const filteredStories = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return [];
+    return stories.filter((story) =>
+      story.title?.toLowerCase().includes(q)
+    );
+  }, [query, stories]);
+
+  const hasNotifications = localNotifs.length > 0;
+
+  const handleStoryClick = (story) => {
+    navigate("/stories", { state: { search: story.title } });
+    setShowSearch(false);
+    setQuery("");
+  };
+
+  const handleNotifClick = (id) => {
+    setLocalNotifs((prev) => prev.filter((n) => n.id !== id));
+  };
 
   return (
     <div className="topbar">
-      <div className={`search-box ${showSearch ? "active" : ""}`}>
-        <button
-          className="search-btn"
-          onClick={() => setShowSearch(!showSearch)}
-        >
-          🔍
-        </button>
+      <div className="topbar-search-area">
+        <div className={`topbar-search-box ${showSearch ? "active" : ""}`}>
+          <button
+            type="button"
+            className="topbar-search-btn"
+            onClick={() => {
+              setShowSearch((prev) => !prev);
+              setQuery("");
+            }}
+          >
+            {showSearch ? "✕" : "🔍"}
+          </button>
 
-        <input
-          type="text"
-          placeholder="Search stories..."
-          className="search-input"
-        />
+          <div className={`topbar-search-input-wrap ${showSearch ? "show" : ""}`}>
+            <input
+              type="text"
+              placeholder="Search stories..."
+              className="topbar-search-input"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              autoFocus={showSearch}
+            />
+          </div>
+        </div>
+
+        {showSearch && query.trim() && (
+          <div className="topbar-search-results">
+            {filteredStories.length > 0 ? (
+              filteredStories.map((story) => (
+                <button
+                  key={story.id}
+                  className="topbar-search-result-item"
+                  onClick={() => handleStoryClick(story)}
+                >
+                  <span className="topbar-result-title">{story.title}</span>
+                  <span className="topbar-result-genre">{story.genre}</span>
+                </button>
+              ))
+            ) : (
+              <div className="topbar-search-no-results">No stories found</div>
+            )}
+          </div>
+        )}
       </div>
 
-      <button className="bell-btn">
-        <span className="bell-icon">🔔</span>
-        <span className="notif-dot"></span>
-      </button>
+      {/* الجرس */}
+      <div className="topbar-notif-wrapper" ref={notifRef}>
+        <button
+          className="topbar-bell-btn"
+          onClick={() => setShowNotifications((prev) => !prev)}
+        >
+          <span className="topbar-bell-icon">🔔</span>
+          {hasNotifications && <span className="topbar-notif-dot"></span>}
+        </button>
+
+        {showNotifications && (
+          <div className="topbar-notif-dropdown">
+            <h4>Notifications</h4>
+            {localNotifs.length === 0 ? (
+              <p className="topbar-notif-empty">No notifications</p>
+            ) : (
+              localNotifs.map((n, i) => (
+                <div
+                  className="topbar-notif-item"
+                  key={n.id || i}
+                  onClick={() => handleNotifClick(n.id)}
+                >
+                  <span className="topbar-notif-title">{n.title}</span>
+                  <span className="topbar-notif-msg">{n.message}</span>
+                </div>
+              ))
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

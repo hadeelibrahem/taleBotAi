@@ -1,7 +1,7 @@
 import React from "react";
 import "../styles/aiInsights.css";
 
-export default function AiInsights() {
+export default function AiInsights({ data = [], stats = {} }) {
   return (
     <div className="ai-insights-card">
       <div className="ai-insights-header">
@@ -9,29 +9,22 @@ export default function AiInsights() {
         <p>Personalized recommendations</p>
       </div>
 
-      <div className="insight-box">
-        <h4>Most Popular Theme</h4>
-        <p>
-          Emma loves magical creatures and friendship stories. Try combining them!
-        </p>
-      </div>
 
-      <div className="insight-box">
-        <h4>Suggested Moral</h4>
-        <p>
-          “Kindness creates lasting friendships” would be perfect for your next story.
-        </p>
-      </div>
+      {data.map((insight, index) => (
+        <div className="insight-box" key={index}>
+          <h4>{insight.title}</h4>
+          <p>{insight.content}</p>
+        </div>
+      ))}
 
-      <button className="generate-story-btn">Generate AI Story</button>
-
+    
       <div className="ai-stats">
         <div>
-          <h3>92%</h3>
+          <h3>{stats?.completion_rate ?? 0}%</h3>
           <p>Completion Rate</p>
         </div>
         <div>
-          <h3>4.9</h3>
+          <h3>{stats?.avg_rating ?? 0}</h3>
           <p>Avg Rating</p>
         </div>
       </div>

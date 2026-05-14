@@ -1,42 +1,111 @@
 import React, { useState } from "react";
 
-const initialChildren = [
-  { id: 1, icon: "👧", name: "Sarah",  age: 7,  interests: "Stories, Drawing",  disabled: false },
-  { id: 2, icon: "👦", name: "Liam",   age: 10, interests: "Science, Adventures", disabled: false },
-  { id: 3, icon: "🧒", name: "Emma",   age: 5,  interests: "Animals, Music",    disabled: false },
-];
+const avatarOptions = ["👧", "👦", "🧒", "👶", "🧑", "👱"];
 
-const avatarOptions = ["👧","👦","🧒","👶","🧑","👱"];
-
-export default function ParentalControls() {
-  const [children, setChildren]     = useState(initialChildren);
-  const [activeId, setActiveId]     = useState(null);
-  const [editData, setEditData]     = useState({});
+export default function ParentalControls({ children, setChildren, apiBase }) {
+  const [activeId, setActiveId] = useState(null);
+  const [editData, setEditData] = useState({});
   const [showAddForm, setShowAddForm] = useState(false);
-  const [newChild, setNewChild]     = useState({ icon: "🧒", name: "", age: "", interests: "" });
+  const [newChild, setNewChild] = useState({
+    avatar: "🧒",
+    name: "",
+    age: "",
+  });
 
   const handleEdit = (child) => {
     if (activeId === child.id) {
       setActiveId(null);
     } else {
       setActiveId(child.id);
-      setEditData({ name: child.name, age: child.age, interests: child.interests, icon: child.icon });
+      setEditData({
+        name: child.name || "",
+        age: child.age || "",
+        avatar: child.avatar || "🧒",
+      });
     }
   };
 
-  const handleSave = (id) => {
-    setChildren((prev) =>
-      prev.map((c) => c.id === id ? { ...c, ...editData } : c)
-    );
-    setActiveId(null);
+  const handleSave = async (id) => {
+    try {
+      const res = await fetch(`${apiBase}/settings/children/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          name: editData.name,
+          age: Number(editData.age),
+          avatar: editData.avatar,
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to update child");
+      }
+
+      const result = await res.json();
+      const updatedChild = result.data;
+
+      setChildren((prev) =>
+        prev.map((c) => (c.id === id ? updatedChild : c))
+      );
+
+      setActiveId(null);
+    } catch (err) {
+      alert(err.message || "Update failed");
+    }
   };
 
-  const handleAdd = () => {
-    if (!newChild.name.trim()) return;
-    const id = Date.now();
-    setChildren((prev) => [...prev, { ...newChild, id, disabled: false }]);
-    setNewChild({ icon: "🧒", name: "", age: "", interests: "" });
-    setShowAddForm(false);
+  const handleAdd = async () => {
+    try {
+      if (!newChild.name.trim()) return;
+
+      const res = await fetch(`${apiBase}/settings/children`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          name: newChild.name,
+          age: Number(newChild.age),
+          avatar: newChild.avatar,
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to add child");
+      }
+
+      const result = await res.json();
+      setChildren((prev) => [...prev, result.data]);
+
+      setNewChild({ avatar: "🧒", name: "", age: "" });
+      setShowAddForm(false);
+    } catch (err) {
+      alert(err.message || "Add child failed");
+    }
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      const res = await fetch(`${apiBase}/settings/children/${id}`, {
+        method: "DELETE",
+        headers: {
+          Accept: "application/json",
+        },
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to delete child");
+      }
+
+      setChildren((prev) => prev.filter((c) => c.id !== id));
+      if (activeId === id) setActiveId(null);
+    } catch (err) {
+      alert(err.message || "Delete failed");
+    }
   };
 
   return (
@@ -46,40 +115,48 @@ export default function ParentalControls() {
       <div className="profile-list">
         {children.map((child) => {
           const isActive = activeId === child.id;
+
           return (
             <div key={child.id} className="child-item">
-
-              {/* Row */}
               <div className="profile-row">
                 <div className="profile-info">
-                  <span className="profile-icon">{child.icon}</span>
+                  <span className="profile-icon">{child.avatar || "🧒"}</span>
                   <div className="profile-name-wrap">
                     <span className="profile-name">{child.name}</span>
                     <span className="profile-age">Age {child.age}</span>
                   </div>
                 </div>
 
-                <button
-                  className={`mini-edit-btn ${child.disabled ? "is-disabled" : ""} ${isActive ? "is-active" : ""}`}
-                  onClick={() => !child.disabled && handleEdit(child)}
-                >
-                  {isActive ? "✕ Close" : "✎ Edit"}
-                </button>
+                <div style={{ display: "flex", gap: "8px" }}>
+                  <button
+                    className={`mini-edit-btn ${isActive ? "is-active" : ""}`}
+                    onClick={() => handleEdit(child)}
+                    type="button"
+                  >
+                    {isActive ? "✕ Close" : "✎ Edit"}
+                  </button>
+
+                  <button
+                    className="mini-edit-btn"
+                    onClick={() => handleDelete(child.id)}
+                    type="button"
+                  >
+                    🗑 Delete
+                  </button>
+                </div>
               </div>
 
-              {/* Expandable edit panel */}
               <div className={`child-edit-panel ${isActive ? "is-open" : ""}`}>
                 <div className="child-edit-inner">
-
-                  {/* Avatar picker */}
                   <div className="edit-field-group">
                     <label className="edit-label">Avatar</label>
                     <div className="avatar-picker">
                       {avatarOptions.map((av) => (
                         <button
                           key={av}
-                          className={`avatar-option ${editData.icon === av ? "selected" : ""}`}
-                          onClick={() => setEditData((d) => ({ ...d, icon: av }))}
+                          type="button"
+                          className={`avatar-option ${editData.avatar === av ? "selected" : ""}`}
+                          onClick={() => setEditData((d) => ({ ...d, avatar: av }))}
                         >
                           {av}
                         </button>
@@ -87,7 +164,6 @@ export default function ParentalControls() {
                     </div>
                   </div>
 
-                  {/* Name */}
                   <div className="edit-field-group">
                     <label className="edit-label">Name</label>
                     <input
@@ -98,63 +174,48 @@ export default function ParentalControls() {
                     />
                   </div>
 
-                  {/* Age */}
                   <div className="edit-field-group">
                     <label className="edit-label">Age</label>
                     <input
                       className="settings-input edit-input"
                       type="number"
                       min="1"
-                      max="17"
+                      max="18"
                       value={editData.age || ""}
                       onChange={(e) => setEditData((d) => ({ ...d, age: e.target.value }))}
                       placeholder="Age"
                     />
                   </div>
 
-                  {/* Interests */}
-                  <div className="edit-field-group">
-                    <label className="edit-label">Interests</label>
-                    <input
-                      className="settings-input edit-input"
-                      value={editData.interests || ""}
-                      onChange={(e) => setEditData((d) => ({ ...d, interests: e.target.value }))}
-                      placeholder="e.g. Stories, Drawing"
-                    />
-                  </div>
-
-                  <button className="save-child-btn" onClick={() => handleSave(child.id)}>
+                  <button className="save-child-btn" onClick={() => handleSave(child.id)} type="button">
                     ✓ Save Changes
                   </button>
                 </div>
               </div>
-
             </div>
           );
         })}
       </div>
 
-      {/* Add Child button */}
       <button
         className={`add-child-btn ${showAddForm ? "is-cancel" : ""}`}
         onClick={() => setShowAddForm((v) => !v)}
+        type="button"
       >
         {showAddForm ? "✕ Cancel" : "+ Add Child Profile"}
       </button>
 
-      {/* Add Child form */}
       <div className={`child-edit-panel add-child-panel ${showAddForm ? "is-open" : ""}`}>
         <div className="child-edit-inner">
-
-          {/* Avatar picker */}
           <div className="edit-field-group">
             <label className="edit-label">Avatar</label>
             <div className="avatar-picker">
               {avatarOptions.map((av) => (
                 <button
                   key={av}
-                  className={`avatar-option ${newChild.icon === av ? "selected" : ""}`}
-                  onClick={() => setNewChild((d) => ({ ...d, icon: av }))}
+                  type="button"
+                  className={`avatar-option ${newChild.avatar === av ? "selected" : ""}`}
+                  onClick={() => setNewChild((d) => ({ ...d, avatar: av }))}
                 >
                   {av}
                 </button>
@@ -162,7 +223,6 @@ export default function ParentalControls() {
             </div>
           </div>
 
-          {/* Name */}
           <div className="edit-field-group">
             <label className="edit-label">Name</label>
             <input
@@ -173,37 +233,24 @@ export default function ParentalControls() {
             />
           </div>
 
-          {/* Age */}
           <div className="edit-field-group">
             <label className="edit-label">Age</label>
             <input
               className="settings-input edit-input"
               type="number"
               min="1"
-              max="17"
+              max="18"
               value={newChild.age}
               onChange={(e) => setNewChild((d) => ({ ...d, age: e.target.value }))}
               placeholder="Age"
             />
           </div>
 
-          {/* Interests */}
-          <div className="edit-field-group">
-            <label className="edit-label">Interests</label>
-            <input
-              className="settings-input edit-input"
-              value={newChild.interests}
-              onChange={(e) => setNewChild((d) => ({ ...d, interests: e.target.value }))}
-              placeholder="e.g. Animals, Music"
-            />
-          </div>
-
-          <button className="save-child-btn" onClick={handleAdd}>
+          <button className="save-child-btn" onClick={handleAdd} type="button">
             + Add Child
           </button>
         </div>
       </div>
-
     </section>
   );
 }

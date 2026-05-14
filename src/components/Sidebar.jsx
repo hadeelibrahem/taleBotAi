@@ -61,12 +61,7 @@ export default function Sidebar() {
             <NavLink to="/" className="nav-link" onClick={() => setOpen(false)}>
               <span>📊</span> Dashboard
             </NavLink>
-            <NavLink to="/stories" className="nav-link" onClick={() => setOpen(false)}>
-              <span>📚</span> My Stories
-            </NavLink>
-            <NavLink to="/create" className="nav-link" onClick={() => setOpen(false)}>
-              <span>✨</span> Create Story
-            </NavLink>
+         
             <NavLink to="/analytics" className="nav-link" onClick={() => setOpen(false)}>
               <span>📈</span> Analytics
             </NavLink>

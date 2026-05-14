@@ -1,13 +1,11 @@
 import React, { useState } from "react";
 
-export default function AccountSection({ onManage }) {
+export default function AccountSection({ account, setAccount, onManage }) {
   const [copied, setCopied] = useState(false);
   const [showName, setShowName] = useState(true);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showPasswordText, setShowPasswordText] = useState(false);
-
+  
   const handleCopy = () => {
-    navigator.clipboard.writeText("sarah.johnson@email.com");
+    navigator.clipboard.writeText(account.email || "");
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -15,18 +13,28 @@ export default function AccountSection({ onManage }) {
   return (
     <section className="settings-card account-card">
       <div className="account-header">
-        <div className="account-avatar">SJ</div>
+        <div className="account-avatar">
+          {(account.name || "U")
+            .split(" ")
+            .map((p) => p[0])
+            .join("")
+            .slice(0, 2)
+            .toUpperCase()}
+        </div>
+
         <div className="account-header-info">
           <h3 className="section-title" style={{ margin: 0 }}>Account</h3>
-          <span className="account-badge">✦ Premium</span>
+          <span className="account-badge">✦ {account.plan || "Free"}</span>
         </div>
       </div>
 
       <div className="input-with-icon account-input-wrap">
         <input
           type="text"
-          value="sarah.johnson@email.com"
-          readOnly
+          value={account.email || ""}
+          onChange={(e) =>
+            setAccount((prev) => ({ ...prev, email: e.target.value }))
+          }
           className="settings-input"
         />
         <button
@@ -36,38 +44,12 @@ export default function AccountSection({ onManage }) {
           title={copied ? "Copied!" : "Copy email"}
           aria-label="Copy email"
         >
-          {copied ? "✓" : "🔒"}
+          {copied ? "✓" : "📋"}
         </button>
-      </div>
-
-      <div className={`password-field-wrap ${showPassword ? "is-open" : ""}`}>
-        <div className="input-with-icon">
-          <input
-            type={showPasswordText ? "text" : "password"}
-            defaultValue="mysecretpassword"
-            className="settings-input"
-            placeholder="New password"
-          />
-          <button
-            type="button"
-            className="input-icon-btn"
-            onClick={() => setShowPasswordText((v) => !v)}
-            aria-label={showPasswordText ? "Hide password" : "Show password"}
-            title={showPasswordText ? "Hide" : "Show"}
-          >
-            {showPasswordText ? "🙈" : "👁"}
-          </button>
-        </div>
       </div>
 
       <div className="small-links-row">
-        <button
-          type="button"
-          className={`tiny-link tiny-link-btn ${showPassword ? "active" : ""}`}
-          onClick={() => setShowPassword((v) => !v)}
-        >
-          ✉ Password
-        </button>
+       
 
         <button
           type="button"
@@ -87,7 +69,10 @@ export default function AccountSection({ onManage }) {
         <div className="input-with-icon">
           <input
             type="text"
-            defaultValue="Sarah Johnson"
+            value={account.name || ""}
+            onChange={(e) =>
+              setAccount((prev) => ({ ...prev, name: e.target.value }))
+            }
             className="settings-input"
             placeholder="Display name"
           />

@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit53b5d56b3b7e3cbac1713e68c8850f6c
+class ComposerStaticInitf4dbe09ac5bbddf1a0ad59af35d90a39
 {
     public static $files = array (
         '6e3fae29631ef280660b3cdad06f25a8' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
@@ -130,6 +130,7 @@ class ComposerStaticInit53b5d56b3b7e3cbac1713e68c8850f6c
             'League\\CommonMark\\' => 18,
             'Laravel\\Tinker\\' => 15,
             'Laravel\\SerializableClosure\\' => 28,
+            'Laravel\\Sanctum\\' => 16,
             'Laravel\\Sail\\' => 13,
             'Laravel\\Prompts\\' => 16,
             'Laravel\\Pail\\' => 13,
@@ -422,6 +423,10 @@ class ComposerStaticInit53b5d56b3b7e3cbac1713e68c8850f6c
         array (
             0 => __DIR__ . '/..' . '/laravel/serializable-closure/src',
         ),
+        'Laravel\\Sanctum\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/laravel/sanctum/src',
+        ),
         'Laravel\\Sail\\' =>
         array (
             0 => __DIR__ . '/..' . '/laravel/sail/src',
@@ -531,12 +536,31 @@ class ComposerStaticInit53b5d56b3b7e3cbac1713e68c8850f6c
     );
 
     public static $classMap = array (
+        'App\\Http\\Controllers\\AuthController' => __DIR__ . '/../..' . '/app/Http/Controllers/AuthController.php',
         'App\\Http\\Controllers\\Controller' => __DIR__ . '/../..' . '/app/Http/Controllers/Controller.php',
+        'App\\Http\\Controllers\\DashboardController' => __DIR__ . '/../..' . '/app/Http/Controllers/DashboardController.php',
+        'App\\Http\\Controllers\\SettingsController' => __DIR__ . '/../..' . '/app/Http/Controllers/SettingsController.php',
         'App\\Http\\Controllers\\StoryController' => __DIR__ . '/../..' . '/app/Http/Controllers/StoryController.php',
         'App\\Http\\Requests\\GenerateStoryRequest' => __DIR__ . '/../..' . '/app/Http/Requests/GenerateStoryRequest.php',
+        'App\\Http\\Requests\\StoreChildProfileRequest' => __DIR__ . '/../..' . '/app/Http/Requests/StoreChildProfileRequest.php',
+        'App\\Http\\Requests\\UpdateAccountRequest' => __DIR__ . '/../..' . '/app/Http/Requests/UpdateAccountRequest.php',
+        'App\\Http\\Requests\\UpdateChildProfileRequest' => __DIR__ . '/../..' . '/app/Http/Requests/UpdateChildProfileRequest.php',
+        'App\\Http\\Requests\\UpdatePreferencesRequest' => __DIR__ . '/../..' . '/app/Http/Requests/UpdatePreferencesRequest.php',
+        'App\\Models\\Activity' => __DIR__ . '/../..' . '/app/Models/Activity.php',
+        'App\\Models\\AiInsight' => __DIR__ . '/../..' . '/app/Models/AiInsight.php',
+        'App\\Models\\ChildProfile' => __DIR__ . '/../..' . '/app/Models/ChildProfile.php',
+        'App\\Models\\Favorite' => __DIR__ . '/../..' . '/app/Models/Favorite.php',
+        'App\\Models\\Notification' => __DIR__ . '/../..' . '/app/Models/Notification.php',
+        'App\\Models\\PremiumSetting' => __DIR__ . '/../..' . '/app/Models/PremiumSetting.php',
+        'App\\Models\\Story' => __DIR__ . '/../..' . '/app/Models/Story.php',
+        'App\\Models\\StoryPage' => __DIR__ . '/../..' . '/app/Models/StoryPage.php',
+        'App\\Models\\StoryProgress' => __DIR__ . '/../..' . '/app/Models/StoryProgress.php',
+        'App\\Models\\StoryRating' => __DIR__ . '/../..' . '/app/Models/StoryRating.php',
         'App\\Models\\User' => __DIR__ . '/../..' . '/app/Models/User.php',
+        'App\\Models\\UserSetting' => __DIR__ . '/../..' . '/app/Models/UserSetting.php',
         'App\\Providers\\AppServiceProvider' => __DIR__ . '/../..' . '/app/Providers/AppServiceProvider.php',
         'App\\Services\\AiStoryService' => __DIR__ . '/../..' . '/app/Services/AiStoryService.php',
+        'App\\Services\\DashboardService' => __DIR__ . '/../..' . '/app/Services/DashboardService.php',
         'Attribute' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/Attribute.php',
         'Brick\\Math\\BigDecimal' => __DIR__ . '/..' . '/brick/math/src/BigDecimal.php',
         'Brick\\Math\\BigInteger' => __DIR__ . '/..' . '/brick/math/src/BigInteger.php',
@@ -3090,6 +3114,26 @@ class ComposerStaticInit53b5d56b3b7e3cbac1713e68c8850f6c
         'Laravel\\Sail\\Console\\InstallCommand' => __DIR__ . '/..' . '/laravel/sail/src/Console/InstallCommand.php',
         'Laravel\\Sail\\Console\\PublishCommand' => __DIR__ . '/..' . '/laravel/sail/src/Console/PublishCommand.php',
         'Laravel\\Sail\\SailServiceProvider' => __DIR__ . '/..' . '/laravel/sail/src/SailServiceProvider.php',
+        'Laravel\\Sanctum\\Console\\Commands\\PruneExpired' => __DIR__ . '/..' . '/laravel/sanctum/src/Console/Commands/PruneExpired.php',
+        'Laravel\\Sanctum\\Contracts\\HasAbilities' => __DIR__ . '/..' . '/laravel/sanctum/src/Contracts/HasAbilities.php',
+        'Laravel\\Sanctum\\Contracts\\HasApiTokens' => __DIR__ . '/..' . '/laravel/sanctum/src/Contracts/HasApiTokens.php',
+        'Laravel\\Sanctum\\Events\\TokenAuthenticated' => __DIR__ . '/..' . '/laravel/sanctum/src/Events/TokenAuthenticated.php',
+        'Laravel\\Sanctum\\Exceptions\\MissingAbilityException' => __DIR__ . '/..' . '/laravel/sanctum/src/Exceptions/MissingAbilityException.php',
+        'Laravel\\Sanctum\\Exceptions\\MissingScopeException' => __DIR__ . '/..' . '/laravel/sanctum/src/Exceptions/MissingScopeException.php',
+        'Laravel\\Sanctum\\Guard' => __DIR__ . '/..' . '/laravel/sanctum/src/Guard.php',
+        'Laravel\\Sanctum\\HasApiTokens' => __DIR__ . '/..' . '/laravel/sanctum/src/HasApiTokens.php',
+        'Laravel\\Sanctum\\Http\\Controllers\\CsrfCookieController' => __DIR__ . '/..' . '/laravel/sanctum/src/Http/Controllers/CsrfCookieController.php',
+        'Laravel\\Sanctum\\Http\\Middleware\\AuthenticateSession' => __DIR__ . '/..' . '/laravel/sanctum/src/Http/Middleware/AuthenticateSession.php',
+        'Laravel\\Sanctum\\Http\\Middleware\\CheckAbilities' => __DIR__ . '/..' . '/laravel/sanctum/src/Http/Middleware/CheckAbilities.php',
+        'Laravel\\Sanctum\\Http\\Middleware\\CheckForAnyAbility' => __DIR__ . '/..' . '/laravel/sanctum/src/Http/Middleware/CheckForAnyAbility.php',
+        'Laravel\\Sanctum\\Http\\Middleware\\CheckForAnyScope' => __DIR__ . '/..' . '/laravel/sanctum/src/Http/Middleware/CheckForAnyScope.php',
+        'Laravel\\Sanctum\\Http\\Middleware\\CheckScopes' => __DIR__ . '/..' . '/laravel/sanctum/src/Http/Middleware/CheckScopes.php',
+        'Laravel\\Sanctum\\Http\\Middleware\\EnsureFrontendRequestsAreStateful' => __DIR__ . '/..' . '/laravel/sanctum/src/Http/Middleware/EnsureFrontendRequestsAreStateful.php',
+        'Laravel\\Sanctum\\NewAccessToken' => __DIR__ . '/..' . '/laravel/sanctum/src/NewAccessToken.php',
+        'Laravel\\Sanctum\\PersonalAccessToken' => __DIR__ . '/..' . '/laravel/sanctum/src/PersonalAccessToken.php',
+        'Laravel\\Sanctum\\Sanctum' => __DIR__ . '/..' . '/laravel/sanctum/src/Sanctum.php',
+        'Laravel\\Sanctum\\SanctumServiceProvider' => __DIR__ . '/..' . '/laravel/sanctum/src/SanctumServiceProvider.php',
+        'Laravel\\Sanctum\\TransientToken' => __DIR__ . '/..' . '/laravel/sanctum/src/TransientToken.php',
         'Laravel\\SerializableClosure\\Contracts\\Serializable' => __DIR__ . '/..' . '/laravel/serializable-closure/src/Contracts/Serializable.php',
         'Laravel\\SerializableClosure\\Contracts\\Signer' => __DIR__ . '/..' . '/laravel/serializable-closure/src/Contracts/Signer.php',
         'Laravel\\SerializableClosure\\Exceptions\\InvalidSignatureException' => __DIR__ . '/..' . '/laravel/serializable-closure/src/Exceptions/InvalidSignatureException.php',
@@ -6988,9 +7032,9 @@ class ComposerStaticInit53b5d56b3b7e3cbac1713e68c8850f6c
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit53b5d56b3b7e3cbac1713e68c8850f6c::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit53b5d56b3b7e3cbac1713e68c8850f6c::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInit53b5d56b3b7e3cbac1713e68c8850f6c::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInitf4dbe09ac5bbddf1a0ad59af35d90a39::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInitf4dbe09ac5bbddf1a0ad59af35d90a39::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInitf4dbe09ac5bbddf1a0ad59af35d90a39::$classMap;
 
         }, null, ClassLoader::class);
     }

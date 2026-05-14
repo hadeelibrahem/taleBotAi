@@ -20,7 +20,7 @@ export default function Profile() {
     readingTime: 48,
     streak: 7,
     favGenre: "Fantasy",
-    // بيانات جديدة
+
     pagesRead: 156,
     completedBooks: 8,
     weeklyGoal: { current: 3, target: 5 },
