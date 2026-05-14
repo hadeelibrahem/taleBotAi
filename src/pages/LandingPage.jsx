@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, BookOpen, User, Mail, Lock, ShieldCheck, Upload } from 'lucide-react';
-import { loginAdmin, registerAdmin } from '../services/adminApi';
+import { loginAdmin } from '../services/adminApi';
 
 import TopTab from '../components/TopTab';
 import SparkleOverlay from '../components/SparkleOverlay';
@@ -55,7 +55,7 @@ const LandingPage = () => {
     setMessage('');
 
     
-    if (authMode === 'reset' || authMode === 'signup' || authMode === 'admin-signup') {
+    if (authMode === 'reset' || authMode === 'signup') {
       if (formData.password.length < 8) {
         setMessage('Password must be at least 8 characters long! 🪄');
         return;
@@ -71,7 +71,7 @@ const LandingPage = () => {
     const endpoint = endpoints[authMode];
     let body, headers = { 'Accept': 'application/json' };
 
-    if (authMode === 'admin-login' || authMode === 'admin-signup') {
+    if (authMode === 'admin-login') {
       headers['Content-Type'] = 'application/json';
       body = JSON.stringify({
         full_name: formData.full_name,
@@ -95,24 +95,19 @@ const LandingPage = () => {
         return;
       }
 
-      if (authMode === 'admin-signup') {
-        await registerAdmin({
-          full_name: formData.full_name,
-          email: formData.email,
-          password: formData.password,
-          password_confirmation: formData.password_confirmation,
-        });
-        navigate('/admin');
-        return;
-      }
-
       const response = await fetch(`http://localhost:8000/api${endpoint}`, { method: 'POST', body, headers });
       const result = await response.json();
       if (response.ok) {
-        if (authMode === 'signup') { setAuthMode('login'); setMessage('Account created!'); }
+        if (authMode === 'signup') {
+          localStorage.setItem('token', result.access_token);
+          localStorage.setItem('user', JSON.stringify(result.user || null));
+          setAuthMode('login');
+          setMessage('Account created!');
+        }
         else if (authMode === 'login') {
           setIsLoggedIn(true);
           localStorage.setItem('token', result.access_token);
+          localStorage.setItem('user', JSON.stringify(result.user || null));
           navigate('/dashboard');
         }
         else if (authMode === 'forgot') setMessage(result.message);
@@ -260,7 +255,7 @@ const LandingPage = () => {
                 ))}
 
                 {/* عرض الصورة في جميع أوضاع التسجيل لضمان التناسق */}
-                {(authMode === 'login' || authMode === 'forgot' || authMode === 'signup' || authMode === 'admin-login' || authMode === 'admin-signup') && (
+                {(authMode === 'login' || authMode === 'forgot' || authMode === 'signup' || authMode === 'admin-login') && (
                   <motion.img 
                     initial={{ x: -20, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
@@ -279,15 +274,15 @@ const LandingPage = () => {
                   {/* العناوين بنفس ثيم TaleBot AI */}
                   <div className="flex justify-center items-center mb-6 gap-2">
                     <span className="text-[#8eb8e5] text-4xl font-black" style={pangolinStyle}>
-                      {authMode === 'forgot' ? 'Reset' : authMode === 'signup' || authMode === 'admin-signup' ? 'Join' : 'Welcome'}
+                      {authMode === 'forgot' ? 'Reset' : authMode === 'signup' ? 'Join' : 'Welcome'}
                     </span>
                     <span className="text-[#ffb2c5] text-4xl font-black italic drop-shadow-sm" style={pangolinStyle}>
-                      {authMode === 'admin-login' || authMode === 'admin-signup' ? 'Admin' : authMode === 'forgot' ? 'Magic' : authMode === 'signup' ? 'Fun!' : 'Back'}
+                      {authMode === 'admin-login' ? 'Admin' : authMode === 'forgot' ? 'Magic' : authMode === 'signup' ? 'Fun!' : 'Back'}
                     </span>
                   </div>
                   
                   <div className="space-y-3">
-                    {(authMode === 'signup' || authMode === 'admin-signup') && (
+                    {authMode === 'signup' && (
                       <div className="relative">
                         <User className="absolute left-4 top-1/2 -translate-y-1/2 text-[#8eb8e5]" size={18} />
                         <input name="full_name" value={formData.full_name} onChange={handleInputChange} type="text" placeholder="Full Name" className="w-full pl-12 pr-4 py-4 rounded-2xl bg-white/80 shadow-sm outline-none focus:ring-2 focus:ring-[#8eb8e5] transition-all" />
@@ -306,7 +301,7 @@ const LandingPage = () => {
                       </div>
                     )}
 
-                    {(authMode === 'signup' || authMode === 'admin-signup' || authMode === 'reset') && (
+                    {(authMode === 'signup' || authMode === 'reset') && (
                       <div className="relative">
                         <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-[#8eb8e5]" size={18} />
                         <input name="password_confirmation" value={formData.password_confirmation} onChange={handleInputChange} type="password" placeholder="Confirm Password" className="w-full pl-12 pr-4 py-4 rounded-2xl bg-white/80 shadow-sm outline-none focus:ring-2 focus:ring-[#8eb8e5] transition-all" />
@@ -325,21 +320,19 @@ const LandingPage = () => {
                   </div>
 
                   <button onClick={handleAuthSubmit} className="w-full py-4 text-white font-black rounded-full shadow-lg transition-transform hover:scale-105 active:scale-95 mt-4" style={{ background: 'linear-gradient(90deg, #a78bfa, #f472b6)' }}>
-                    {loading ? 'Casting Magic...' : authMode === 'signup' || authMode === 'admin-signup' ? 'Create Account' : 'Submit'}
+                    {loading ? 'Casting Magic...' : authMode === 'signup' ? 'Create Account' : 'Submit'}
                   </button>
 
                   {message && <p className="text-xs text-center text-pink-500 font-bold bg-pink-50 py-2 rounded-lg">{message}</p>}
                   
                   <div className="flex flex-col gap-3 text-xs font-bold text-gray-500 px-2 mt-6">
                     <button onClick={() => {
-                      setAuthMode(authMode === 'login' ? 'signup' : authMode === 'admin-login' ? 'admin-signup' : authMode === 'admin-signup' ? 'admin-login' : 'login');
+                      setAuthMode(authMode === 'login' ? 'signup' : 'login');
                       setMessage('');
                     }} className="hover:text-[#f472b6] transition-colors">
                       {authMode === 'admin-login'
-                        ? "Create an admin account"
-                        : authMode === 'admin-signup'
-                          ? "Already an admin? Log in"
-                          : authMode === 'login'
+                        ? "Continue as storyteller"
+                        : authMode === 'login'
                             ? "Don't have an account? Create one!"
                             : "Already have an account? Log In"}
                     </button>
@@ -349,7 +342,7 @@ const LandingPage = () => {
                         <ShieldCheck size={14} /> Log in as admin
                       </button>
                     )}
-                    {(authMode === 'admin-login' || authMode === 'admin-signup') && (
+                    {authMode === 'admin-login' && (
                       <button onClick={() => { setAuthMode('login'); setMessage(''); }} className="hover:text-[#8eb8e5] transition-colors self-center">
                         Continue as storyteller
                       </button>

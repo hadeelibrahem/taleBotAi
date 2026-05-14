@@ -34,17 +34,15 @@ async function adminFetch(path, options = {}) {
 }
 
 export async function registerAdmin(payload) {
-  const response = await fetch(buildApiUrl("/api/admin/register"), {
+  const response = await adminFetch("/api/admin/register", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Accept: "application/json",
     },
     body: JSON.stringify(payload),
   });
   const result = await parseJsonResponse(response);
-  setAdminSession(result.access_token, result.admin);
-  return result.admin;
+  return result.data || result.admin || null;
 }
 
 export async function loginAdmin(payload) {
@@ -73,6 +71,19 @@ export async function fetchAdmins() {
   const response = await adminFetch("/api/admins");
   const result = await parseJsonResponse(response);
   return Array.isArray(result.data) ? result.data : [];
+}
+
+export async function updateAdminRole(adminId, role) {
+  const response = await adminFetch(`/api/admins/${adminId}/role`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ role }),
+  });
+
+  const result = await parseJsonResponse(response);
+  return result.data || null;
 }
 
 export async function fetchCurrentAdmin() {

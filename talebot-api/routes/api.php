@@ -10,9 +10,9 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
 Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 
-Route::post('/admin/register', [AdminAuthController::class, 'register']);
 Route::post('/admin/login', [AdminAuthController::class, 'login']);
 Route::middleware(['auth:sanctum', 'admin.token'])->group(function () {
+    Route::post('/admin/register', [AdminAuthController::class, 'register']);
     Route::get('/admin/me', [AdminAuthController::class, 'current']);
     Route::post('/admin/logout', [AdminAuthController::class, 'logout']);
 });

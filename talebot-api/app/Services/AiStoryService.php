@@ -13,7 +13,7 @@ private function uploadChildPhotoToLeonardo(array $data, string $apiKey): ?strin
         return null;
     }
 
-    $absolutePath = storage_path('app/public/' . $data['child_photo_path']);
+    $absolutePath = storage_path('app/private/' . $data['child_photo_path']);
 
     if (!file_exists($absolutePath)) {
         logger()->warning('Child photo file not found', ['path' => $absolutePath]);
@@ -239,6 +239,9 @@ private function buildStructuredStoryPrompt(array $data): string
     };
 
     $styleRules = $this->getStyleRulesForStoryPrompt($data['illustration_style']);
+    $childPhotoRule = !empty($data['use_child_photo'])
+        ? 'A child photo will be used later as the visual identity reference. Do not invent specific facial traits that could conflict with the uploaded photo; keep appearance flexible and say the main character should match the uploaded child reference.'
+        : 'Describe a clear, consistent child character appearance.';
 
     return <<<PROMPT
 Create a children's story in valid JSON only.
@@ -292,6 +295,7 @@ Story rules:
 Illustration rules:
 - The scene_prompt of each page must describe ONLY that page image.
 - The character appearance must stay consistent across all pages.
+- {$childPhotoRule}
 - The illustration style must be exactly "{$data['illustration_style']}".
 - The visual theme must strongly match the requested illustration style.
 - Every scene_prompt must explicitly reinforce the style.
@@ -502,9 +506,21 @@ private function getPollinationsStyleEnforcement(string $style): string
     'negative_prompt' => 'blurry, distorted face, extra fingers, cropped, text, caption, watermark, logo, duplicate character, inconsistent clothes, scary, realistic photo, photorealistic, 3d render, glossy render, random style changes, mixed art styles, inconsistent palette, inconsistent rendering',
 ];
 
-if ($childReferenceImageId) {
-    $payload['imagePrompts'] = [$childReferenceImageId];
-}
+    if ($childReferenceImageId) {
+        if (filter_var(env('LEONARDO_USE_CHARACTER_REFERENCE_CONTROLNET', false), FILTER_VALIDATE_BOOL)) {
+            $payload['controlnets'] = [
+                [
+                    'initImageId' => $childReferenceImageId,
+                    'initImageType' => 'UPLOADED',
+                    'preprocessorId' => (int) env('LEONARDO_CHARACTER_REFERENCE_PREPROCESSOR_ID', 133),
+                    'strengthType' => env('LEONARDO_CHARACTER_REFERENCE_STRENGTH', 'High'),
+                    'weight' => (float) env('LEONARDO_CHARACTER_REFERENCE_WEIGHT', 1.8),
+                ],
+            ];
+        } else {
+            $payload['imagePrompts'] = [$childReferenceImageId];
+        }
+    }
 
     $response = Http::timeout(120)
         ->withHeaders([
@@ -518,6 +534,29 @@ if ($childReferenceImageId) {
         'status' => $response->status(),
         'body' => $response->json(),
     ]);
+
+    if (
+        !$response->successful() &&
+        $childReferenceImageId &&
+        isset($payload['controlnets']) &&
+        str_contains(strtolower((string) data_get($response->json(), 'error', '')), 'does not support')
+    ) {
+        unset($payload['controlnets']);
+        $payload['imagePrompts'] = [$childReferenceImageId];
+
+        $response = Http::timeout(120)
+            ->withHeaders([
+                'accept' => 'application/json',
+                'authorization' => 'Bearer ' . $apiKey,
+                'content-type' => 'application/json',
+            ])
+            ->post('https://cloud.leonardo.ai/api/rest/v1/generations', $payload);
+
+        logger()->info('Leonardo generation retry without controlnets response', [
+            'status' => $response->status(),
+            'body' => $response->json(),
+        ]);
+    }
 
     if (!$response->successful()) {
         return $this->pollinationsFallback(
@@ -575,6 +614,7 @@ if ($childReferenceImageId) {
         'generation_id' => $generationId,
         'used_previous_reference' => !empty($previousLeonardoUrl),
         'child_reference_used' => !empty($childReferenceImageId),
+        'child_reference_mode' => isset($payload['controlnets']) ? 'controlnets' : (!empty($payload['imagePrompts']) ? 'imagePrompts' : null),
     ],
 ];
 }
@@ -672,7 +712,7 @@ if ($childReferenceImageId) {
     $referenceRules = [];
 
     if ($useChildPhotoReference) {
-        $referenceRules[] = 'Use the uploaded child photo as the face and appearance reference.';
+        $referenceRules[] = 'Use the uploaded child photo as the character reference. Preserve the child\'s core identity cues: face shape, hairstyle, hair color, skin tone, eye shape, eyebrow shape, smile, and overall age impression. Translate those features into the requested illustration style; do not replace the child with a generic cartoon face.';
     }
 
     if ($usePreviousPageContinuity) {
@@ -700,6 +740,7 @@ Style rules: {$styleEnforcement}
 {$referenceText}
 
 Keep the same character design, same outfit, same companions, same book style.
+Prioritize recognizable illustrated likeness of the referenced child over generic cuteness.
 Child-friendly.
 No text, no logo, no watermark.
 ");
