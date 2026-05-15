@@ -1,3 +1,4 @@
+
 * {
   box-sizing: border-box;
 }
@@ -7,18 +8,27 @@ html, body {
   padding: 0;
   overflow-x: hidden;
 }
+.filter-chip{
 
+  color: #7f67c8;
+}
 .analytics-layout {
   display: flex;
   min-height: 100vh;
   min-width: 0;
   width: 100%;
   overflow-x: hidden;
-  padding: 1.5rem 2rem 3rem;
-  gap: 20px;
+}
 
-  scrollbar-width: thin;
-  scrollbar-color: transparent transparent;
+
+.analytics-layout > .sidebar,
+.analytics-layout > aside,
+.analytics-layout > nav {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  flex-shrink: 0;
+  overflow-y: auto;
 }
 
 .analytics-page {
@@ -32,6 +42,7 @@ html, body {
   font-family: 'Segoe UI', system-ui, sans-serif;
   min-height: 100vh;
   overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .scroll-reveal {
@@ -355,8 +366,7 @@ html, body {
 /* Tablet */
 @media (max-width: 992px) {
   .analytics-layout {
-    padding: 1rem;
-    gap: 14px;
+    padding: 0;
   }
 
   .analytics-page {
@@ -384,11 +394,18 @@ html, body {
 @media (max-width: 768px) {
   .analytics-layout {
     flex-direction: column;
-    padding: 0.75rem;
+  }
+
+  /* على الموبايل الـ Sidebar يرجع عادي */
+  .analytics-layout > .sidebar,
+  .analytics-layout > aside,
+  .analytics-layout > nav {
+    position: relative;
+    height: auto;
   }
 
   .analytics-page {
-    padding: 12px 0;
+    padding: 12px;
     min-height: auto;
   }
 

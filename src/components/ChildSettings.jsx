@@ -1,19 +1,71 @@
-import React, { useState } from "react";
+import React from "react";
 
-const initialOptions = [
-  { id: 1, icon: "🧸", label: "Moderate Language", enabled: false },
-  { id: 2, icon: "📝", label: "Disable Story Sharing", enabled: false },
-  { id: 3, icon: "🛡", label: "Safe Content Filter", enabled: false },
-  { id: 4, icon: "📘", label: "Reading Time Limits", enabled: false, small: "⏱" },
-];
+const API_BASE = "http://127.0.0.1:8000/api";
 
-export default function ChildSettings({ onPassword }) {
-  const [options, setOptions] = useState(initialOptions);
+export default function ChildSettings({
+  preferences,
+  setPreferences,
+  onPassword,
+}) {
+  const token = localStorage.getItem("token");
 
-  const toggle = (id) => {
-    setOptions((prev) =>
-      prev.map((o) => (o.id === id ? { ...o, enabled: !o.enabled } : o))
-    );
+  const options = [
+    {
+      id: "disable_story_sharing",
+      icon: "📝",
+      label: "Disable Story Sharing",
+      enabled: !!preferences.disable_story_sharing,
+    },
+    {
+      id: "reading_time_limits",
+      icon: "📘",
+      label: "Reading Time Limits",
+      enabled: !!preferences.reading_time_limits,
+      small: "⏱",
+    },
+  ];
+
+  const toggleField = async (field) => {
+    const newValue = !preferences[field];
+
+    setPreferences((prev) => ({
+      ...prev,
+      [field]: newValue,
+    }));
+
+    try {
+      const res = await fetch(`${API_BASE}/settings/preferences`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          [field]: newValue,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Failed to save setting");
+      }
+
+      setPreferences((prev) => ({
+        ...prev,
+        ...data.data,
+      }));
+    } catch (err) {
+      console.error("Failed to save child setting:", err);
+
+      setPreferences((prev) => ({
+        ...prev,
+        [field]: !newValue,
+      }));
+
+      alert("Failed to save setting");
+    }
   };
 
   return (
@@ -21,7 +73,6 @@ export default function ChildSettings({ onPassword }) {
       <h3 className="section-title">Child Profiles</h3>
 
       <div className="plan-boxes">
-        <div className="mini-plan-box">Premium Plan</div>
         <button
           type="button"
           className="gradient-action-btn"
@@ -42,12 +93,15 @@ export default function ChildSettings({ onPassword }) {
             </div>
 
             <div className="toggle-right-wrap">
-              {item.small && <span className="small-side-icon">{item.small}</span>}
+              {item.small && (
+                <span className="small-side-icon">{item.small}</span>
+              )}
+
               <button
                 type="button"
                 className={`toggle-switch ${item.enabled ? "is-on" : ""}`}
                 aria-label={item.label}
-                onClick={() => toggle(item.id)}
+                onClick={() => toggleField(item.id)}
               >
                 <span className="toggle-knob" />
               </button>

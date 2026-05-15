@@ -1,7 +1,6 @@
 import Sidebar from "../components/Sidebar";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-// ─── Styles ───
 import "../styles/variables.css";
 import "../styles/layout.css";
 import "../styles/shared.css";
@@ -13,7 +12,6 @@ import "../styles/modal.css";
 import "../styles/bearBalloon.css";
 import "../styles/confirmToast.css";
 
-// ─── Components ───
 import AccountSection from "../components/AccountSection";
 import ParentalControls from "../components/ParentalControls";
 import ChildSettings from "../components/ChildSettings";
@@ -21,6 +19,8 @@ import Preferences from "../components/Preferences";
 
 import SubscriptionModal from "../components/modals/SubscriptionModal";
 import PasswordModal from "../components/modals/PasswordModal";
+
+const API_BASE = "http://127.0.0.1:8000/api";
 
 function FlyingBear({ side, balloon }) {
   return (
@@ -41,13 +41,217 @@ function FlyingBear({ side, balloon }) {
 }
 
 export default function Settings() {
-  const [openSubscription, setOpenSubscription] = useState(false);
-  const [openPassword, setOpenPassword]         = useState(false);
-  const [savedToast, setSavedToast]             = useState(false);
+  const token = localStorage.getItem("token");
 
-  const handleSave = () => {
+  const [accountData, setAccountData] = useState({
+    name: "",
+    email: "",
+    password: "",
+  });
+
+  const [openSubscription, setOpenSubscription] = useState(false);
+  const [openPassword, setOpenPassword] = useState(false);
+  const [savedToast, setSavedToast] = useState(false);
+  const [selectedChild, setSelectedChild] = useState(null);
+  const [childPassword, setChildPassword] = useState("");
+  const [childLoginError, setChildLoginError] = useState("");
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const [account, setAccount] = useState({
+    id: 1,
+    name: "",
+    email: "",
+    plan: "Free",
+  });
+
+ const [preferences, setPreferences] = useState({
+  new_story_suggestions: false,
+  reading_reminders: false,
+  account_updates: false,
+  disable_story_sharing: false,
+  reading_time_limits: false,
+});
+  const [children, setChildren] = useState([]);
+
+  const fetchSettings = async () => {
+    try {
+      setLoading(true);
+      setError("");
+
+      const res = await fetch(`${API_BASE}/settings`, {
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) throw new Error("Failed to fetch settings");
+
+      const result = await res.json();
+      const data = result.data || {};
+
+      const fetchedAccount = {
+        id: data.account?.id || 1,
+        name: data.account?.name || "",
+        email: data.account?.email || "",
+        plan: data.account?.plan || "Free",
+      };
+
+      setAccount(fetchedAccount);
+
+    
+      setAccountData({
+        name: fetchedAccount.name,
+        email: fetchedAccount.email,
+        password: "",
+      });
+
+      setPreferences({
+  new_story_suggestions: !!data.preferences?.new_story_suggestions,
+  reading_reminders: !!data.preferences?.reading_reminders,
+  account_updates: !!data.preferences?.account_updates,
+  disable_story_sharing: !!data.preferences?.disable_story_sharing,
+  reading_time_limits: !!data.preferences?.reading_time_limits,
+});
+
+      setChildren(Array.isArray(data.children) ? data.children : []);
+    } catch (err) {
+      setError(err.message || "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSettings();
+  }, []);
+const handleSave = async () => {
+  try {
+    const body = {};
+
+    if (accountData.name.trim() !== "") {
+      body.name = accountData.name.trim();
+    }
+
+    // ✅ ما تبعت الإيميل إلا إذا تغير
+    if (accountData.email !== account.email) {
+      body.email = accountData.email;
+    }
+
+    if (accountData.password.trim() !== "") {
+      body.password = accountData.password;
+    }
+
+    // إذا ما في شي اتغير ما تبعت طلب
+    if (Object.keys(body).length === 0) {
+      setSavedToast(true);
+      setTimeout(() => setSavedToast(false), 3000);
+      return;
+    }
+
+    const response = await fetch(`${API_BASE}/settings/account`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(body),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      const firstError = data.errors
+        ? Object.values(data.errors)[0][0]
+        : data.message;
+      alert(firstError || "Failed to update account");
+      return;
+    }
+
+    const updatedName = data.data?.full_name || accountData.name;
+    const updatedEmail = data.data?.email || accountData.email;
+
+    setAccount((prev) => ({ ...prev, name: updatedName, email: updatedEmail }));
+    setAccountData((prev) => ({
+      ...prev,
+      name: updatedName,
+      email: updatedEmail,
+    }));
+
     setSavedToast(true);
     setTimeout(() => setSavedToast(false), 3000);
+  } catch (error) {
+    console.error(error);
+    alert("Failed to update account");
+  }
+};
+
+  const handlePasswordUpdate = async (passwordData) => {
+    const res = await fetch(`${API_BASE}/settings/account`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(passwordData),
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => null);
+      throw new Error(errorData?.message || "Failed to update password");
+    }
+
+    return res.json();
+  };
+
+  const handleDeleteAccount = async () => {
+    const res = await fetch(`${API_BASE}/settings/account/delete`, {
+      method: "DELETE",
+      headers: {
+        Accept: "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!res.ok) throw new Error("Failed to delete account");
+
+   
+    localStorage.removeItem("token");
+    localStorage.removeItem("childUser");
+    window.location.href = "/login";
+  };
+
+  const handleChildLogin = async () => {
+    try {
+      setChildLoginError("");
+
+      const res = await fetch(`${API_BASE}/children/${selectedChild.id}/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          password: childPassword,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Incorrect password");
+      }
+
+      localStorage.setItem("childUser", JSON.stringify(data.data));
+      window.location.href = `/child/${selectedChild.id}`;
+    } catch (err) {
+      setChildLoginError(err.message);
+    }
   };
 
   return (
@@ -55,14 +259,14 @@ export default function Settings() {
       <Sidebar />
 
       <div className="settings-page">
-
         <FlyingBear side="right" balloon="🎈" />
-        <FlyingBear side="left"  balloon="🎀" />
+        <FlyingBear side="left" balloon="🎀" />
 
         <div className="settings-shell">
           <span className="sparkle sparkle-1">✦</span>
           <span className="sparkle sparkle-2">✦</span>
           <span className="sparkle sparkle-3">✦</span>
+
           <span className="corner-deco corner-left">🌸</span>
           <span className="corner-deco corner-right">🌿</span>
 
@@ -73,44 +277,130 @@ export default function Settings() {
 
           <h1 className="settings-title">Settings</h1>
 
-          <div className="settings-grid">
-            <div className="settings-column settings-left">
-              <AccountSection onManage={() => setOpenSubscription(true)} />
-              <ParentalControls />
-            </div>
+          {loading && (
+            <p style={{ textAlign: "center" }}>Loading settings...</p>
+          )}
 
-            <div className="settings-column settings-middle">
-              <div className="center-bot">
-                <img src="/imags/logo.jpg" alt="TaleBot AI" />
+          {error && (
+            <p style={{ textAlign: "center", color: "crimson" }}>{error}</p>
+          )}
+
+          {!loading && (
+            <div className="settings-grid">
+              <div className="settings-column settings-left">
+               <AccountSection
+  onManage={() => setOpenSubscription(true)}
+  accountData={accountData}
+  setAccountData={setAccountData}
+  plan={account.plan}
+/>
+
+                <ParentalControls
+                  children={children}
+                  setChildren={setChildren}
+                  apiBase={API_BASE}
+                />
               </div>
-              <ChildSettings onPassword={() => setOpenPassword(true)} />
-            </div>
 
-            <div className="settings-column settings-right">
-              <Preferences />
+              <div className="settings-column settings-middle">
+                <div className="center-bot">
+                  <img src="/imags/logo.jpg" alt="TaleBot AI" />
+                </div>
+
+            <ChildSettings
+  preferences={preferences}
+  setPreferences={setPreferences}
+  onPassword={() => setOpenPassword(true)}
+/>
+              </div>
+
+              <div className="settings-column settings-right">
+                <Preferences
+                  preferences={preferences}
+                  setPreferences={setPreferences}
+                  onDeleteConfirm={handleDeleteAccount}
+                />
+
+                <div className="settings-card children-access-card">
+                  <h3>Child Accounts</h3>
+
+                  {children.length === 0 && <p>No children added yet.</p>}
+
+                  {children.map((child) => (
+                    <button
+                      key={child.id}
+                      className="child-access-btn"
+                      onClick={() => {
+                        setSelectedChild(child);
+                        setChildPassword("");
+                        setChildLoginError("");
+                      }}
+                    >
+                      {child.avatar} {child.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
-          </div>
+          )}
 
           <div className="settings-footer">
-            <button className="save-changes-btn" onClick={handleSave}>
+            <button
+              className="save-changes-btn"
+              onClick={handleSave}
+              disabled={loading}
+            >
               ✦ Save Changes
             </button>
           </div>
         </div>
       </div>
 
-      {/* ── Save Toast ── */}
       {savedToast && (
-        <div className="action-toast toast-save">
-          ✦ Changes saved successfully!
-        </div>
+        <div className="action-toast toast-save">✦ Changes saved successfully!</div>
       )}
 
-      {openSubscription && (
-        <SubscriptionModal onClose={() => setOpenSubscription(false)} />
-      )}
+    {openSubscription && (
+  <SubscriptionModal
+    onClose={() => setOpenSubscription(false)}
+    currentPlan={account.plan}
+  />
+)}
+
       {openPassword && (
-        <PasswordModal onClose={() => setOpenPassword(false)} />
+        <PasswordModal
+          onClose={() => setOpenPassword(false)}
+          onSubmit={handlePasswordUpdate}
+        />
+      )}
+
+      {selectedChild && (
+        <div className="modal-overlay" onClick={() => setSelectedChild(null)}>
+          <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={() => setSelectedChild(null)}>
+              ✕
+            </button>
+
+            <div className="modal-lock-icon">🔒</div>
+
+            <input
+              type="password"
+              className="modal-input"
+              placeholder="Enter password"
+              value={childPassword}
+              onChange={(e) => setChildPassword(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleChildLogin()}
+            />
+
+            {childLoginError && (
+              <p className="modal-error">{childLoginError}</p>
+            )}
+
+            <button className="modal-submit-btn" onClick={handleChildLogin}>
+              login 👶
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );

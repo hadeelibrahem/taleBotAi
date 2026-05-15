@@ -22,4 +22,34 @@ class Story extends Model
     {
         return $this->hasMany(StoryPage::class);
     }
+
+    public function ratings()
+    {
+        return $this->hasMany(StoryRating::class);
+    }
+
+    public function progress()
+    {
+        return $this->hasMany(StoryProgress::class);
+    }
+
+    public function favorites()
+    {
+        return $this->hasMany(Favorite::class);
+    }
+
+    public function child()
+    {
+        return $this->belongsTo(ChildProfile::class, 'child_id');
+    }
+
+    public function childProfile()
+    {
+        return $this->belongsTo(ChildProfile::class, 'child_id');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
 }

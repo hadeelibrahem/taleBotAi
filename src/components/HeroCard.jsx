@@ -1,26 +1,43 @@
-import React from 'react';
+import React from "react";
+import { NavLink } from "react-router-dom";
 import "../styles/HeroCard.css";
 
-function HeroCard() {
+function HeroCard({ data, isChildDashboard = false }) {
+  const hour = new Date().getHours();
+
+  let greeting = "";
+
+  if (hour >= 5 && hour < 12) {
+    greeting = "Good morning";
+  } else if (hour >= 12 && hour < 18) {
+    greeting = "Good evening";
+  } else {
+    greeting = "Good night";
+  }
+
   return (
     <div className="hero-container">
       <div className="hero-content">
-        <span className="badge">✨ AI-Powered Stories</span>
-        <h1>Good evening, Sarah! </h1>
-        <p>
-          You've crafted 12 enchanting tales this month. Ready to dream
-          up another magical bedside story?
-        </p>
-        <div className="hero-buttons">
-          <button className="btn-primary">
-            <span>🖋️</span> Create New Story
-          </button>
-          <button className="btn-secondary">
-         View All Stories  →
-          </button>
-        </div>
+        <span className="badge">✨ {data?.badge || "AI-Powered Stories"}</span>
+
+        <h1>{data?.title || greeting}</h1>
+
+        <p>{data?.subtitle}</p>
+
+        {isChildDashboard && (
+          <div className="hero-buttons">
+            <NavLink to="/create" className="btn-primary hero-link">
+              <span>🖋️</span> {data?.actions?.[0]?.label || "Create New Story"}
+            </NavLink>
+
+            <NavLink to="/stories" className="btn-secondary hero-link">
+              {data?.actions?.[1]?.label || "View All Stories"} →
+            </NavLink>
+          </div>
+        )}
       </div>
     </div>
   );
 }
+
 export default HeroCard;

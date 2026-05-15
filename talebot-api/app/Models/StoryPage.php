@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class StoryPage extends Model
 {
+    protected $table = 'story_pages';
+
     protected $fillable = [
         'story_id',
         'page_number',
@@ -14,6 +16,8 @@ class StoryPage extends Model
         'status',
         'moderation_status',
     ];
+
+    public $timestamps = false;
 
     public function story()
     {

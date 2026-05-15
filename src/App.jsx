@@ -8,12 +8,16 @@ import Settings from "./pages/Settings";
 import AnalyticsPage from "./pages/AnalyticsPage";
 import CreateStory from "./pages/createStory";
 import Profile from "./pages/Profile";
+import ChildDashboard from "./pages/ChildDashboard";
 import Admin from "./pages/Admin";
 import { getAdminToken } from "./services/adminApi";
 
 function AdminRoute() {
   return getAdminToken() ? <Admin /> : <Navigate to="/" replace />;
 }
+
+
+
 
 function App() {
   return (
@@ -30,7 +34,11 @@ function App() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/admin" element={<AdminRoute />} />
         <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="/child/:id" element={<ChildDashboard />} />
+          <Route path="/child/:id/stories" element={<MyStories />} />
+          <Route path="/child/:id/create" element={<CreateStory />} />
       </Routes>
+
     </BrowserRouter>
   );
 }

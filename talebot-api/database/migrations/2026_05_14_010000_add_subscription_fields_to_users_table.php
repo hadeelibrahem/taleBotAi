@@ -9,11 +9,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->timestamp('plan_started_at')->nullable()->after('plan');
-            $table->timestamp('plan_renews_at')->nullable()->after('plan_started_at');
-            $table->timestamp('plan_expires_at')->nullable()->after('plan_renews_at');
-            $table->timestamp('last_payment_at')->nullable()->after('plan_expires_at');
-            $table->string('payment_status')->default('free')->after('last_payment_at');
+            $table->timestamp('plan_started_at')->nullable();
+            $table->timestamp('plan_renews_at')->nullable();
+            $table->timestamp('plan_expires_at')->nullable();
+            $table->timestamp('last_payment_at')->nullable();
+            $table->string('payment_status')->default('free');
         });
     }
 

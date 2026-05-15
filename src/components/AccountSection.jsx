@@ -1,13 +1,20 @@
 import React, { useState } from "react";
 
-export default function AccountSection({ onManage }) {
+export default function AccountSection({
+  onManage,
+  accountData,
+  setAccountData,
+  plan = "Free",
+}) {
   const [copied, setCopied] = useState(false);
   const [showName, setShowName] = useState(true);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showPasswordText, setShowPasswordText] = useState(false);
+
+  const displayName = accountData?.name || "User";
+  const email = accountData?.email || "";
+  const firstLetter = displayName.charAt(0).toUpperCase();
 
   const handleCopy = () => {
-    navigator.clipboard.writeText("sarah.johnson@email.com");
+    navigator.clipboard.writeText(email);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -15,20 +22,27 @@ export default function AccountSection({ onManage }) {
   return (
     <section className="settings-card account-card">
       <div className="account-header">
-        <div className="account-avatar">SJ</div>
+        <div className="account-avatar">{firstLetter}</div>
+
         <div className="account-header-info">
-          <h3 className="section-title" style={{ margin: 0 }}>Account</h3>
-          <span className="account-badge">✦ Premium</span>
+          <h3 className="section-title" style={{ margin: 0 }}>
+            Account
+          </h3>
+
+          <span className={`account-badge ${plan.toLowerCase()}`}>
+            ✦ {plan}
+          </span>
         </div>
       </div>
 
       <div className="input-with-icon account-input-wrap">
         <input
           type="text"
-          value="sarah.johnson@email.com"
+          value={email}
           readOnly
           className="settings-input"
         />
+
         <button
           type="button"
           className="input-icon-btn"
@@ -36,39 +50,11 @@ export default function AccountSection({ onManage }) {
           title={copied ? "Copied!" : "Copy email"}
           aria-label="Copy email"
         >
-          {copied ? "✓" : "🔒"}
+          {copied ? "✓" : "📋"}
         </button>
-      </div>
-
-      <div className={`password-field-wrap ${showPassword ? "is-open" : ""}`}>
-        <div className="input-with-icon">
-          <input
-            type={showPasswordText ? "text" : "password"}
-            defaultValue="mysecretpassword"
-            className="settings-input"
-            placeholder="New password"
-          />
-          <button
-            type="button"
-            className="input-icon-btn"
-            onClick={() => setShowPasswordText((v) => !v)}
-            aria-label={showPasswordText ? "Hide password" : "Show password"}
-            title={showPasswordText ? "Hide" : "Show"}
-          >
-            {showPasswordText ? "🙈" : "👁"}
-          </button>
-        </div>
       </div>
 
       <div className="small-links-row">
-        <button
-          type="button"
-          className={`tiny-link tiny-link-btn ${showPassword ? "active" : ""}`}
-          onClick={() => setShowPassword((v) => !v)}
-        >
-          ✉ Password
-        </button>
-
         <button
           type="button"
           className={`tiny-link tiny-link-btn set-name-btn ${
@@ -87,9 +73,15 @@ export default function AccountSection({ onManage }) {
         <div className="input-with-icon">
           <input
             type="text"
-            defaultValue="Sarah Johnson"
+            value={accountData.name}
             className="settings-input"
             placeholder="Display name"
+            onChange={(e) =>
+              setAccountData((prev) => ({
+                ...prev,
+                name: e.target.value,
+              }))
+            }
           />
           <span className="input-icon">✏️</span>
         </div>
@@ -100,11 +92,7 @@ export default function AccountSection({ onManage }) {
           <span className="inline-label">Subscription Plan</span>
         </div>
 
-        <button
-          type="button"
-          className="soft-pill-btn"
-          onClick={onManage}
-        >
+        <button type="button" className="soft-pill-btn" onClick={onManage}>
           Manage
         </button>
       </div>
