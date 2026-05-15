@@ -13,9 +13,22 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 
 class SettingsController extends Controller
 {
+    private const DEFAULT_PLANS = [
+        'free' => [
+            'child_profile_limit' => 1,
+        ],
+        'premium' => [
+            'child_profile_limit' => 5,
+        ],
+        'unlimited' => [
+            'child_profile_limit' => null,
+        ],
+    ];
+
     private function currentUser(Request $request): User
     {
         return $request->user();
@@ -67,6 +80,7 @@ class SettingsController extends Controller
 
         $isExpired = $user->plan_expires_at && $user->plan_expires_at->isPast();
         $currentPlan = $isExpired ? 'free' : strtolower($user->plan ?? 'free');
+        $childProfileLimit = $this->childProfileLimitFor($user);
 
         if ($isExpired) {
             $user->forceFill([
@@ -90,6 +104,10 @@ class SettingsController extends Controller
                 ],
                 'preferences' => $settings,
                 'children' => $children,
+                'plan_limits' => [
+                    'child_profile_limit' => $childProfileLimit,
+                    'current_child_profiles' => $children->count(),
+                ],
             ],
         ]);
     }
@@ -185,6 +203,19 @@ class SettingsController extends Controller
     public function storeChild(StoreChildProfileRequest $request): JsonResponse
     {
         $user = $this->currentUser($request);
+        $limit = $this->childProfileLimitFor($user);
+        $currentChildProfiles = $user->childProfiles()->count();
+
+        if ($limit !== null && $currentChildProfiles >= $limit) {
+            return response()->json([
+                'message' => "Your plan allows up to {$limit} child profiles.",
+                'data' => [
+                    'child_profile_limit' => $limit,
+                    'current_child_profiles' => $currentChildProfiles,
+                    'plan' => ucfirst($this->effectivePlanKey($user)),
+                ],
+            ], 403);
+        }
 
         $child = ChildProfile::create([
             'user_id' => $user->id,
@@ -384,5 +415,46 @@ class SettingsController extends Controller
             'message' => 'Plans fetched successfully',
             'data' => $plans,
         ]);
+    }
+
+    private function childProfileLimitFor(User $user): ?int
+    {
+        $planKey = $this->effectivePlanKey($user);
+        $defaults = self::DEFAULT_PLANS[$planKey] ?? self::DEFAULT_PLANS['free'];
+
+        if (! Schema::hasTable('plan_settings')) {
+            return $defaults['child_profile_limit'];
+        }
+
+        $settings = DB::table('plan_settings')
+            ->where('key', $planKey)
+            ->first(['child_profile_limit']);
+
+        if (! $settings) {
+            return $defaults['child_profile_limit'];
+        }
+
+        return $settings->child_profile_limit === null
+            ? null
+            : (int) $settings->child_profile_limit;
+    }
+
+    private function effectivePlanKey(User $user): string
+    {
+        $planKey = strtolower((string) ($user->plan ?? 'free'));
+
+        if (! array_key_exists($planKey, self::DEFAULT_PLANS)) {
+            $planKey = 'free';
+        }
+
+        if ($planKey !== 'free' && $user->plan_expires_at && $user->plan_expires_at->isPast()) {
+            return 'free';
+        }
+
+        if (($user->payment_status ?? null) === 'expired') {
+            return 'free';
+        }
+
+        return $planKey;
     }
 }

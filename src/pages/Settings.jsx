@@ -74,6 +74,10 @@ export default function Settings() {
   reading_time_limits: false,
 });
   const [children, setChildren] = useState([]);
+  const [planLimits, setPlanLimits] = useState({
+    child_profile_limit: null,
+    current_child_profiles: 0,
+  });
 
   const fetchSettings = async () => {
     try {
@@ -117,6 +121,10 @@ export default function Settings() {
 });
 
       setChildren(Array.isArray(data.children) ? data.children : []);
+      setPlanLimits({
+        child_profile_limit: data.plan_limits?.child_profile_limit ?? null,
+        current_child_profiles: data.plan_limits?.current_child_profiles ?? 0,
+      });
     } catch (err) {
       setError(err.message || "Something went wrong");
     } finally {
@@ -299,6 +307,7 @@ const handleSave = async () => {
                   children={children}
                   setChildren={setChildren}
                   apiBase={API_BASE}
+                  planLimits={planLimits}
                 />
               </div>
 
