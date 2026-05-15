@@ -2,7 +2,7 @@ import React, { useState } from "react";
 
 const avatarOptions = ["👧", "👦", "🧒", "👶", "🧑", "👱"];
 
-export default function ParentalControls({ children, setChildren, apiBase }) {
+export default function ParentalControls({ children, setChildren, apiBase, planLimits }) {
   const [activeId, setActiveId] = useState(null);
   const [editData, setEditData] = useState({});
   const [showAddForm, setShowAddForm] = useState(false);
@@ -13,6 +13,10 @@ export default function ParentalControls({ children, setChildren, apiBase }) {
   });
 
   const token = localStorage.getItem("token");
+  const childProfileLimit = planLimits?.child_profile_limit ?? null;
+  const childCount = (children || []).length;
+  const reachedChildLimit =
+    childProfileLimit !== null && childCount >= Number(childProfileLimit);
 
   const handleEdit = (child) => {
     if (activeId === child.id) {
@@ -57,6 +61,11 @@ export default function ParentalControls({ children, setChildren, apiBase }) {
 
   const handleAdd = async () => {
     if (!newChild.name.trim()) return;
+    if (reachedChildLimit) {
+      alert(`Your plan allows up to ${childProfileLimit} child profiles.`);
+      setShowAddForm(false);
+      return;
+    }
 
     try {
       const response = await fetch(`${apiBase}/settings/children`, {
@@ -205,11 +214,30 @@ export default function ParentalControls({ children, setChildren, apiBase }) {
 
       <button
         className={`add-child-btn ${showAddForm ? "is-cancel" : ""}`}
-        onClick={() => setShowAddForm((v) => !v)}
+        onClick={() => {
+          if (reachedChildLimit && !showAddForm) {
+            alert(`Your plan allows up to ${childProfileLimit} child profiles.`);
+            return;
+          }
+
+          setShowAddForm((v) => !v);
+        }}
+        disabled={reachedChildLimit && !showAddForm}
         type="button"
+        title={
+          reachedChildLimit
+            ? `Your plan allows up to ${childProfileLimit} child profiles.`
+            : undefined
+        }
       >
         {showAddForm ? "✕ Cancel" : "+ Add Child Profile"}
       </button>
+
+      {reachedChildLimit && (
+        <p className="plan-box-note">
+          Child limit reached ({childCount}/{childProfileLimit})
+        </p>
+      )}
 
       <div className={`child-edit-panel add-child-panel ${showAddForm ? "is-open" : ""}`}>
         <div className="child-edit-inner">
