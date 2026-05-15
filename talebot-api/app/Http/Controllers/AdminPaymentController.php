@@ -16,9 +16,9 @@ class AdminPaymentController extends Controller
             'name' => 'Free',
             'monthly_price' => 0,
             'story_limit' => 3,
-            'image_limit' => 0,
+            'image_limit' => null,
             'child_profile_limit' => 1,
-            'features' => ['Basic story generation', 'Standard illustration styles'],
+            'features' => ['Basic story generation', 'Images included for 3 stories', 'Standard illustration styles'],
         ],
         'premium' => [
             'name' => 'Premium',

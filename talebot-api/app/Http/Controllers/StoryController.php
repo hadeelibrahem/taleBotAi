@@ -53,7 +53,7 @@ class StoryController extends Controller
         if ($request->boolean('use_child_photo') && ! $canUsePremiumCharacter) {
             return response()->json([
                 'success' => false,
-                'message' => 'Using a child photo as the story character is available for premium users only.',
+                'message' => 'Using a child photo as the story character is available for Premium or Unlimited users only.',
             ], 403);
         }
 
@@ -63,7 +63,9 @@ class StoryController extends Controller
             return $limitResponse;
         }
 
-        if ($request->boolean('use_child_photo') && $request->hasFile('child_photo')) {
+        $data['skip_image_generation'] = $this->shouldSkipImageGeneration($user, $data, $planLimits);
+
+        if (! $data['skip_image_generation'] && $request->boolean('use_child_photo') && $request->hasFile('child_photo')) {
             $data['child_photo_path'] = $request->file('child_photo')->store('child-photos', 'local');
         }
 
@@ -137,7 +139,6 @@ class StoryController extends Controller
     private function validatePlanLimits($user, array $data, array $planLimits): ?JsonResponse
     {
         $storyLimit = $planLimits['story_limit'];
-        $imageLimit = $planLimits['image_limit'];
 
         if ($storyLimit !== null && $user->stories()->count() >= $storyLimit) {
             return response()->json([
@@ -146,8 +147,15 @@ class StoryController extends Controller
             ], 403);
         }
 
+        return null;
+    }
+
+    private function shouldSkipImageGeneration($user, array $data, array $planLimits): bool
+    {
+        $imageLimit = $planLimits['image_limit'];
+
         if ($imageLimit === null) {
-            return null;
+            return false;
         }
 
         $existingImages = StoryPage::query()
@@ -157,14 +165,7 @@ class StoryController extends Controller
 
         $requestedImages = $this->pagesCountForLength($data['story_length'] ?? 'medium');
 
-        if (($existingImages + $requestedImages) > $imageLimit) {
-            return response()->json([
-                'success' => false,
-                'message' => "Your plan allows up to {$imageLimit} generated images.",
-            ], 403);
-        }
-
-        return null;
+        return ($existingImages + $requestedImages) > $imageLimit;
     }
 
     private function pagesCountForLength(string $storyLength): int
@@ -180,7 +181,7 @@ class StoryController extends Controller
     private function planLimits(string $planKey): array
     {
         $defaults = [
-            'free' => ['story_limit' => 3, 'image_limit' => 0],
+            'free' => ['story_limit' => 3, 'image_limit' => null],
             'premium' => ['story_limit' => null, 'image_limit' => 50],
             'unlimited' => ['story_limit' => null, 'image_limit' => null],
         ];

@@ -49,9 +49,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) { re
 require __DIR__.'/hadeelRoutes.php';
 
 
-Route::post('/stories/generate', [StoryController::class, 'generate']);
-
-
 //Route::get('/stories',[StoryViewController::class,'index']);
 
 //Route::post('/children/{id}/login', [SettingsController::class, 'loginChild']);
@@ -68,4 +65,3 @@ Route::post('/subscription/checkout', [SettingsController::class, 'checkoutSubsc
     Route::delete('/settings/account/delete', [SettingsController::class, 'deleteAccount']);
     Route::post('/children/{id}/login', [SettingsController::class, 'loginChild']);
 });
-

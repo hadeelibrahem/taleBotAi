@@ -17,6 +17,7 @@ class ComposerStaticInit289fa8b191b251016f2b1558df7eec6b
         '667aeda72477189d0494fecd327c3641' => __DIR__ . '/..' . '/symfony/var-dumper/Resources/functions/dump.php',
         'a4a119a56e50fbb293281d9a48007e0e' => __DIR__ . '/..' . '/symfony/polyfill-php80/bootstrap.php',
         '606a39d89246991a373564698c2d8383' => __DIR__ . '/..' . '/symfony/polyfill-php85/bootstrap.php',
+        '662a729f963d39afe703c9d9b7ab4a8c' => __DIR__ . '/..' . '/symfony/polyfill-php83/bootstrap.php',
         '35a6ad97d21e794e7e22a17d806652e4' => __DIR__ . '/..' . '/nunomaduro/termwind/src/Functions.php',
         '7b11c4dc42b3b3023073cb14e519683c' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
         '2203a247e6fda86070a5e4e07aed533a' => __DIR__ . '/..' . '/symfony/clock/Resources/now.php',
@@ -27,7 +28,6 @@ class ComposerStaticInit289fa8b191b251016f2b1558df7eec6b
         '6124b4c8570aa390c21fafd04a26c69f' => __DIR__ . '/..' . '/myclabs/deep-copy/src/DeepCopy/deep_copy.php',
         '801c31d8ed748cfa537fa45402288c95' => __DIR__ . '/..' . '/psy/psysh/src/functions.php',
         'e39a8b23c42d4e1452234d762b03835a' => __DIR__ . '/..' . '/ramsey/uuid/src/functions.php',
-        '662a729f963d39afe703c9d9b7ab4a8c' => __DIR__ . '/..' . '/symfony/polyfill-php83/bootstrap.php',
         '9d2b9fc6db0f153a0a149fefb182415e' => __DIR__ . '/..' . '/symfony/polyfill-php84/bootstrap.php',
         '476ca15b8d69b04665cd879be9cb4c68' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Collections/functions.php',
         '265b4faa2b3a9766332744949e83bf97' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Collections/helpers.php',
@@ -179,6 +179,7 @@ class ComposerStaticInit289fa8b191b251016f2b1558df7eec6b
         'B' =>
         array (
             'Brick\\Math\\' => 11,
+            'BeyondCode\\ErdGenerator\\' => 24,
         ),
         'A' =>
         array (
@@ -543,10 +544,25 @@ class ComposerStaticInit289fa8b191b251016f2b1558df7eec6b
         array (
             0 => __DIR__ . '/..' . '/brick/math/src',
         ),
+        'BeyondCode\\ErdGenerator\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/beyondcode/laravel-er-diagram-generator/src',
+        ),
         'App\\' =>
         array (
             0 => __DIR__ . '/../..' . '/app',
             1 => __DIR__ . '/..' . '/laravel/pint/app',
+        ),
+    );
+
+    public static $prefixesPsr0 = array (
+        'p' =>
+        array (
+            'phpDocumentor' =>
+            array (
+                0 => __DIR__ . '/..' . '/phpdocumentor/graphviz/src',
+                1 => __DIR__ . '/..' . '/phpdocumentor/graphviz/tests/unit',
+            ),
         ),
     );
 
@@ -587,6 +603,14 @@ class ComposerStaticInit289fa8b191b251016f2b1558df7eec6b
         'App\\Services\\AiStoryService' => __DIR__ . '/../..' . '/app/Services/AiStoryService.php',
         'App\\Services\\DashboardService' => __DIR__ . '/../..' . '/app/Services/DashboardService.php',
         'Attribute' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/Attribute.php',
+        'BeyondCode\\ErdGenerator\\Edge' => __DIR__ . '/..' . '/beyondcode/laravel-er-diagram-generator/src/Edge.php',
+        'BeyondCode\\ErdGenerator\\ErdGeneratorServiceProvider' => __DIR__ . '/..' . '/beyondcode/laravel-er-diagram-generator/src/ErdGeneratorServiceProvider.php',
+        'BeyondCode\\ErdGenerator\\GenerateDiagramCommand' => __DIR__ . '/..' . '/beyondcode/laravel-er-diagram-generator/src/GenerateDiagramCommand.php',
+        'BeyondCode\\ErdGenerator\\GraphBuilder' => __DIR__ . '/..' . '/beyondcode/laravel-er-diagram-generator/src/GraphBuilder.php',
+        'BeyondCode\\ErdGenerator\\Model' => __DIR__ . '/..' . '/beyondcode/laravel-er-diagram-generator/src/Model.php',
+        'BeyondCode\\ErdGenerator\\ModelFinder' => __DIR__ . '/..' . '/beyondcode/laravel-er-diagram-generator/src/ModelFinder.php',
+        'BeyondCode\\ErdGenerator\\ModelRelation' => __DIR__ . '/..' . '/beyondcode/laravel-er-diagram-generator/src/ModelRelation.php',
+        'BeyondCode\\ErdGenerator\\RelationFinder' => __DIR__ . '/..' . '/beyondcode/laravel-er-diagram-generator/src/RelationFinder.php',
         'Brick\\Math\\BigDecimal' => __DIR__ . '/..' . '/brick/math/src/BigDecimal.php',
         'Brick\\Math\\BigInteger' => __DIR__ . '/..' . '/brick/math/src/BigInteger.php',
         'Brick\\Math\\BigNumber' => __DIR__ . '/..' . '/brick/math/src/BigNumber.php',
@@ -4317,7 +4341,6 @@ class ComposerStaticInit289fa8b191b251016f2b1558df7eec6b
         'Nette\\Utils\\JsonException' => __DIR__ . '/..' . '/nette/utils/src/Utils/exceptions.php',
         'Nette\\Utils\\ObjectHelpers' => __DIR__ . '/..' . '/nette/utils/src/Utils/ObjectHelpers.php',
         'Nette\\Utils\\Paginator' => __DIR__ . '/..' . '/nette/utils/src/Utils/Paginator.php',
-        'Nette\\Utils\\Process' => __DIR__ . '/..' . '/nette/utils/src/Utils/Process.php',
         'Nette\\Utils\\ProcessFailedException' => __DIR__ . '/..' . '/nette/utils/src/Utils/exceptions.php',
         'Nette\\Utils\\ProcessTimeoutException' => __DIR__ . '/..' . '/nette/utils/src/Utils/exceptions.php',
         'Nette\\Utils\\Random' => __DIR__ . '/..' . '/nette/utils/src/Utils/Random.php',
@@ -7273,6 +7296,7 @@ class ComposerStaticInit289fa8b191b251016f2b1558df7eec6b
         'Symfony\\Component\\Translation\\StaticMessage' => __DIR__ . '/..' . '/symfony/translation/StaticMessage.php',
         'Symfony\\Component\\Translation\\Test\\AbstractProviderFactoryTestCase' => __DIR__ . '/..' . '/symfony/translation/Test/AbstractProviderFactoryTestCase.php',
         'Symfony\\Component\\Translation\\Test\\IncompleteDsnTestTrait' => __DIR__ . '/..' . '/symfony/translation/Test/IncompleteDsnTestTrait.php',
+        'Symfony\\Component\\Translation\\Test\\ProviderFactoryTestCase' => __DIR__ . '/..' . '/symfony/translation/Test/ProviderFactoryTestCase.php',
         'Symfony\\Component\\Translation\\Test\\ProviderTestCase' => __DIR__ . '/..' . '/symfony/translation/Test/ProviderTestCase.php',
         'Symfony\\Component\\Translation\\TranslatableMessage' => __DIR__ . '/..' . '/symfony/translation/TranslatableMessage.php',
         'Symfony\\Component\\Translation\\Translator' => __DIR__ . '/..' . '/symfony/translation/Translator.php',
@@ -7400,7 +7424,6 @@ class ComposerStaticInit289fa8b191b251016f2b1558df7eec6b
         'Symfony\\Contracts\\EventDispatcher\\EventDispatcherInterface' => __DIR__ . '/..' . '/symfony/event-dispatcher-contracts/EventDispatcherInterface.php',
         'Symfony\\Contracts\\Service\\Attribute\\Required' => __DIR__ . '/..' . '/symfony/service-contracts/Attribute/Required.php',
         'Symfony\\Contracts\\Service\\Attribute\\SubscribedService' => __DIR__ . '/..' . '/symfony/service-contracts/Attribute/SubscribedService.php',
-        'Symfony\\Contracts\\Service\\ContainerAwareInterface' => __DIR__ . '/..' . '/symfony/service-contracts/ContainerAwareInterface.php',
         'Symfony\\Contracts\\Service\\ResetInterface' => __DIR__ . '/..' . '/symfony/service-contracts/ResetInterface.php',
         'Symfony\\Contracts\\Service\\ServiceCollectionInterface' => __DIR__ . '/..' . '/symfony/service-contracts/ServiceCollectionInterface.php',
         'Symfony\\Contracts\\Service\\ServiceLocatorTrait' => __DIR__ . '/..' . '/symfony/service-contracts/ServiceLocatorTrait.php',
@@ -7501,6 +7524,11 @@ class ComposerStaticInit289fa8b191b251016f2b1558df7eec6b
         'Whoops\\Util\\Misc' => __DIR__ . '/..' . '/filp/whoops/src/Whoops/Util/Misc.php',
         'Whoops\\Util\\SystemFacade' => __DIR__ . '/..' . '/filp/whoops/src/Whoops/Util/SystemFacade.php',
         'Whoops\\Util\\TemplateHelper' => __DIR__ . '/..' . '/filp/whoops/src/Whoops/Util/TemplateHelper.php',
+        'phpDocumentor\\GraphViz\\Attribute' => __DIR__ . '/..' . '/phpdocumentor/graphviz/src/phpDocumentor/GraphViz/Attribute.php',
+        'phpDocumentor\\GraphViz\\Edge' => __DIR__ . '/..' . '/phpdocumentor/graphviz/src/phpDocumentor/GraphViz/Edge.php',
+        'phpDocumentor\\GraphViz\\Exception' => __DIR__ . '/..' . '/phpdocumentor/graphviz/src/phpDocumentor/GraphViz/Exception.php',
+        'phpDocumentor\\GraphViz\\Graph' => __DIR__ . '/..' . '/phpdocumentor/graphviz/src/phpDocumentor/GraphViz/Graph.php',
+        'phpDocumentor\\GraphViz\\Node' => __DIR__ . '/..' . '/phpdocumentor/graphviz/src/phpDocumentor/GraphViz/Node.php',
         'staabm\\SideEffectsDetector\\SideEffect' => __DIR__ . '/..' . '/staabm/side-effects-detector/lib/SideEffect.php',
         'staabm\\SideEffectsDetector\\SideEffectsDetector' => __DIR__ . '/..' . '/staabm/side-effects-detector/lib/SideEffectsDetector.php',
         'voku\\helper\\ASCII' => __DIR__ . '/..' . '/voku/portable-ascii/src/voku/helper/ASCII.php',
@@ -7511,6 +7539,7 @@ class ComposerStaticInit289fa8b191b251016f2b1558df7eec6b
         return \Closure::bind(function () use ($loader) {
             $loader->prefixLengthsPsr4 = ComposerStaticInit289fa8b191b251016f2b1558df7eec6b::$prefixLengthsPsr4;
             $loader->prefixDirsPsr4 = ComposerStaticInit289fa8b191b251016f2b1558df7eec6b::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInit289fa8b191b251016f2b1558df7eec6b::$prefixesPsr0;
             $loader->classMap = ComposerStaticInit289fa8b191b251016f2b1558df7eec6b::$classMap;
 
         }, null, ClassLoader::class);

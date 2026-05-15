@@ -10,6 +10,16 @@ function formatCurrency(value) {
   return `$${Number(value || 0).toFixed(2)}`;
 }
 
+function formatPlanLimit(plan, field) {
+  const value = plan[field];
+
+  if (field === "imageLimit" && plan.key === "free" && value === null) {
+    return "With 3 stories";
+  }
+
+  return value ?? "Unlimited";
+}
+
 export default function PaymentsView({ currentAdmin }) {
   const [summary, setSummary] = useState({});
   const [plans, setPlans] = useState([]);
@@ -261,15 +271,15 @@ export default function PaymentsView({ currentAdmin }) {
               <div className="admin-detail-list">
                 <div className="admin-detail-list-row">
                   <span>Stories</span>
-                  <strong>{plan.storyLimit ?? "Unlimited"}</strong>
+                  <strong>{formatPlanLimit(plan, "storyLimit")}</strong>
                 </div>
                 <div className="admin-detail-list-row">
                   <span>Images</span>
-                  <strong>{plan.imageLimit ?? "Unlimited"}</strong>
+                  <strong>{formatPlanLimit(plan, "imageLimit")}</strong>
                 </div>
                 <div className="admin-detail-list-row">
                   <span>Child Profiles</span>
-                  <strong>{plan.childProfileLimit ?? "Unlimited"}</strong>
+                  <strong>{formatPlanLimit(plan, "childProfileLimit")}</strong>
                 </div>
               </div>
               {plan.features?.length ? (

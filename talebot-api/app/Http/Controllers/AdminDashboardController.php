@@ -30,7 +30,7 @@ class AdminDashboardController extends Controller
     private function stats(): array
     {
         $totalUsers = User::query()->count();
-        $premiumUsers = User::query()->where('plan', 'premium')->count();
+        $premiumUsers = User::query()->whereIn('plan', ['premium', 'unlimited'])->count();
         $totalStories = Story::query()->count();
         $pendingStories = Story::query()->where(fn ($query) => $query
             ->where('status', 'Pending')

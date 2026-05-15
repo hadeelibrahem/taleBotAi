@@ -21,7 +21,7 @@ Route::middleware(['auth:sanctum', 'admin.token'])->group(function () {
     Route::post('/admins/current', [AdminController::class, 'updateCurrent']);
     Route::patch('/admins/current', [AdminController::class, 'updateCurrent']);
     Route::patch('/admins/{admin}/role', [AdminController::class, 'updateRole']);
-   // Route::get('/dashboard', [AdminDashboardController::class, 'index']);
+    Route::get('/admin/dashboard', [AdminDashboardController::class, 'index']);
     Route::get('/logs', [AdminLogController::class, 'index']);
     Route::delete('/logs', [AdminLogController::class, 'destroy']);
     Route::get('/payments', [AdminPaymentController::class, 'index']);
