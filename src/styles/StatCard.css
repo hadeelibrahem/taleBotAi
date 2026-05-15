@@ -5,7 +5,6 @@
   width: 100%;
 }
 
-/* ===== AI Insights Hero Card ===== */
 .ai-insights-card {
   flex: 1;
   background: linear-gradient(135deg, #e8b4c8 0%, #c9a8e0 50%, #a8b8e8 100%);
@@ -86,7 +85,7 @@
   background: rgba(255, 255, 255, 0.3);
 }
 
-/* ===== Stats Column ===== */
+
 .stats-column {
   display: flex;
   flex-direction: column;
@@ -95,7 +94,6 @@
   flex-shrink: 0;
 }
 
-/* ===== Stat Card — Large Premium Version ===== */
 .stat-card {
   flex: 1;
   background: #ffffff;
@@ -132,7 +130,7 @@
   opacity: 1;
 }
 
-/* Top row: dot + badge */
+
 .stat-top {
   display: flex;
   align-items: center;
@@ -157,7 +155,7 @@
   letter-spacing: 0.02em;
 }
 
-/* Bottom row: text + icon */
+
 .stat-content {
   display: flex;
   align-items: flex-end;
@@ -193,7 +191,84 @@
   box-shadow: 0 2px 8px rgba(138, 111, 199, 0.12);
 }
 
-/* Make stat cards equal height inside column */
 .stats-column .stat-card {
   flex: 1;
+}
+
+
+
+
+@media (max-width: 1200px) {
+  .dashboard-row {
+    flex-direction: column;
+  }
+
+  .stats-column {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .ai-insights-card {
+    padding: 1.4rem;
+    min-height: auto;
+  }
+
+  .ai-insights-card h2 {
+    font-size: 1.4rem;
+  }
+
+  .hero-actions {
+    flex-direction: column;
+  }
+
+  .btn-primary,
+  .btn-ghost {
+    width: 100%;
+  }
+
+  .stats-column {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .stat-card {
+    min-height: auto;
+    padding: 1.1rem;
+  }
+
+  .stat-content {
+    align-items: center;
+  }
+
+  .stat-text h3 {
+    font-size: 1.3rem;
+  }
+
+  .stat-icon {
+    width: 42px;
+    height: 42px;
+    font-size: 1.2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-row {
+    gap: 12px;
+  }
+
+  .ai-insights-card {
+    border-radius: 18px;
+    padding: 1.1rem;
+  }
+
+  .stat-card {
+    border-radius: 16px;
+  }
+
+  .stat-content {
+    gap: 10px;
+  }
 }

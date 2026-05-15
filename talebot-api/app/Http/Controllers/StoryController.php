@@ -7,18 +7,45 @@ use App\Models\Story;
 use App\Models\StoryPage;
 use App\Services\AiStoryService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 
 class StoryController extends Controller
 {
+    public function index(Request $request): JsonResponse
+    {
+        $query = Story::query()
+            ->where('user_id', $request->user()->id);
+
+        if ($request->filled('child_id')) {
+            $query->where('child_id', $request->child_id);
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                    ->orWhere('genre', 'like', "%{$search}%")
+                    ->orWhere('moral_lesson', 'like', "%{$search}%");
+            });
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $query->latest()->get(),
+        ]);
+    }
+
     public function generate(
         GenerateStoryRequest $request,
         AiStoryService $aiStoryService
     ): JsonResponse {
         $data = $request->validated();
         $user = $request->user();
+
         $planKey = $this->effectivePlanKey($user);
         $planLimits = $this->planLimits($planKey);
         $canUsePremiumCharacter = in_array($planKey, ['premium', 'unlimited'], true);
@@ -36,10 +63,7 @@ class StoryController extends Controller
             return $limitResponse;
         }
 
-        if (
-            $request->boolean('use_child_photo') &&
-            $request->hasFile('child_photo')
-        ) {
+        if ($request->boolean('use_child_photo') && $request->hasFile('child_photo')) {
             $data['child_photo_path'] = $request->file('child_photo')->store('child-photos', 'local');
         }
 
@@ -51,11 +75,9 @@ class StoryController extends Controller
             }
         }
 
-        $story = DB::transaction(function () use ($data, $generatedStory) {
-            $userId = auth()->id();
-
+        $story = DB::transaction(function () use ($data, $generatedStory, $user) {
             $story = Story::create([
-                'user_id' => $userId,
+                'user_id' => $user->id,
                 'child_id' => $data['child_id'],
                 'title' => $generatedStory['title'] ?? 'Untitled Story',
                 'genre' => $data['genre'],
@@ -77,6 +99,16 @@ class StoryController extends Controller
                 ]);
             }
 
+            DB::table('activities')->insert([
+                'user_id' => $user->id,
+                'child_id' => $data['child_id'],
+                'story_id' => $story->id,
+                'activity_type' => 'story_created',
+                'description' => 'Created a new story: ' . $story->title,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
             $story->load('pages');
 
             return $story;
@@ -87,7 +119,7 @@ class StoryController extends Controller
             'message' => 'Story generated successfully',
             'data' => [
                 'id' => $story->id,
-                'title' => $generatedStory['title'] ?? $story->title,
+                'title' => $story->title,
                 'opening_sentence' => $generatedStory['opening_sentence'] ?? null,
                 'character_bible' => $generatedStory['character_bible'] ?? null,
                 'visual_theme' => $generatedStory['visual_theme'] ?? null,
@@ -110,7 +142,7 @@ class StoryController extends Controller
         if ($storyLimit !== null && $user->stories()->count() >= $storyLimit) {
             return response()->json([
                 'success' => false,
-                'message' => "Your plan allows up to {$storyLimit} stories. Upgrade your plan or ask an admin to increase the limit.",
+                'message' => "Your plan allows up to {$storyLimit} stories.",
             ], 403);
         }
 
@@ -122,12 +154,13 @@ class StoryController extends Controller
             ->whereHas('story', fn ($query) => $query->where('user_id', $user->id))
             ->whereNotNull('image_url')
             ->count();
+
         $requestedImages = $this->pagesCountForLength($data['story_length'] ?? 'medium');
 
         if (($existingImages + $requestedImages) > $imageLimit) {
             return response()->json([
                 'success' => false,
-                'message' => "Your plan allows up to {$imageLimit} generated images. This story needs {$requestedImages} more images.",
+                'message' => "Your plan allows up to {$imageLimit} generated images.",
             ], 403);
         }
 
@@ -147,18 +180,9 @@ class StoryController extends Controller
     private function planLimits(string $planKey): array
     {
         $defaults = [
-            'free' => [
-                'story_limit' => 3,
-                'image_limit' => 0,
-            ],
-            'premium' => [
-                'story_limit' => null,
-                'image_limit' => 50,
-            ],
-            'unlimited' => [
-                'story_limit' => null,
-                'image_limit' => null,
-            ],
+            'free' => ['story_limit' => 3, 'image_limit' => 0],
+            'premium' => ['story_limit' => null, 'image_limit' => 50],
+            'unlimited' => ['story_limit' => null, 'image_limit' => null],
         ];
 
         $planKey = array_key_exists($planKey, $defaults) ? $planKey : 'premium';

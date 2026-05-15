@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from "react";
-import Sidebar from "../components/Sidebar";
+import ChildSidebar from "../components/ChildSidebar";
 import Topbar from "../components/Topbar";
 import "../styles/createStory.css";
 import { buildApiUrl, parseJsonResponse } from "@/services/apiClient";
+import { useParams } from "react-router-dom";
 
 function CreateStory() {
+  const { id } = useParams();
+
   const [formData, setFormData] = useState({
-    child_id: 1,
+    child_id: id,
     child_name: "",
     age: "3-5",
     moral_lesson: "Kindness",
@@ -114,9 +117,9 @@ function CreateStory() {
 
   return (
     <div className="create-story-page">
-      <Sidebar />
+      <ChildSidebar child={JSON.parse(localStorage.getItem("childUser") || "null")} />
       <div className="create-story-main">
-        <div className="create-story-overlay"></div>
+       
         <div className="create-story-content">
           <div className="create-story-topbar">
             <Topbar />

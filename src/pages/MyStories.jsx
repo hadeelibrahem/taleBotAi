@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import Sidebar from "../components/Sidebar";
+import ChildSidebar from "../components/ChildSidebar";
 import "../styles/MyStories.css";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 
@@ -28,7 +28,7 @@ export default function MyStories() {
 
   return (
     <div className="main-container">
-      <Sidebar activeItem="stories" />
+      <ChildSidebar activeItem="stories" />
 
       <main className="stories-page">
         <div className="stories-shell">

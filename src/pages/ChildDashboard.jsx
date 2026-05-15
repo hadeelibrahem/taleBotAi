@@ -1,45 +1,48 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+
 import ChildSidebar from "../components/ChildSidebar";
 import Topbar from "../components/Topbar";
 import HeroCard from "../components/HeroCard";
 import StatCard from "../components/StatCard";
 import TopStories from "../components/TopStories";
 import RecentActivity from "../components/RecentActivity";
+import { useParams } from "react-router-dom";
 import AiInsights from "../components/AiInsights";
 import "../styles/Dashboard.css";
 
 export default function ChildDashboard() {
-  const navigate = useNavigate();
 
-  const [child] = useState(() => {
-    const stored = localStorage.getItem("childUser");
-    return stored ? JSON.parse(stored) : null;
-  });
+
+ const { id } = useParams();
+
+const [child, setChild] = useState(() => {
+  const stored = localStorage.getItem("childUser");
+  return stored ? JSON.parse(stored) : null;
+});
 
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!child?.id) {
-      navigate("/settings");
-      return;
-    }
+  fetch(`http://127.0.0.1:8000/api/children/${id}/dashboard`)
+    .then((res) => res.json())
+    .then((json) => {
+      setDashboardData(json.data);
 
-    fetch(`http://127.0.0.1:8000/api/children/${child.id}/dashboard`)
-      .then((res) => res.json())
-      .then((json) => {
-        setDashboardData(json.data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Child dashboard error:", err);
-        setLoading(false);
+      setChild({
+        id,
+        name: json.data?.hero_section?.title?.replace("Welcome ", "") || "Child",
+        avatar: "👶",
       });
-  }, [child?.id, navigate]);
 
-  if (loading) return <div>Loading...</div>;
-
+      setLoading(false);
+    })
+    .catch((err) => {
+      console.error("Child dashboard error:", err);
+      setLoading(false);
+    });
+}, [id]);
+if (loading) return <div>Loading...</div>;
   return (
     <div className="dashboard-layout">
       <ChildSidebar child={child} />

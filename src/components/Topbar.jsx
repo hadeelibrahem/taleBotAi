@@ -6,16 +6,22 @@ function Topbar({ stories = [], notifications = [] }) {
   const [showSearch, setShowSearch] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [query, setQuery] = useState("");
-  const [localNotifs, setLocalNotifs] = useState(notifications);
+  const [dismissedIds, setDismissedIds] = useState(new Set());
+
   const navigate = useNavigate();
   const notifRef = useRef(null);
 
+  const visibleNotifs = useMemo(
+    () => notifications.filter((n) => !dismissedIds.has(n.id)),
+    [notifications, dismissedIds]
+  );
 
-  useEffect(() => {
-    setLocalNotifs(notifications);
-  }, [notifications]);
+  const hasNotifications = visibleNotifs.length > 0;
 
- 
+  const handleNotifClick = (id) => {
+    setDismissedIds((prev) => new Set([...prev, id]));
+  };
+
   useEffect(() => {
     function handleClickOutside(e) {
       if (notifRef.current && !notifRef.current.contains(e.target)) {
@@ -29,21 +35,13 @@ function Topbar({ stories = [], notifications = [] }) {
   const filteredStories = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return [];
-    return stories.filter((story) =>
-      story.title?.toLowerCase().includes(q)
-    );
+    return stories.filter((story) => story.title?.toLowerCase().includes(q));
   }, [query, stories]);
-
-  const hasNotifications = localNotifs.length > 0;
 
   const handleStoryClick = (story) => {
     navigate("/stories", { state: { search: story.title } });
     setShowSearch(false);
     setQuery("");
-  };
-
-  const handleNotifClick = (id) => {
-    setLocalNotifs((prev) => prev.filter((n) => n.id !== id));
   };
 
   return (
@@ -106,10 +104,10 @@ function Topbar({ stories = [], notifications = [] }) {
         {showNotifications && (
           <div className="topbar-notif-dropdown">
             <h4>Notifications</h4>
-            {localNotifs.length === 0 ? (
+            {visibleNotifs.length === 0 ? (
               <p className="topbar-notif-empty">No notifications</p>
             ) : (
-              localNotifs.map((n, i) => (
+              visibleNotifs.map((n, i) => (
                 <div
                   className="topbar-notif-item"
                   key={n.id || i}

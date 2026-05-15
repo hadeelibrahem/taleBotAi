@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { NavLink, useParams,useNavigate } from "react-router-dom";
-
+import { useNavigate, useParams } from "react-router-dom";
+import { NavLink} from "react-router-dom";
 
 export default function ChildSidebar({ child }) {
   const [open, setOpen] = useState(false);
@@ -53,18 +53,39 @@ const handleLogout = () => {
           </div>
 
           <nav className="space-y-2">
-            <NavLink to={`/child/${id}`} className="nav-link" onClick={() => setOpen(false)}>
-              <span>📊</span> Dashboard
-            </NavLink>
 
-            <NavLink to={`/child/${id}/stories`} className="nav-link" onClick={() => setOpen(false)}>
-              <span>📚</span> My Stories
-            </NavLink>
+  <NavLink
+  to={`/child/${id}`}
+  end
+  className={({ isActive }) =>
+    isActive ? "nav-link active-link" : "nav-link"
+  }
+  onClick={() => setOpen(false)}
+>
+  <span>📊</span> Dashboard
+</NavLink>
 
-            <NavLink to={`/child/${id}/create`} className="nav-link" onClick={() => setOpen(false)}>
-              <span>✨</span> Create Story
-            </NavLink>
-          </nav>
+<NavLink
+  to={`/child/${id}/stories`}
+  className={({ isActive }) =>
+    isActive ? "nav-link active-link" : "nav-link"
+  }
+  onClick={() => setOpen(false)}
+>
+  <span>📚</span> My Stories
+</NavLink>
+
+<NavLink
+  to={`/child/${id}/create`}
+  className={({ isActive }) =>
+    isActive ? "nav-link active-link" : "nav-link"
+  }
+  onClick={() => setOpen(false)}
+>
+  <span>✨</span> Create Story
+</NavLink>
+
+</nav>
         </div>
 
         <div className="mt-6">

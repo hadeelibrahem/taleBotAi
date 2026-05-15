@@ -33,10 +33,11 @@ function App() {
         <Route path="/settings" element={<Settings />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/admin" element={<AdminRoute />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
+        
         <Route path="/child/:id" element={<ChildDashboard />} />
           <Route path="/child/:id/stories" element={<MyStories />} />
           <Route path="/child/:id/create" element={<CreateStory />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
 
     </BrowserRouter>
