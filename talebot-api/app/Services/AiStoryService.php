@@ -123,6 +123,24 @@ private function getLeonardoChildImageId(array $data, string $apiKey): ?string
 
     $story = $this->generateStructuredStory($data);
 
+    if (!empty($data['skip_image_generation'])) {
+        $story['pages'] = collect($story['pages'] ?? [])
+            ->map(function ($page) {
+                $page['image'] = null;
+                $page['image_mime_type'] = null;
+                $page['image_debug'] = [
+                    'skipped' => true,
+                    'reason' => 'plan_image_limit_reached',
+                ];
+
+                return $page;
+            })
+            ->values()
+            ->all();
+
+        return $story;
+    }
+
     return $this->generateImagesForPages($story, $data);
 }
 

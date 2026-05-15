@@ -35,7 +35,8 @@ function CreateStory() {
       return null;
     }
   }, []);
-  const canUsePremiumCharacter = ["premium", "unlimited"].includes(user?.plan?.toLowerCase());
+  const planKey = String(user?.plan || "").toLowerCase();
+  const canUsePremiumCharacter = ["premium", "unlimited"].some((plan) => planKey.includes(plan));
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -63,7 +64,7 @@ function CreateStory() {
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
     if (name === "use_child_photo" && checked && !canUsePremiumCharacter) {
-      setError("Using your child's photo as a character is available for premium users only.");
+      setError("Using your child's photo as a character is available for Premium or Unlimited users only.");
       return;
     }
 
@@ -88,7 +89,7 @@ function CreateStory() {
       setLoading(true);
       setError("");
       if (formData.use_child_photo && !canUsePremiumCharacter) {
-        setError("Using your child's photo as a character is available for premium users only.");
+        setError("Using your child's photo as a character is available for Premium or Unlimited users only.");
         return;
       }
 
@@ -242,7 +243,7 @@ function CreateStory() {
                   <span className="slider round"></span>
                 </label>
                 <span className="premium-label">
-                  Use my child's photo as character (Premium)
+                  Use my child's photo as character (Premium / Unlimited)
                   {!canUsePremiumCharacter ? " - upgrade required" : ""}
                 </span>
               </div>

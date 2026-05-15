@@ -73,6 +73,13 @@ class AdminUserController extends Controller
 
     public function destroy(User $user): JsonResponse
     {
+        if ($user->stories()->exists()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'This user has stories. Move or export the stories before deleting the user.',
+            ], 409);
+        }
+
         $user->delete();
 
         return response()->json([

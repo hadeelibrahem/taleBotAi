@@ -110,7 +110,7 @@ export async function updateCurrentAdmin(payload) {
 }
 
 export async function fetchAdminDashboard() {
-  const response = await adminFetch("/api/dashboard");
+  const response = await adminFetch("/api/admin/dashboard");
   const result = await parseJsonResponse(response);
   return result.data || {};
 }

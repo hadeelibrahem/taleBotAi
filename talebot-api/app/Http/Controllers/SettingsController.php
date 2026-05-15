@@ -276,6 +276,13 @@ class SettingsController extends Controller
         $user = $this->currentUser($request);
 
         $child = ChildProfile::where('user_id', $user->id)->findOrFail($id);
+
+        if ($child->stories()->exists()) {
+            return response()->json([
+                'message' => 'This child profile has stories. Move or delete the stories before deleting the child profile.',
+            ], 409);
+        }
+
         $childName = $child->name;
 
         $child->delete();
@@ -294,6 +301,12 @@ class SettingsController extends Controller
     public function deleteAccount(Request $request): JsonResponse
     {
         $user = $this->currentUser($request);
+
+        if ($user->stories()->exists()) {
+            return response()->json([
+                'message' => 'This account has stories. Move or export the stories before deleting the account.',
+            ], 409);
+        }
 
         ChildProfile::where('user_id', $user->id)->delete();
         UserSetting::where('user_id', $user->id)->delete();
