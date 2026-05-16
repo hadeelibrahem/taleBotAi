@@ -230,7 +230,10 @@ const handleSave = async () => {
    
     localStorage.removeItem("token");
     localStorage.removeItem("childUser");
-    window.location.href = "/login";
+    localStorage.removeItem("childMode");
+    localStorage.removeItem("selectedChildId");
+    localStorage.removeItem("user");
+    window.location.href = "/";
   };
 
   const handleChildLogin = async () => {
@@ -256,6 +259,8 @@ const handleSave = async () => {
       }
 
       localStorage.setItem("childUser", JSON.stringify(data.data));
+      localStorage.setItem("childMode", "true");
+      localStorage.setItem("selectedChildId", selectedChild.id);
       window.location.href = `/child/${selectedChild.id}`;
     } catch (err) {
       setChildLoginError(err.message);

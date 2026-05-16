@@ -99,6 +99,9 @@ const LandingPage = () => {
       const result = await response.json();
       if (response.ok) {
         if (authMode === 'signup') {
+          localStorage.removeItem('childMode');
+          localStorage.removeItem('childUser');
+          localStorage.removeItem('selectedChildId');
           localStorage.setItem('token', result.access_token);
           localStorage.setItem('user', JSON.stringify(result.user || null));
           setAuthMode('login');
@@ -106,6 +109,9 @@ const LandingPage = () => {
         }
         else if (authMode === 'login') {
           setIsLoggedIn(true);
+          localStorage.removeItem('childMode');
+          localStorage.removeItem('childUser');
+          localStorage.removeItem('selectedChildId');
           localStorage.setItem('token', result.access_token);
           localStorage.setItem('user', JSON.stringify(result.user || null));
           navigate('/dashboard');
