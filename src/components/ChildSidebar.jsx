@@ -8,8 +8,12 @@ export default function ChildSidebar({ child }) {
 const navigate = useNavigate();
 
 const handleLogout = () => {
-  localStorage.removeItem("token"); 
-  navigate("/login");
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+  localStorage.removeItem("childUser");
+  localStorage.removeItem("childMode");
+  localStorage.removeItem("selectedChildId");
+  navigate("/", { replace: true });
 };
 
   return (

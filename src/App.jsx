@@ -1,4 +1,4 @@
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes, useParams } from "react-router-dom";
 import LandingPage from "./pages/LandingPage";
 import AboutUs from "./pages/AboutUs";
 import StoryReader from "./pages/StoryReader";
@@ -13,7 +13,50 @@ import Admin from "./pages/Admin";
 import { getAdminToken } from "./services/adminApi";
 
 function AdminRoute() {
+  if (isChildModeLocked()) {
+    return <Navigate to={getChildModePath()} replace />;
+  }
+
   return getAdminToken() ? <Admin /> : <Navigate to="/" replace />;
+}
+
+function isChildModeLocked() {
+  return localStorage.getItem("childMode") === "true";
+}
+
+function getChildModePath() {
+  try {
+    const child = JSON.parse(localStorage.getItem("childUser") || "null");
+    const childId = child?.id || localStorage.getItem("selectedChildId");
+
+    return childId ? `/child/${childId}` : "/";
+  } catch {
+    return "/";
+  }
+}
+
+function ParentRoute({ children }) {
+  return isChildModeLocked() ? <Navigate to={getChildModePath()} replace /> : children;
+}
+
+function PublicRoute({ children }) {
+  return isChildModeLocked() ? <Navigate to={getChildModePath()} replace /> : children;
+}
+
+function ChildRoute({ children }) {
+  const { id } = useParams();
+  const lockedPath = getChildModePath();
+  const lockedId = lockedPath.match(/^\/child\/([^/]+)/)?.[1];
+
+  if (!isChildModeLocked()) {
+    return <Navigate to={localStorage.getItem("token") ? "/settings" : "/"} replace />;
+  }
+
+  if (isChildModeLocked() && lockedId && id && String(id) !== String(lockedId)) {
+    return <Navigate to={lockedPath} replace />;
+  }
+
+  return children;
 }
 
 
@@ -23,21 +66,21 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/about" element={<AboutUs />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/create" element={<CreateStory />} />
-        <Route path="/reader" element={<StoryReader />} />
-        <Route path="/analytics" element={<AnalyticsPage />} />
-        <Route path="/settings" element={<Settings />} />
-        <Route path="/profile" element={<Profile />} />
+        <Route path="/" element={<PublicRoute><LandingPage /></PublicRoute>} />
+        <Route path="/about" element={<PublicRoute><AboutUs /></PublicRoute>} />
+        <Route path="/dashboard" element={<ParentRoute><Dashboard /></ParentRoute>} />
+        <Route path="/create" element={<ParentRoute><CreateStory /></ParentRoute>} />
+        <Route path="/reader" element={<ParentRoute><StoryReader /></ParentRoute>} />
+        <Route path="/analytics" element={<ParentRoute><AnalyticsPage /></ParentRoute>} />
+        <Route path="/settings" element={<ParentRoute><Settings /></ParentRoute>} />
+        <Route path="/profile" element={<ParentRoute><Profile /></ParentRoute>} />
         <Route path="/admin" element={<AdminRoute />} />
         
-        <Route path="/child/:id" element={<ChildDashboard />} />
-          <Route path="/child/:id/stories" element={<MyStories />} />
-          <Route path="/child/:id/reader" element={<StoryReader />} />
-          <Route path="/child/:id/create" element={<CreateStory />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="/child/:id" element={<ChildRoute><ChildDashboard /></ChildRoute>} />
+          <Route path="/child/:id/stories" element={<ChildRoute><MyStories /></ChildRoute>} />
+          <Route path="/child/:id/reader" element={<ChildRoute><StoryReader /></ChildRoute>} />
+          <Route path="/child/:id/create" element={<ChildRoute><CreateStory /></ChildRoute>} />
+          <Route path="*" element={<Navigate to={isChildModeLocked() ? getChildModePath() : "/"} replace />} />
       </Routes>
 
     </BrowserRouter>

@@ -50,6 +50,9 @@ export default function Sidebar() {
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    localStorage.removeItem("childUser");
+    localStorage.removeItem("childMode");
+    localStorage.removeItem("selectedChildId");
     setOpen(false);
     navigate("/", { replace: true });
   };

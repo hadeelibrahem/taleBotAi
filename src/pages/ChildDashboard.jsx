@@ -30,11 +30,16 @@ const [child, setChild] = useState(() => {
     .then((json) => {
       setDashboardData(json.data);
 
-      setChild({
+      const fetchedChild = json.data?.child || {
         id,
         name: json.data?.hero_section?.title?.replace("Welcome ", "") || "Child",
         avatar: "👶",
-      });
+      };
+
+      localStorage.setItem("childMode", "true");
+      localStorage.setItem("selectedChildId", fetchedChild.id || id);
+      localStorage.setItem("childUser", JSON.stringify(fetchedChild));
+      setChild(fetchedChild);
 
       setLoading(false);
     })
