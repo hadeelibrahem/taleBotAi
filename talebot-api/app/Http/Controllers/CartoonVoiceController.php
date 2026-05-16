@@ -90,7 +90,7 @@ class CartoonVoiceController extends Controller
             Storage::disk('public')->put($filename, $body);
 
             return response()->json([
-                'audio_url'=>asset('storage/'.$filename)
+                'audio_url' => $request->getSchemeAndHttpHost() . Storage::url($filename),
             ]);
 
         } catch(\Exception $e){
