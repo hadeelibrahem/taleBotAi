@@ -17,6 +17,7 @@ class UpdateChildProfileRequest extends FormRequest
             'name' => ['sometimes', 'string', 'max:100'],
             'age' => ['sometimes', 'integer', 'min:1', 'max:18'],
             'avatar' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'allow_photo_usage' => ['sometimes', 'boolean'],
             'reading_time_limit' => ['sometimes', 'nullable', 'integer', 'min:0', 'max:300'],
             'safe_content_filter' => ['sometimes', 'boolean'],
             'disable_story_sharing' => ['sometimes', 'boolean'],

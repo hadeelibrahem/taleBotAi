@@ -136,6 +136,13 @@ class DashboardController extends Controller
         return response()->json([
             'message' => 'Child dashboard fetched successfully',
             'data' => [
+                'child' => [
+                    'id' => $child->id,
+                    'name' => $child->name,
+                    'age' => $child->age,
+                    'avatar' => $child->avatar,
+                    'allow_photo_usage' => (bool) $child->allow_photo_usage,
+                ],
                 'hero_section' => [
                     'badge' => 'Child Mode',
                     'title' => 'Welcome ' . $child->name . $child->avatar,

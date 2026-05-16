@@ -222,6 +222,7 @@ class SettingsController extends Controller
             'name' => $request->name,
             'age' => $request->age,
             'avatar' => $request->avatar,
+            'allow_photo_usage' => $request->boolean('allow_photo_usage'),
         ]);
 
         $this->addNotification(
@@ -244,6 +245,7 @@ class SettingsController extends Controller
 
         $oldName = $child->name;
         $oldAge = $child->age;
+        $oldPhotoConsent = (bool) $child->allow_photo_usage;
 
         $child->update($request->validated());
 
@@ -255,6 +257,10 @@ class SettingsController extends Controller
 
         if ($request->filled('age') && (int) $oldAge !== (int) $child->age) {
             $changes[] = 'Age changed from "' . $oldAge . '" to "' . $child->age . '"';
+        }
+
+        if ($request->has('allow_photo_usage') && $oldPhotoConsent !== (bool) $child->allow_photo_usage) {
+            $changes[] = 'Photo usage consent changed to ' . ((bool) $child->allow_photo_usage ? 'ON' : 'OFF');
         }
 
         if (!empty($changes)) {

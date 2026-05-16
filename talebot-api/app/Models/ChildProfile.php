@@ -13,6 +13,11 @@ class ChildProfile extends Model
         'name',
         'age',
         'avatar',
+        'allow_photo_usage',
+    ];
+
+    protected $casts = [
+        'allow_photo_usage' => 'boolean',
     ];
 
 
