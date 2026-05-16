@@ -25,6 +25,7 @@ function CreateStory() {
     age: "3-5",
     moral_lesson: "Kindness",
     story_length: "medium",
+    language: "en",
     genre: "Fantasy",
     illustration_style: "Water Color",
     use_child_photo: false,
@@ -119,6 +120,7 @@ function CreateStory() {
   };
 
   const handleLengthSelect = (length) => setFormData((prev) => ({ ...prev, story_length: length }));
+  const handleLanguageSelect = (language) => setFormData((prev) => ({ ...prev, language }));
   const handleGenreSelect = (genre) => setFormData((prev) => ({ ...prev, genre }));
   const handleStyleSelect = (style) => setFormData((prev) => ({ ...prev, illustration_style: style }));
 
@@ -232,6 +234,24 @@ function CreateStory() {
                     </div>
                   </div>
                 </div>
+              </div>
+
+              <h4 className="section-title">Story Language</h4>
+              <div className="language-toggle-row">
+                <button
+                  type="button"
+                  className={`language-btn ${formData.language === "en" ? "active" : ""}`}
+                  onClick={() => handleLanguageSelect("en")}
+                >
+                  English
+                </button>
+                <button
+                  type="button"
+                  className={`language-btn ${formData.language === "ar" ? "active" : ""}`}
+                  onClick={() => handleLanguageSelect("ar")}
+                >
+                  Arabic
+                </button>
               </div>
 
               {/* Genre Grid with original Stickers */}

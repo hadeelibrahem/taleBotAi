@@ -45,6 +45,7 @@ class StoryController extends Controller
         AiStoryService $aiStoryService
     ): JsonResponse {
         $data = $request->validated();
+        $data['language'] = $data['language'] ?? 'en';
         $user = $request->user();
 
         $planKey = $this->effectivePlanKey($user);
@@ -94,16 +95,23 @@ class StoryController extends Controller
                 'genre' => $data['genre'],
                 'moral_lesson' => $data['moral_lesson'],
                 'story_length' => $data['story_length'],
+                'language' => $data['language'],
                 'illustration_style' => $data['illustration_style'],
                 'cover_image' => $generatedStory['pages'][0]['image'] ?? null,
                 'status' => 'Pending',
             ]);
 
             foreach (($generatedStory['pages'] ?? []) as $page) {
+                $pageText = $page['text']
+                    ?? $page['content']
+                    ?? $page['story_text']
+                    ?? $page['page_text']
+                    ?? '';
+
                 StoryPage::create([
                     'story_id' => $story->id,
                     'page_number' => $page['page_number'] ?? 1,
-                    'text_content' => $page['text'] ?? '',
+                    'text_content' => $pageText,
                     'image_url' => $page['image'] ?? null,
                     'status' => 'Pending',
                     'moderation_status' => 'Review',
@@ -136,8 +144,17 @@ class StoryController extends Controller
                 'visual_theme' => $generatedStory['visual_theme'] ?? null,
                 'pages' => collect($story->pages)->map(function ($page) {
                     return [
+                        'id' => $page->id,
                         'page_number' => $page->page_number,
                         'text' => $page->text_content,
+                        'image' => $page->image_url,
+                    ];
+                })->values(),
+                'chapters' => collect($story->pages)->map(function ($page) use ($story) {
+                    return [
+                        'id' => $page->id,
+                        'title' => $story->title,
+                        'content' => $page->text_content,
                         'image' => $page->image_url,
                     ];
                 })->values(),

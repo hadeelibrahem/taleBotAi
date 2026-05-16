@@ -26,6 +26,7 @@ public function rules(): array
         'age' => ['required', 'string'],
         'moral_lesson' => ['required', 'string', 'max:100'],
         'story_length' => ['required', 'in:short,medium,long'],
+        'language' => ['nullable', 'string', 'in:en,ar'],
         'genre' => ['required', 'string', 'max:100'],
         'illustration_style' => ['required', 'string', 'max:100'],
 

@@ -185,7 +185,7 @@ private function getLeonardoChildImageId(array $data, string $apiKey): ?string
                 'messages' => [
                     [
                         'role' => 'system',
-                        'content' => 'You write structured children stories in valid JSON only.',
+                        'content' => 'You write structured children stories in valid JSON only and follow the requested story language exactly.',
                     ],
                     [
                         'role' => 'user',
@@ -230,7 +230,11 @@ private function getLeonardoChildImageId(array $data, string $apiKey): ?string
                 ->map(function ($page, $index) {
                     return [
                         'page_number' => $page['page_number'] ?? ($index + 1),
-                        'text' => $page['text'] ?? '',
+                        'text' => $page['text']
+                            ?? $page['content']
+                            ?? $page['story_text']
+                            ?? $page['page_text']
+                            ?? '',
                         'scene_prompt' => $page['scene_prompt'] ?? '',
                     ];
                 })
@@ -257,6 +261,14 @@ private function buildStructuredStoryPrompt(array $data): string
     };
 
     $styleRules = $this->getStyleRulesForStoryPrompt($data['illustration_style']);
+    $language = $data['language'] ?? 'en';
+    $languageLabel = $language === 'ar' ? 'Arabic' : 'English';
+    $languageRules = $language === 'ar'
+        ? '- Write title, opening_sentence, all page text, character_bible, and visual_theme values in natural Modern Standard Arabic suitable for children.
+- Use Arabic script only for story prose. Do not mix English words into the story text unless the child name itself is English.
+- Keep the Arabic warm, simple, and easy for children to understand.
+- Keep every scene_prompt in English for image generation.'
+        : '- Write title, opening_sentence, all page text, character_bible, visual_theme, and scene_prompt values in simple child-friendly English.';
     $childPhotoRule = !empty($data['use_child_photo'])
         ? 'A child photo will be used later as the visual identity reference. Do not invent specific facial traits that could conflict with the uploaded photo; keep appearance flexible and say the main character should match the uploaded child reference.'
         : 'Describe a clear, consistent child character appearance.';
@@ -269,6 +281,7 @@ Child details:
 - Age: {$data['age']}
 - Moral lesson: {$data['moral_lesson']}
 - Story length: {$data['story_length']}
+- Story language: {$languageLabel}
 - Genre: {$data['genre']}
 - Illustration style: {$data['illustration_style']}
 
@@ -309,6 +322,7 @@ Story rules:
 - Keep the same characters across all pages.
 - Each page should clearly continue from the previous page.
 - Do not make the story too short for the requested length.
+- {$languageRules}
 
 Illustration rules:
 - The scene_prompt of each page must describe ONLY that page image.
@@ -885,6 +899,22 @@ Use one strict, highly consistent children's storybook illustration style across
 
     private function buildFallbackCharacterBible(array $data): array
     {
+        if (($data['language'] ?? 'en') === 'ar') {
+            return [
+                'main_character_name' => $data['child_name'],
+                'appearance' => 'طفل لطيف الملامح بعينين معبرتين وابتسامة ودودة',
+                'clothes' => 'ملابس مغامرة مميزة تبقى نفسها في كل الصفحات',
+                'personality' => 'لطيف، فضولي، وشجاع',
+                'companions' => ['صديق سحري صغير'],
+                'non_negotiables' => [
+                    'نفس تصميم الوجه',
+                    'نفس الشعر',
+                    'نفس الملابس',
+                    'نفس الرفاق',
+                ],
+            ];
+        }
+
         return [
             'main_character_name' => $data['child_name'],
             'appearance' => 'A cute child hero with expressive eyes and a friendly face',
@@ -902,6 +932,16 @@ Use one strict, highly consistent children's storybook illustration style across
 
     private function buildFallbackVisualTheme(array $data): array
     {
+        if (($data['language'] ?? 'en') === 'ar') {
+            return [
+                'style' => $data['illustration_style'] . ' بأسلوب كتاب أطفال مصور',
+                'palette' => 'ألوان ناعمة ومتناغمة',
+                'lighting' => 'إضاءة سحرية لطيفة',
+                'mood' => 'دافئ، خيالي، ومطمئن',
+                'environment_feel' => 'عالم قصة من نوع ' . $data['genre'],
+            ];
+        }
+
         return [
             'style' => $data['illustration_style'] . " children's storybook illustration",
             'palette' => 'soft cohesive colors',
@@ -916,6 +956,43 @@ Use one strict, highly consistent children's storybook illustration style across
         $name = $data['child_name'] ?: 'Little Star';
         $moral = $data['moral_lesson'] ?: 'Kindness';
         $genre = $data['genre'] ?: 'Fantasy';
+
+        if (($data['language'] ?? 'en') === 'ar') {
+            $arabicName = $data['child_name'] ?: 'النجم الصغير';
+            $arabicMoral = $data['moral_lesson'] ?: 'اللطف';
+
+            return [
+                'title' => "مغامرة {$arabicName} السحرية",
+                'opening_sentence' => "في صباح جميل، اكتشف {$arabicName} طريقا صغيرا يلمع كأنه يدعوه إلى مغامرة.",
+                'character_bible' => $this->buildFallbackCharacterBible($data),
+                'visual_theme' => $this->buildFallbackVisualTheme($data),
+                'pages' => [
+                    [
+                        'page_number' => 1,
+                        'text' => "كان {$arabicName} يحب طرح الأسئلة واستكشاف كل مكان جديد بقلب مليء بالفضول.",
+                        'scene_prompt' => "{$arabicName} standing at the edge of a magical path, looking curious and excited.",
+                    ],
+                    [
+                        'page_number' => 2,
+                        'text' => "وفي ذلك اليوم، وجد علامة صغيرة مضيئة تقوده خطوة بعد خطوة نحو سر لطيف.",
+                        'scene_prompt' => "{$arabicName} discovering a glowing clue in a magical forest.",
+                    ],
+                    [
+                        'page_number' => 3,
+                        'text' => "عندما ظهر تحد صغير، تنفس {$arabicName} بهدوء وفكر جيدا ثم تابع طريقه بشجاعة.",
+                        'scene_prompt' => "{$arabicName} facing a gentle magical challenge with courage and calm.",
+                    ],
+                    [
+                        'page_number' => 4,
+                        'text' => "وفي نهاية الرحلة، تعلم {$arabicName} أن {$arabicMoral} يجعل العالم أدفأ وأجمل.",
+                        'scene_prompt' => "{$arabicName} smiling at the end of the adventure in a warm magical setting.",
+                    ],
+                ],
+                'raw_text' => 'local fallback story',
+                'source' => 'local',
+                'debug' => $debug,
+            ];
+        }
 
         return [
             'title' => "The {$genre} Adventure of {$name}",

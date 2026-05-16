@@ -250,6 +250,7 @@ use OpenApi\Attributes as OA;
     new OA\Property(property: 'age', type: 'string'),
     new OA\Property(property: 'moral_lesson', type: 'string', maxLength: 100),
     new OA\Property(property: 'story_length', type: 'string', enum: ['short', 'medium', 'long']),
+    new OA\Property(property: 'language', type: 'string', enum: ['en', 'ar'], nullable: true),
     new OA\Property(property: 'genre', type: 'string', maxLength: 100),
     new OA\Property(property: 'illustration_style', type: 'string', maxLength: 100),
     new OA\Property(property: 'use_child_photo', type: 'boolean', nullable: true),
