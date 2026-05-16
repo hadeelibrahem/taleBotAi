@@ -32,6 +32,11 @@ Route::middleware(['auth:sanctum', 'admin.token'])->group(function () {
     Route::get('/users/{user}', [AdminUserController::class, 'show']);
     Route::patch('/users/{user}/status', [AdminUserController::class, 'updateStatus']);
     Route::delete('/users/{user}', [AdminUserController::class, 'destroy']);
+    Route::get('/admin/stories', [AdminStoryController::class, 'storiesIndex']);
+    Route::patch('/admin/stories/{story}/status', [AdminStoryController::class, 'updateStoryStatus']);
+    Route::get('/admin/stories/images', [AdminStoryController::class, 'imagesIndex']);
+    Route::patch('/admin/stories/images/{storyPage}', [AdminStoryController::class, 'updateImageStatus']);
+    Route::get('/admin/stories/{story}', [AdminStoryController::class, 'show']);
     Route::get('/stories', [AdminStoryController::class, 'storiesIndex']);
     Route::patch('/stories/{story}/status', [AdminStoryController::class, 'updateStoryStatus']);
     Route::get('/stories/images', [AdminStoryController::class, 'imagesIndex']);

@@ -20,12 +20,6 @@ function CreateStory() {
   });
 
   const [childPhoto, setChildPhoto] = useState(null);
-  const [preview, setPreview] = useState({
-    title: "Story Title (Preview)",
-    opening_sentence: "Once upon a time...",
-    pages: [],
-  });
-
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [user, setUser] = useState(() => {
@@ -107,8 +101,7 @@ function CreateStory() {
         },
         body: payload,
       });
-      const result = await parseJsonResponse(response);
-      setPreview(result.data);
+      await parseJsonResponse(response);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -284,15 +277,14 @@ function CreateStory() {
             <div className="story-preview-card">
               <div className="preview-header">
                 <div><h3>Live Story Preview</h3><p>Sample Story Cover</p></div>
-                <div className="preview-actions"><button>Save</button><button>Share</button></div>
               </div>
               <div className="preview-cover">
                 <img src="/imags/pink-castle-blue.webp" alt="preview" />
-                <h4>{preview.title}</h4>
+                <h4>Story Title (Preview)</h4>
               </div>
               <div className="preview-text-box">
                 <h5>Opening Sentence:</h5>
-                <p>{preview.opening_sentence}</p>
+                <p>Once upon a time...</p>
               </div>
             </div>
           </div>
