@@ -106,6 +106,7 @@ use OpenApi\Attributes as OA;
         new OA\Property(property: 'genre', type: 'string', example: 'Animals'),
         new OA\Property(property: 'moral_lesson', type: 'string', nullable: true, example: 'Courage'),
         new OA\Property(property: 'story_length', type: 'string', nullable: true, example: 'medium'),
+        new OA\Property(property: 'language', type: 'string', nullable: true, example: 'en'),
         new OA\Property(property: 'illustration_style', type: 'string', nullable: true, example: 'Sketch'),
         new OA\Property(property: 'cover_image', type: 'string', nullable: true),
         new OA\Property(property: 'status', type: 'string', nullable: true, example: 'Pending'),

@@ -13,6 +13,7 @@ class Story extends Model
         'genre',
         'moral_lesson',
         'story_length',
+        'language',
         'illustration_style',
         'cover_image',
         'status',

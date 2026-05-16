@@ -147,12 +147,21 @@ fetch(`http://127.0.0.1:8000/api/favorites/check/${selectedChildId}/${story.id}`
 
   const pagesData = useMemo(() => {
     if (story?.chapters && story.chapters.length > 0) {
-    return story.chapters.map((chapter) => ({
-  id: chapter.id,
-  title: chapter.title,
-  content: chapter.content,
-  image: chapter.image || story.image,
-}));
+      return story.chapters.map((chapter, index) => ({
+        id: chapter.id,
+        title: chapter.title || `Page ${index + 1}`,
+        content: chapter.content || chapter.text || "",
+        image: chapter.image || story.image,
+      }));
+    }
+
+    if (story?.pages && story.pages.length > 0) {
+      return story.pages.map((page, index) => ({
+        id: page.id,
+        title: page.title || story.title || `Page ${page.page_number || index + 1}`,
+        content: page.content || page.text || page.text_content || "",
+        image: page.image || page.image_url || story.image || story.cover_image,
+      }));
     }
 
     return [

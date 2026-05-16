@@ -154,6 +154,36 @@
   box-shadow: 0 6px 16px rgba(191, 142, 255, 0.16);
 }
 
+.language-toggle-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.language-btn {
+  height: 46px;
+  border-radius: 999px;
+  border: 1px solid #ded7e8;
+  background: rgba(255, 255, 255, 0.72);
+  color: #4a3a66;
+  cursor: pointer;
+  font-weight: 800;
+  transition: 0.22s ease;
+}
+
+.language-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(163, 136, 214, 0.12);
+}
+
+.language-btn.active {
+  color: #ffffff;
+  border-color: transparent;
+  background: linear-gradient(135deg, #8b5cf6, #ef5da8);
+  box-shadow: 0 10px 24px rgba(139, 92, 246, 0.22);
+}
+
 .genre-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
