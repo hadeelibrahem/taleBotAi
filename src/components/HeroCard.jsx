@@ -2,7 +2,7 @@ import React from "react";
 import { NavLink } from "react-router-dom";
 import "../styles/HeroCard.css";
 
-function HeroCard({ data, isChildDashboard = false }) {
+function HeroCard({ data, isChildDashboard = false, childId }) {
   const hour = new Date().getHours();
 
   let greeting = "";
@@ -26,12 +26,19 @@ function HeroCard({ data, isChildDashboard = false }) {
 
         {isChildDashboard && (
           <div className="hero-buttons">
-            <NavLink to="/create" className="btn-primary hero-link">
-              <span>🖋️</span> {data?.actions?.[0]?.label || "Create New Story"}
+            <NavLink
+              to={`/child/${childId}/create`}
+              className="btn-primary hero-link"
+            >
+              <span>🖋️</span>{" "}
+              {data?.actions?.[0]?.label || "Create Story"}
             </NavLink>
 
-            <NavLink to="/stories" className="btn-secondary hero-link">
-              {data?.actions?.[1]?.label || "View All Stories"} →
+            <NavLink
+              to={`/child/${childId}/stories`}
+              className="btn-secondary hero-link"
+            >
+              {data?.actions?.[1]?.label || "My Stories"} →
             </NavLink>
           </div>
         )}

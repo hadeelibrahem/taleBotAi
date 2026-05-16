@@ -54,7 +54,11 @@ if (loading) return <div>Loading...</div>;
         />
 
         <section className="dashboard-top-section">
-          <HeroCard data={dashboardData?.hero_section} isChildDashboard={true} />
+      <HeroCard
+  data={dashboardData?.hero_section}
+  isChildDashboard={true}
+  childId={id}
+/>
 
           <div className="stats-column">
             <StatCard
