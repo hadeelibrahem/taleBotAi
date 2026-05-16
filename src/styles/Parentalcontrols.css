@@ -21,6 +21,7 @@
   display: flex;
   align-items: center;
   gap: 0.6vw;
+  min-width: 0;
 }
 
 .profile-icon {
@@ -34,6 +35,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.1vw;
+  min-width: 0;
 }
 
 .profile-name {
@@ -46,6 +48,29 @@
   font-size: 0.78vw;
   color: var(--text-soft);
   font-weight: 400;
+}
+
+.photo-consent-badge {
+  width: fit-content;
+  border-radius: var(--radius-pill);
+  padding: 0.16vw 0.48vw;
+  font-size: 0.62vw;
+  font-weight: 700;
+  color: #a15b65;
+  background: rgba(197, 139, 156, 0.12);
+  border: 1px solid rgba(197, 139, 156, 0.2);
+}
+
+.photo-consent-badge.is-on {
+  color: #3f8f68;
+  background: rgba(91, 194, 143, 0.13);
+  border-color: rgba(91, 194, 143, 0.24);
+}
+
+.profile-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
 .mini-edit-btn {
@@ -173,8 +198,9 @@
 }
 
 .avatar-option {
-  width: 2vw;
+  min-width: 2vw;
   height: 2vw;
+  padding: 0 0.45vw;
   border-radius: 50%;
   border: 2px solid transparent;
   background: rgba(255,255,255,0.7);
@@ -184,6 +210,52 @@
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
+}
+
+.avatar-option-text {
+  width: auto;
+  border-radius: var(--radius-pill);
+  font-size: 0.68vw;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.photo-consent-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7vw;
+  padding: 0.75vw;
+  border-radius: 0.8vw;
+  border: 1px solid rgba(155, 143, 246, 0.18);
+  background: rgba(255, 255, 255, 0.72);
+  cursor: pointer;
+}
+
+.photo-consent-row input {
+  width: 1vw;
+  height: 1vw;
+  min-width: 16px;
+  min-height: 16px;
+  margin-top: 0.15vw;
+  accent-color: var(--accent-purple);
+}
+
+.photo-consent-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.16vw;
+  color: var(--text-mid);
+}
+
+.photo-consent-copy strong {
+  font-size: 0.86vw;
+  line-height: 1.2;
+}
+
+.photo-consent-copy small {
+  font-size: 0.72vw;
+  line-height: 1.35;
+  color: var(--text-soft);
 }
 
 .avatar-option:hover {
@@ -227,12 +299,17 @@
   .profile-icon { font-size: 18px; }
   .profile-name { font-size: 14px; }
   .profile-age { font-size: 11px; }
+  .photo-consent-badge { font-size: 10px; padding: 3px 8px; }
   .mini-edit-btn { font-size: 14px; }
   .add-child-btn { font-size: 14px; padding: 10px 16px; }
   .edit-label { font-size: 11px; }
   .edit-input { height: 38px !important; font-size: 13px !important; }
   .avatar-option { width: 32px; height: 32px; font-size: 16px; }
+  .avatar-option-text { width: auto; min-width: 42px; font-size: 11px; }
   .avatar-picker { gap: 6px; }
+  .photo-consent-row { gap: 10px; padding: 12px; border-radius: 12px; }
+  .photo-consent-copy strong { font-size: 13px; }
+  .photo-consent-copy small { font-size: 11px; }
   .child-edit-inner { border-radius: 14px; padding: 14px; gap: 10px; }
   .save-child-btn { font-size: 13px; padding: 8px 16px; }
   .child-edit-panel.is-open { margin-top: 10px; }

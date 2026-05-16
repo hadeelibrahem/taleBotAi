@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\GenerateStoryRequest;
+use App\Models\ChildProfile;
 use App\Models\Story;
 use App\Models\StoryPage;
 use App\Services\AiStoryService;
@@ -49,11 +50,19 @@ class StoryController extends Controller
         $planKey = $this->effectivePlanKey($user);
         $planLimits = $this->planLimits($planKey);
         $canUsePremiumCharacter = in_array($planKey, ['premium', 'unlimited'], true);
+        $child = ChildProfile::where('user_id', $user->id)->findOrFail($data['child_id']);
 
         if ($request->boolean('use_child_photo') && ! $canUsePremiumCharacter) {
             return response()->json([
                 'success' => false,
                 'message' => 'Using a child photo as the story character is available for Premium or Unlimited users only.',
+            ], 403);
+        }
+
+        if ($request->boolean('use_child_photo') && ! $child->allow_photo_usage) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Parent consent is required before using this child photo as a story character.',
             ], 403);
         }
 

@@ -1,15 +1,25 @@
 import React, { useState } from "react";
 
-const avatarOptions = ["👧", "👦", "🧒", "👶", "🧑", "👱"];
+const defaultAvatar = "\u{1F9D2}";
+const avatarOptions = [
+  "\u{1F467}",
+  "\u{1F466}",
+  defaultAvatar,
+  "\u{1F476}",
+  "\u{1F9D1}",
+  "\u{1F471}",
+];
+const hasPhotoConsent = (child) => Boolean(child?.allow_photo_usage);
 
 export default function ParentalControls({ children, setChildren, apiBase, planLimits }) {
   const [activeId, setActiveId] = useState(null);
   const [editData, setEditData] = useState({});
   const [showAddForm, setShowAddForm] = useState(false);
   const [newChild, setNewChild] = useState({
-    avatar: "🧒",
+    avatar: defaultAvatar,
     name: "",
     age: "",
+    allow_photo_usage: false,
   });
 
   const token = localStorage.getItem("token");
@@ -21,14 +31,16 @@ export default function ParentalControls({ children, setChildren, apiBase, planL
   const handleEdit = (child) => {
     if (activeId === child.id) {
       setActiveId(null);
-    } else {
-      setActiveId(child.id);
-      setEditData({
-        name: child.name || "",
-        age: child.age || "",
-        avatar: child.avatar || "🧒",
-      });
+      return;
     }
+
+    setActiveId(child.id);
+    setEditData({
+      name: child.name || "",
+      age: child.age || "",
+      avatar: child.avatar || defaultAvatar,
+      allow_photo_usage: hasPhotoConsent(child),
+    });
   };
 
   const handleSave = async (id) => {
@@ -38,21 +50,20 @@ export default function ParentalControls({ children, setChildren, apiBase, planL
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
-          Authorization: `Bearer ${token}`, // ✅ Fix: added token
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           name: editData.name,
           age: Number(editData.age),
           avatar: editData.avatar,
+          allow_photo_usage: Boolean(editData.allow_photo_usage),
         }),
       });
 
       if (!res.ok) throw new Error("Failed to update child");
 
       const result = await res.json();
-      setChildren((prev) =>
-        prev.map((c) => (c.id === id ? result.data : c))
-      );
+      setChildren((prev) => prev.map((c) => (c.id === id ? result.data : c)));
       setActiveId(null);
     } catch (err) {
       alert(err.message || "Update failed");
@@ -78,7 +89,8 @@ export default function ParentalControls({ children, setChildren, apiBase, planL
         body: JSON.stringify({
           name: newChild.name,
           age: Number(newChild.age),
-          avatar: newChild.avatar, // ✅ Fix: was newChild.icon
+          avatar: newChild.avatar,
+          allow_photo_usage: Boolean(newChild.allow_photo_usage),
           reading_time_limit: null,
           safe_content_filter: false,
           disable_story_sharing: false,
@@ -93,9 +105,8 @@ export default function ParentalControls({ children, setChildren, apiBase, planL
         return;
       }
 
-      setChildren((prev) => [...prev, data.data]); // ✅ Fix: use data from API directly
-
-      setNewChild({ avatar: "🧒", name: "", age: "" });
+      setChildren((prev) => [...prev, data.data]);
+      setNewChild({ avatar: defaultAvatar, name: "", age: "", allow_photo_usage: false });
       setShowAddForm(false);
       alert("Child added successfully!");
     } catch (error) {
@@ -110,7 +121,7 @@ export default function ParentalControls({ children, setChildren, apiBase, planL
         method: "DELETE",
         headers: {
           Accept: "application/json",
-          Authorization: `Bearer ${token}`, // ✅ Fix: added token
+          Authorization: `Bearer ${token}`,
         },
       });
 
@@ -122,6 +133,20 @@ export default function ParentalControls({ children, setChildren, apiBase, planL
       alert(err.message || "Delete failed");
     }
   };
+
+  const renderPhotoConsent = (value, onChange) => (
+    <label className="photo-consent-row">
+      <input
+        type="checkbox"
+        checked={Boolean(value)}
+        onChange={(e) => onChange(e.target.checked)}
+      />
+      <span className="photo-consent-copy">
+        <strong>Allow child photo use</strong>
+        <small>Parent agrees this child's photo may be used as a story character reference.</small>
+      </span>
+    </label>
+  );
 
   return (
     <section className="settings-card">
@@ -135,20 +160,23 @@ export default function ParentalControls({ children, setChildren, apiBase, planL
             <div key={child.id} className="child-item">
               <div className="profile-row">
                 <div className="profile-info">
-                  <span className="profile-icon">{child.avatar || "🧒"}</span>
+                  <span className="profile-icon">{child.avatar || defaultAvatar}</span>
                   <div className="profile-name-wrap">
                     <span className="profile-name">{child.name}</span>
                     <span className="profile-age">Age {child.age}</span>
+                    <span className={`photo-consent-badge ${hasPhotoConsent(child) ? "is-on" : ""}`}>
+                      Photo use {hasPhotoConsent(child) ? "allowed" : "not allowed"}
+                    </span>
                   </div>
                 </div>
 
-                <div style={{ display: "flex", gap: "8px" }}>
+                <div className="profile-actions">
                   <button
                     className={`mini-edit-btn ${isActive ? "is-active" : ""}`}
                     onClick={() => handleEdit(child)}
                     type="button"
                   >
-                    {isActive ? "✕ Close" : "✎ Edit"}
+                    {isActive ? "Close" : "Edit"}
                   </button>
 
                   <button
@@ -156,7 +184,7 @@ export default function ParentalControls({ children, setChildren, apiBase, planL
                     onClick={() => handleDelete(child.id)}
                     type="button"
                   >
-                    🗑 Delete
+                    Delete
                   </button>
                 </div>
               </div>
@@ -166,7 +194,7 @@ export default function ParentalControls({ children, setChildren, apiBase, planL
                   <div className="edit-field-group">
                     <label className="edit-label">Avatar</label>
                     <div className="avatar-picker">
-                     {(avatarOptions || []).map((av) => (
+                      {avatarOptions.map((av) => (
                         <button
                           key={av}
                           type="button"
@@ -202,8 +230,12 @@ export default function ParentalControls({ children, setChildren, apiBase, planL
                     />
                   </div>
 
+                  {renderPhotoConsent(editData.allow_photo_usage, (checked) =>
+                    setEditData((d) => ({ ...d, allow_photo_usage: checked }))
+                  )}
+
                   <button className="save-child-btn" onClick={() => handleSave(child.id)} type="button">
-                    ✓ Save Changes
+                    Save Changes
                   </button>
                 </div>
               </div>
@@ -230,7 +262,7 @@ export default function ParentalControls({ children, setChildren, apiBase, planL
             : undefined
         }
       >
-        {showAddForm ? "✕ Cancel" : "+ Add Child Profile"}
+        {showAddForm ? "Cancel" : "+ Add Child Profile"}
       </button>
 
       {reachedChildLimit && (
@@ -279,6 +311,10 @@ export default function ParentalControls({ children, setChildren, apiBase, planL
               placeholder="Age"
             />
           </div>
+
+          {renderPhotoConsent(newChild.allow_photo_usage, (checked) =>
+            setNewChild((d) => ({ ...d, allow_photo_usage: checked }))
+          )}
 
           <button className="save-child-btn" onClick={handleAdd} type="button">
             + Add Child

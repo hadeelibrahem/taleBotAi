@@ -94,6 +94,7 @@ use OpenApi\Attributes as OA;
         new OA\Property(property: 'name', type: 'string', example: 'Rashed'),
         new OA\Property(property: 'age', type: 'integer', example: 7),
         new OA\Property(property: 'avatar', type: 'string', nullable: true, example: 'avatar.png'),
+        new OA\Property(property: 'allow_photo_usage', type: 'boolean', example: false),
     ]
 )]
 #[OA\Schema(

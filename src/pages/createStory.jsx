@@ -5,6 +5,17 @@ import "../styles/createStory.css";
 import { buildApiUrl, parseJsonResponse } from "@/services/apiClient";
 import { useParams } from "react-router-dom";
 
+function ageToRange(age) {
+  const numericAge = Number(age);
+
+  if (numericAge >= 3 && numericAge <= 5) return "3-5";
+  if (numericAge >= 6 && numericAge <= 8) return "6-8";
+  if (numericAge >= 9 && numericAge <= 11) return "9-11";
+  if (numericAge >= 12) return "12+";
+
+  return "3-5";
+}
+
 function CreateStory() {
   const { id } = useParams();
 
@@ -20,6 +31,14 @@ function CreateStory() {
   });
 
   const [childPhoto, setChildPhoto] = useState(null);
+  const [childAllowsPhotoUsage, setChildAllowsPhotoUsage] = useState(() => {
+    try {
+      const child = JSON.parse(localStorage.getItem("childUser") || "null");
+      return Boolean(child?.allow_photo_usage);
+    } catch {
+      return false;
+    }
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [user, setUser] = useState(() => {
@@ -31,6 +50,7 @@ function CreateStory() {
   }, []);
   const planKey = String(user?.plan || "").toLowerCase();
   const canUsePremiumCharacter = ["premium", "unlimited"].some((plan) => planKey.includes(plan));
+  const canUseChildPhoto = canUsePremiumCharacter && childAllowsPhotoUsage;
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -55,10 +75,40 @@ function CreateStory() {
       .catch(() => {});
   }, []);
 
+  useEffect(() => {
+    if (!id) {
+      return;
+    }
+
+    fetch(`http://127.0.0.1:8000/api/children/${id}/dashboard`)
+      .then((response) => (response.ok ? response.json() : null))
+      .then((payload) => {
+        const child = payload?.data?.child;
+
+        if (!child) {
+          return;
+        }
+
+        localStorage.setItem("childUser", JSON.stringify(child));
+        setChildAllowsPhotoUsage(Boolean(child.allow_photo_usage));
+        setFormData((prev) => ({
+          ...prev,
+          child_id: child.id,
+          child_name: child.name || prev.child_name,
+          age: child.age ? ageToRange(child.age) : prev.age,
+        }));
+      })
+      .catch(() => {});
+  }, [id]);
+
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
     if (name === "use_child_photo" && checked && !canUsePremiumCharacter) {
       setError("Using your child's photo as a character is available for Premium or Unlimited users only.");
+      return;
+    }
+    if (name === "use_child_photo" && checked && !childAllowsPhotoUsage) {
+      setError("Parent consent must be enabled in Settings before using this child's photo.");
       return;
     }
 
@@ -84,6 +134,10 @@ function CreateStory() {
       setError("");
       if (formData.use_child_photo && !canUsePremiumCharacter) {
         setError("Using your child's photo as a character is available for Premium or Unlimited users only.");
+        return;
+      }
+      if (formData.use_child_photo && !childAllowsPhotoUsage) {
+        setError("Parent consent must be enabled in Settings before using this child's photo.");
         return;
       }
 
@@ -231,13 +285,14 @@ function CreateStory() {
                     name="use_child_photo"
                     checked={formData.use_child_photo}
                     onChange={handleInputChange}
-                    disabled={!canUsePremiumCharacter}
+                    disabled={!canUseChildPhoto}
                   />
                   <span className="slider round"></span>
                 </label>
                 <span className="premium-label">
                   Use my child's photo as character (Premium / Unlimited)
                   {!canUsePremiumCharacter ? " - upgrade required" : ""}
+                  {canUsePremiumCharacter && !childAllowsPhotoUsage ? " - parent consent required" : ""}
                 </span>
               </div>
 
