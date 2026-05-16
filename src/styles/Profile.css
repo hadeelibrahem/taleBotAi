@@ -13,6 +13,7 @@ body,
 
 body {
   overflow-x: hidden;
+  font-family: 'Plus Jakarta Sans', sans-serif;
 }
 
 .main-container {
@@ -91,14 +92,69 @@ body {
 }
 
 @keyframes twinkle {
-  0%, 100% { opacity: 0.3; transform: scale(0.8); }
-  50% { opacity: 0.8; transform: scale(1.2); }
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.2);
+  }
 }
 
 .sparkle-1 { top: 20px; right: 200px; font-size: 14px; }
 .sparkle-2 { top: 50px; right: 150px; font-size: 20px; animation-delay: 1s; }
 .sparkle-3 { right: 20px; top: 120px; font-size: 18px; animation-delay: 2s; }
 .sparkle-4 { right: 30px; bottom: 30px; font-size: 22px; animation-delay: 0.5s; }
+
+.profile-topbar {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.78);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.58);
+  box-shadow: 0 8px 20px rgba(125, 102, 76, 0.08);
+  backdrop-filter: blur(6px);
+}
+
+.profile-topbar-label {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 12px;
+  font-weight: 800;
+  color: #8b5cf6;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.profile-topbar strong {
+  color: #3f3a45;
+  font-size: 16px;
+}
+
+.profile-child-select {
+  min-width: 190px;
+  max-width: 100%;
+  border: 1px solid rgba(139, 92, 246, 0.24);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.86);
+  color: #4b3f5f;
+  font-weight: 800;
+  padding: 10px 14px;
+  outline: none;
+  box-shadow: 0 6px 16px rgba(139, 92, 246, 0.08);
+}
+
+.profile-child-select:focus {
+  border-color: rgba(139, 92, 246, 0.58);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.14);
+}
 
 /* ===== الهيدر ===== */
 .profile-header {
@@ -156,7 +212,7 @@ body {
   margin: 0;
 }
 
-/* ===== إحصائيات القصص ===== */
+/* ===== إحصائيات ===== */
 .profile-stats-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -215,7 +271,7 @@ body {
   max-width: 100px;
 }
 
-/* ===== الـ Accordion ===== */
+/* ===== Accordion ===== */
 .profile-accordion {
   display: flex;
   flex-direction: column;
@@ -271,135 +327,6 @@ body {
   border-top: 1px solid rgba(139, 92, 246, 0.15);
 }
 
-/* الأصناف المفضلة */
-.genres-cloud {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  padding-top: 16px;
-}
-
-.genre-chip {
-  background: linear-gradient(135deg, #f3e8ff, #ffe4f0);
-  padding: 8px 18px;
-  border-radius: 40px;
-  font-size: 13px;
-  font-weight: 600;
-  color: #8b5cf6;
-  border: 1px solid white;
-  transition: all 0.2s;
-}
-
-.genre-chip:hover {
-  transform: scale(1.03);
-  background: #8b5cf6;
-  color: white;
-}
-
-/* الشارات */
-.badges-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  padding-top: 16px;
-}
-
-.badge-item {
-  background: linear-gradient(135deg, #fff4e8, #fff0f5);
-  padding: 8px 16px;
-  border-radius: 40px;
-  font-size: 13px;
-  font-weight: 600;
-  color: #ec4899;
-  border: 1px solid white;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-/* Weekly Challenge */
-.challenge-card {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.08), rgba(236, 72, 153, 0.08));
-  border-radius: 20px;
-  padding: 16px;
-  margin-top: 12px;
-}
-
-.challenge-icon {
-  font-size: 48px;
-}
-
-.challenge-info {
-  flex: 1;
-}
-
-.challenge-title {
-  font-weight: 700;
-  color: #2d1b4e;
-  margin-bottom: 10px;
-}
-
-.challenge-progress {
-  margin-bottom: 8px;
-}
-
-.challenge-progress-bar {
-  height: 8px;
-  background: rgba(139, 92, 246, 0.15);
-  border-radius: 40px;
-  overflow: hidden;
-  margin-bottom: 6px;
-}
-
-.challenge-progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #8b5cf6, #ec4899);
-  border-radius: 40px;
-  transition: width 0.3s ease;
-}
-
-.challenge-progress-text {
-  font-size: 12px;
-  color: #8b5cf6;
-  font-weight: 500;
-}
-
-.challenge-reward {
-  font-size: 12px;
-  color: #ec4899;
-}
-
-/* ===== زر المشاركة ===== */
-.profile-share {
-  text-align: center;
-}
-
-.share-btn {
-  background: linear-gradient(90deg, #8b5cf6, #ec4899);
-  border: none;
-  padding: 12px 28px;
-  border-radius: 60px;
-  color: white;
-  font-weight: 700;
-  font-size: 15px;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  transition: all 0.2s;
-  box-shadow: 0 6px 14px rgba(139, 92, 246, 0.25);
-}
-
-.share-btn:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 24px rgba(139, 92, 246, 0.35);
-}
-
-/* ===== إضافات جديدة ===== */
-
 /* Reading Stats */
 .stats-details {
   padding: 8px 0;
@@ -425,7 +352,21 @@ body {
   text-align: right;
 }
 
-/* Goals Container */
+.progress-bar {
+  margin-top: 16px;
+  height: 8px;
+  background: rgba(139, 92, 246, 0.15);
+  border-radius: 40px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #8b5cf6, #ec4899);
+  border-radius: 40px;
+}
+
+/* Goals */
 .goals-container {
   display: flex;
   flex-direction: column;
@@ -477,84 +418,133 @@ body {
   border-radius: 40px;
 }
 
-/* Favorite Characters */
-.characters-container {
+/* Favorite Stories */
+.favorite-stories-container {
   display: flex;
   flex-wrap: wrap;
   gap: 16px;
   padding-top: 8px;
 }
 
-.character-card {
+.favorite-story-card {
   flex: 1;
-  min-width: 100px;
-  text-align: center;
-  background: rgba(255, 255, 255, 0.6);
+  min-width: 220px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: rgba(255, 255, 255, 0.65);
   border-radius: 20px;
-  padding: 16px;
+  padding: 14px;
   transition: all 0.2s;
 }
 
-.character-card:hover {
+.favorite-story-card:hover {
   transform: translateY(-3px);
   background: white;
+  box-shadow: 0 8px 20px rgba(139, 92, 246, 0.12);
 }
 
-.character-emoji {
-  font-size: 48px;
-  margin-bottom: 8px;
+.favorite-story-cover {
+  width: 62px;
+  height: 62px;
+  border-radius: 16px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: rgba(139, 92, 246, 0.08);
 }
 
-.character-name {
+.favorite-story-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.favorite-story-info {
+  min-width: 0;
+}
+
+.favorite-story-title {
+  font-size: 14px;
   font-weight: 700;
   color: #2d1b4e;
-  font-size: 14px;
+  margin-bottom: 4px;
 }
 
-.character-story {
-  font-size: 10px;
-  color: #a78ba0;
-  margin-top: 4px;
+.favorite-story-genre {
+  font-size: 12px;
+  color: #8b5cf6;
+  font-weight: 600;
 }
 
-/* Reading Journal */
-.journal-entry {
-  padding: 8px 0;
+/* Insights */
+.insights-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  padding-top: 8px;
 }
 
-.journal-mood {
+.insight-card {
+  background: rgba(139, 92, 246, 0.06);
+  border-radius: 20px;
+  padding: 18px 16px;
+  text-align: center;
+}
+
+.insight-label {
+  font-size: 12px;
+  color: #8a7aa8;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.insight-value {
+  font-size: 18px;
+  font-weight: 800;
+  color: #2d1b4e;
+}
+
+/* Latest Activity */
+.latest-activity-card {
+  padding-top: 10px;
+}
+
+.latest-activity-header {
   display: flex;
+  justify-content: space-between;
   align-items: center;
   gap: 12px;
-  margin-bottom: 16px;
-  font-size: 14px;
-  color: #6b5b8e;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
 }
 
-.mood-emoji {
-  font-size: 24px;
-}
-
-.journal-thought {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  background: rgba(139, 92, 246, 0.05);
-  border-radius: 20px;
-  padding: 14px;
-  margin-bottom: 16px;
-}
-
-.journal-thought i {
+.activity-badge {
+  background: linear-gradient(90deg, #f3e8ff, #fde7f3);
   color: #8b5cf6;
-  font-size: 18px;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 999px;
 }
 
-.journal-thought p {
-  margin: 0;
+.activity-time {
+  font-size: 12px;
+  color: #8a7aa8;
+  font-weight: 600;
+}
+
+.latest-activity-title {
+  margin: 0 0 8px;
+  font-size: 18px;
+  color: #2d1b4e;
+  font-weight: 800;
+}
+
+.latest-activity-description {
+  margin: 0 0 16px;
   font-size: 14px;
   color: #4a3a6e;
-  font-style: italic;
+  line-height: 1.7;
 }
 
 .journal-btn {
@@ -580,17 +570,51 @@ body {
   border-color: #8b5cf6;
 }
 
-/* ===== Responsive ===== */
+/* Share */
+.profile-share {
+  text-align: center;
+}
+
+.share-btn {
+  background: linear-gradient(90deg, #8b5cf6, #ec4899);
+  border: none;
+  padding: 12px 28px;
+  border-radius: 60px;
+  color: white;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.2s;
+  box-shadow: 0 6px 14px rgba(139, 92, 246, 0.25);
+}
+
+.share-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 24px rgba(139, 92, 246, 0.35);
+}
+
+/* Responsive */
 @media (max-width: 1200px) {
   .profile-stats-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 14px;
+  }
+
+  .insights-grid {
+    grid-template-columns: 1fr 1fr;
   }
 }
 
 @media (max-width: 900px) {
   .profile-stats-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .favorite-stories-container {
+    flex-direction: column;
   }
 }
 
@@ -652,9 +676,13 @@ body {
     padding: 0 16px 16px;
   }
 
-  .challenge-card {
+  .goal-card {
     flex-direction: column;
     text-align: center;
+  }
+
+  .insights-grid {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -717,19 +745,27 @@ body {
     font-size: 14px;
   }
 
-  .genre-chip,
-  .badge-item {
-    padding: 6px 12px;
-    font-size: 12px;
-  }
-
   .share-btn {
     padding: 10px 20px;
     font-size: 14px;
   }
+
+  .favorite-story-card {
+    min-width: 100%;
+  }
 }
 
 @media (max-width: 480px) {
+  .profile-topbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .profile-child-select {
+    width: 100%;
+    min-width: 0;
+  }
+
   .profile-stats-grid {
     grid-template-columns: 1fr;
     gap: 10px;
@@ -751,27 +787,13 @@ body {
   .sparkle {
     display: none;
   }
-}
 
-@media (max-width: 550px) {
-  .characters-container {
+  .detail-row {
     flex-direction: column;
+    align-items: flex-start;
   }
 
-  .character-card {
-    display: flex;
-    align-items: center;
-    gap: 16px;
+  .detail-row strong {
     text-align: left;
-  }
-
-  .character-emoji {
-    font-size: 36px;
-    margin-bottom: 0;
-  }
-
-  .goal-card {
-    flex-direction: column;
-    text-align: center;
   }
 }

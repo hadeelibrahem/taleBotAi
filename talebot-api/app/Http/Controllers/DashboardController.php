@@ -50,6 +50,7 @@ class DashboardController extends Controller
 
         $stories = DB::table('stories')
             ->where('child_id', $child->id)
+            ->where('status', 'Approved')
             ->latest()
             ->get();
 
@@ -93,7 +94,15 @@ class DashboardController extends Controller
             ->keys()
             ->first() ?? 'Adventure';
 
-        $continueReading = $stories->map(function ($story) use ($progress, $child) {
+        $continueReading = $stories
+            ->filter(function ($story) use ($progress) {
+                $storyProgress = $progress->firstWhere('story_id', $story->id);
+                $percentage = (int) ($storyProgress->progress_percentage ?? 0);
+
+                return $percentage > 0 && $percentage < 100;
+            })
+            ->values()
+            ->map(function ($story) use ($progress, $child) {
             $storyProgress = $progress->firstWhere('story_id', $story->id);
 
             return [

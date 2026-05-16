@@ -6,7 +6,7 @@ import HeroCard from "../components/HeroCard";
 import StatCard from "../components/StatCard";
 import TopStories from "../components/TopStories";
 import RecentActivity from "../components/RecentActivity";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import AiInsights from "../components/AiInsights";
 import "../styles/Dashboard.css";
 
@@ -14,6 +14,7 @@ export default function ChildDashboard() {
 
 
  const { id } = useParams();
+ const navigate = useNavigate();
 
 const [child, setChild] = useState(() => {
   const stored = localStorage.getItem("childUser");
@@ -42,6 +43,33 @@ const [child, setChild] = useState(() => {
       setLoading(false);
     });
 }, [id]);
+
+const handleContinueStory = async (story) => {
+  try {
+    const response = await fetch(
+      `http://127.0.0.1:8000/api/children/${id}/stories/${story.id}`,
+      {
+        headers: {
+          Accept: "application/json",
+        },
+      }
+    );
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Unable to open story.");
+    }
+
+    navigate(`/child/${id}/reader`, {
+      state: {
+        story: data.data,
+      },
+    });
+  } catch (error) {
+    console.error("Continue story error:", error);
+  }
+};
+
 if (loading) return <div>Loading...</div>;
   return (
     <div className="dashboard-layout">
@@ -54,7 +82,11 @@ if (loading) return <div>Loading...</div>;
         />
 
         <section className="dashboard-top-section">
-          <HeroCard data={dashboardData?.hero_section} isChildDashboard={true} />
+      <HeroCard
+  data={dashboardData?.hero_section}
+  isChildDashboard={true}
+  childId={id}
+/>
 
           <div className="stats-column">
             <StatCard
@@ -86,7 +118,10 @@ if (loading) return <div>Loading...</div>;
             </div>
           </div>
 
-          <TopStories stories={dashboardData?.continue_reading || []} />
+          <TopStories
+            stories={dashboardData?.continue_reading || []}
+            onStoryClick={handleContinueStory}
+          />
 
           <div className="bottom-grid">
             <AiInsights data={dashboardData?.insights} stats={dashboardData?.stats} />   

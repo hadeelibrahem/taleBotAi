@@ -26,7 +26,6 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/about" element={<AboutUs />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/stories" element={<MyStories />} />
         <Route path="/create" element={<CreateStory />} />
         <Route path="/reader" element={<StoryReader />} />
         <Route path="/analytics" element={<AnalyticsPage />} />
@@ -36,6 +35,7 @@ function App() {
         
         <Route path="/child/:id" element={<ChildDashboard />} />
           <Route path="/child/:id/stories" element={<MyStories />} />
+          <Route path="/child/:id/reader" element={<StoryReader />} />
           <Route path="/child/:id/create" element={<CreateStory />} />
           <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

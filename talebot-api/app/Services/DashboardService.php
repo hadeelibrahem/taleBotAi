@@ -20,9 +20,9 @@ class DashboardService
  
         return [
             'user_card' => $this->getUserCard($user, $childIds),
-            'hero_section' => $this->getHeroSection($userId, $user->name),
+            'hero_section' => $this->getHeroSection($childIds, $user->name),
             'stats' => $this->getStats($userId, $childIds),
-            'continue_reading' => $this->getContinueReading($userId),
+            'continue_reading' => $this->getContinueReading($childIds),
             'recent_activities' => $this->getRecentActivities($userId),
             'insights' => $this->getInsights($userId, $childIds),
             'notifications' => $this->getNotifications($userId),
@@ -41,9 +41,9 @@ class DashboardService
         ];
     }
 
-    private function getHeroSection(int $userId, string $userName): array
+    private function getHeroSection($childIds, string $userName): array
     {
-        $storiesCount = Story::where('user_id', $userId)->count();
+        $storiesCount = Story::whereIn('child_id', $childIds)->count();
 
         return [
             'badge' => 'AI-Powered Stories',
@@ -66,12 +66,12 @@ class DashboardService
 
     private function getStats(int $userId, $childIds): array
     {
-        $storiesCreated = Story::where('user_id', $userId)->count();
+        $storiesCreated = Story::whereIn('child_id', $childIds)->count();
 
         $readingTimeMinutes = StoryProgress::whereIn('child_id', $childIds)
             ->sum('reading_time_minutes');
 
-        $favoriteGenre = Story::where('user_id', $userId)
+        $favoriteGenre = Story::whereIn('child_id', $childIds)
             ->select('genre')
             ->groupBy('genre')
             ->orderByRaw('COUNT(*) DESC')
@@ -99,10 +99,10 @@ class DashboardService
         ];
     }
 
-    private function getContinueReading(int $userId): array
+    private function getContinueReading($childIds): array
     {
         return Story::with(['childProfile', 'progress'])
-            ->where('user_id', $userId)
+            ->whereIn('child_id', $childIds)
             ->latest()
             ->take(4)
             ->get()
@@ -148,13 +148,13 @@ class DashboardService
 
     private function getInsights(int $userId, $childIds): array
     {
-        $popularGenre = Story::where('user_id', $userId)
+        $popularGenre = Story::whereIn('child_id', $childIds)
             ->select('genre')
             ->groupBy('genre')
             ->orderByRaw('COUNT(*) DESC')
             ->value('genre');
 
-        $topRatedStory = Story::where('user_id', $userId)
+        $topRatedStory = Story::whereIn('child_id', $childIds)
             ->withAvg('ratings', 'rating')
             ->orderByDesc('ratings_avg_rating')
             ->first();
