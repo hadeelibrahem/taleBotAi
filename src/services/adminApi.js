@@ -206,13 +206,13 @@ export async function updateAdminUserStatus(userId, status) {
 }
 
 export async function fetchAdminImages() {
-  const response = await adminFetch("/api/stories/images");
+  const response = await adminFetch("/api/admin/stories/images");
   const result = await parseJsonResponse(response);
   return Array.isArray(result.data) ? result.data : [];
 }
 
 export async function updateAdminImageStatus(imageId, status) {
-  const response = await adminFetch(`/api/stories/images/${imageId}`, {
+  const response = await adminFetch(`/api/admin/stories/images/${imageId}`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
@@ -225,19 +225,19 @@ export async function updateAdminImageStatus(imageId, status) {
 }
 
 export async function fetchAdminStories() {
-  const response = await adminFetch("/api/stories");
+  const response = await adminFetch("/api/admin/stories");
   const result = await parseJsonResponse(response);
   return Array.isArray(result.data) ? result.data : [];
 }
 
 export async function fetchAdminStoryDetail(storyId) {
-  const response = await adminFetch(`/api/stories/${storyId}`);
+  const response = await adminFetch(`/api/admin/stories/${storyId}`);
   const result = await parseJsonResponse(response);
   return result.data || null;
 }
 
 export async function updateAdminStoryStatus(storyId, status) {
-  const response = await adminFetch(`/api/stories/${storyId}/status`, {
+  const response = await adminFetch(`/api/admin/stories/${storyId}/status`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
