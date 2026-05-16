@@ -1,5 +1,5 @@
 import { useMemo, useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import "../styles/Topbar.css";
 
 function Topbar({ stories = [], notifications = [] }) {
@@ -9,7 +9,11 @@ function Topbar({ stories = [], notifications = [] }) {
   const [dismissedIds, setDismissedIds] = useState(new Set());
 
   const navigate = useNavigate();
+  const location = useLocation();
+
   const notifRef = useRef(null);
+
+  const isChildDashboard = location.pathname.includes("/child/");
 
   const visibleNotifs = useMemo(
     () => notifications.filter((n) => !dismissedIds.has(n.id)),
@@ -28,18 +32,28 @@ function Topbar({ stories = [], notifications = [] }) {
         setShowNotifications(false);
       }
     }
+
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+
+    return () =>
+      document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const filteredStories = useMemo(() => {
     const q = query.trim().toLowerCase();
+
     if (!q) return [];
-    return stories.filter((story) => story.title?.toLowerCase().includes(q));
+
+    return stories.filter((story) =>
+      story.title?.toLowerCase().includes(q)
+    );
   }, [query, stories]);
 
   const handleStoryClick = (story) => {
-    navigate("/stories", { state: { search: story.title } });
+    navigate("/stories", {
+      state: { search: story.title },
+    });
+
     setShowSearch(false);
     setQuery("");
   };
@@ -59,7 +73,11 @@ function Topbar({ stories = [], notifications = [] }) {
             {showSearch ? "✕" : "🔍"}
           </button>
 
-          <div className={`topbar-search-input-wrap ${showSearch ? "show" : ""}`}>
+          <div
+            className={`topbar-search-input-wrap ${
+              showSearch ? "show" : ""
+            }`}
+          >
             <input
               type="text"
               placeholder="Search stories..."
@@ -80,47 +98,68 @@ function Topbar({ stories = [], notifications = [] }) {
                   className="topbar-search-result-item"
                   onClick={() => handleStoryClick(story)}
                 >
-                  <span className="topbar-result-title">{story.title}</span>
-                  <span className="topbar-result-genre">{story.genre}</span>
+                  <span className="topbar-result-title">
+                    {story.title}
+                  </span>
+
+                  <span className="topbar-result-genre">
+                    {story.genre}
+                  </span>
                 </button>
               ))
             ) : (
-              <div className="topbar-search-no-results">No stories found</div>
+              <div className="topbar-search-no-results">
+                No stories found
+              </div>
             )}
           </div>
         )}
       </div>
 
-      {/* الجرس */}
-      <div className="topbar-notif-wrapper" ref={notifRef}>
-        <button
-          className="topbar-bell-btn"
-          onClick={() => setShowNotifications((prev) => !prev)}
-        >
-          <span className="topbar-bell-icon">🔔</span>
-          {hasNotifications && <span className="topbar-notif-dot"></span>}
-        </button>
+      {!isChildDashboard && (
+        <div className="topbar-notif-wrapper" ref={notifRef}>
+          <button
+            className="topbar-bell-btn"
+            onClick={() =>
+              setShowNotifications((prev) => !prev)
+            }
+          >
+            <span className="topbar-bell-icon">🔔</span>
 
-        {showNotifications && (
-          <div className="topbar-notif-dropdown">
-            <h4>Notifications</h4>
-            {visibleNotifs.length === 0 ? (
-              <p className="topbar-notif-empty">No notifications</p>
-            ) : (
-              visibleNotifs.map((n, i) => (
-                <div
-                  className="topbar-notif-item"
-                  key={n.id || i}
-                  onClick={() => handleNotifClick(n.id)}
-                >
-                  <span className="topbar-notif-title">{n.title}</span>
-                  <span className="topbar-notif-msg">{n.message}</span>
-                </div>
-              ))
+            {hasNotifications && (
+              <span className="topbar-notif-dot"></span>
             )}
-          </div>
-        )}
-      </div>
+          </button>
+
+          {showNotifications && (
+            <div className="topbar-notif-dropdown">
+              <h4>Notifications</h4>
+
+              {visibleNotifs.length === 0 ? (
+                <p className="topbar-notif-empty">
+                  No notifications
+                </p>
+              ) : (
+                visibleNotifs.map((n, i) => (
+                  <div
+                    className="topbar-notif-item"
+                    key={n.id || i}
+                    onClick={() => handleNotifClick(n.id)}
+                  >
+                    <span className="topbar-notif-title">
+                      {n.title}
+                    </span>
+
+                    <span className="topbar-notif-msg">
+                      {n.message}
+                    </span>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
