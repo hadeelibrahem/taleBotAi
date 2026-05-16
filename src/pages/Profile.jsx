@@ -1,39 +1,104 @@
-import React, { useState } from "react";
+
+import React, { useEffect, useState } from "react";
 import Sidebar from "../components/Sidebar";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import "../styles/Profile.css";
 
 export default function Profile() {
   const [openSection, setOpenSection] = useState(null);
+  const [children, setChildren] = useState([]);
+  const [selectedChild, setSelectedChild] = useState("");
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const API = "http://127.0.0.1:8000";
+  const token = localStorage.getItem("token");
 
   const toggleSection = (section) => {
     setOpenSection(openSection === section ? null : section);
   };
 
-  const user = {
-    name: "Sarah Johnson",
-    email: "sarah@talbot.ai",
-    plan: "Premium",
-    avatar: "/imags/logo.jpg",
-    memberSince: "March 2024",
-    stories: 12,
-    readingTime: 48,
-    streak: 7,
-    favGenre: "Fantasy",
+  useEffect(() => {
+    setLoading(true);
+    setError("");
 
-    pagesRead: 156,
-    completedBooks: 8,
-    weeklyGoal: { current: 3, target: 5 },
-    points: 72,
-    pointsTarget: 100,
-    favoriteCharacters: [
-      { emoji: "🐉", name: "Dragon", story: "The Dragon's Picnic" },
-      { emoji: "🌙", name: "Moonbeam", story: "Mia and the Moonbeam" },
-      { emoji: "☁️", name: "Cloud Princess", story: "The Cloud Castle" }
-    ],
-    readingMood: "happy",
-    recentThoughts: "I loved the magic castle! ✨"
-  };
+    fetch(`${API}/api/analytics/children`, {
+      headers: {
+        Accept: "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        const childList = Array.isArray(data) ? data : [];
+        const storedChildId = localStorage.getItem("selectedChildId");
+        const initialChild =
+          childList.find((child) => String(child.id) === String(storedChildId)) ||
+          childList[0];
+
+        setChildren(childList);
+        setSelectedChild(initialChild?.id || "");
+
+        if (initialChild?.id) {
+          localStorage.setItem("selectedChildId", initialChild.id);
+        }
+
+        if (childList.length === 0) {
+          setUser(null);
+          setError("No child profiles found.");
+          setLoading(false);
+        }
+      })
+      .catch((err) => {
+        console.error("Children error:", err);
+        setError("Unable to load child profiles.");
+        setLoading(false);
+      });
+  }, [token]);
+
+  useEffect(() => {
+    if (!selectedChild) return;
+
+    setLoading(true);
+    setError("");
+    localStorage.setItem("selectedChildId", selectedChild);
+
+    fetch(`${API}/api/profile/${selectedChild}`, {
+      headers: {
+        Accept: "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then(async (res) => {
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.message || "Unable to load profile.");
+        }
+        return data;
+      })
+      .then((data) => {
+        setUser(data);
+      })
+      .catch((err) => {
+        console.error("Profile error:", err);
+        setUser(null);
+        setError(err.message || "Unable to load profile.");
+      })
+      .finally(() => setLoading(false));
+  }, [selectedChild, token]);
+
+  if (loading) {
+    return <div>Loading profile...</div>;
+  }
+
+  if (error && !user) {
+    return <div>{error}</div>;
+  }
+
+  if (!user) {
+    return <div>Profile not found.</div>;
+  }
 
   return (
     <div className="main-container">
@@ -41,50 +106,69 @@ export default function Profile() {
 
       <main className="profile-page">
         <div className="profile-shell">
-          {/* Breadcrumb */}
           <div className="profile-breadcrumb">
-            <span>Sarah's Account</span>
+            <span>{user.child_name}'s Account</span>
             <span className="crumb-separator">›</span>
             <span className="active-crumb">My Profile</span>
           </div>
 
-          {/* Card الرئيسي */}
           <div className="profile-card-main">
             <div className="sparkle sparkle-1">✨</div>
             <div className="sparkle sparkle-2">⭐</div>
             <div className="sparkle sparkle-3">🌟</div>
             <div className="sparkle sparkle-4">💫</div>
 
-            {/* Header */}
+            <div className="profile-topbar">
+              <div>
+                <span className="profile-topbar-label">Child Profile</span>
+                <strong>{user.child_name}</strong>
+              </div>
+
+              <select
+                className="profile-child-select"
+                value={selectedChild}
+                onChange={(event) => setSelectedChild(event.target.value)}
+              >
+                {children.map((child) => (
+                  <option key={child.id} value={child.id}>
+                    {child.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             <div className="profile-header">
               <div className="profile-avatar">
                 <img src={user.avatar} alt="avatar" />
                 <span className="profile-plan-badge">{user.plan}</span>
               </div>
-              <h1 className="profile-name">{user.name}</h1>
-              <p className="profile-email">{user.email}</p>
+
+              <h1 className="profile-name">{user.child_name}</h1>
+              <p className="profile-email">Parent: {user.name}</p>
               <p className="profile-since">
                 <i className="fa-regular fa-calendar"></i> Member since {user.memberSince}
               </p>
             </div>
 
-            {/* Stats Grid - نفسها */}
             <div className="profile-stats-grid">
               <div className="stat-card">
                 <div className="stat-icon">📚</div>
                 <div className="stat-number">{user.stories}</div>
                 <div className="stat-label">Stories Created</div>
               </div>
+
               <div className="stat-card">
                 <div className="stat-icon">⏱️</div>
                 <div className="stat-number">{user.readingTime}</div>
                 <div className="stat-label">Reading Minutes</div>
               </div>
+
               <div className="stat-card">
-                <div className="stat-icon">🔥</div>
-                <div className="stat-number">{user.streak}</div>
-                <div className="stat-label">Day Streak</div>
+                <div className="stat-icon">✅</div>
+                <div className="stat-number">{user.completedStories}</div>
+                <div className="stat-label">Completed Stories</div>
               </div>
+
               <div className="stat-card">
                 <div className="stat-icon">✨</div>
                 <div className="stat-number">{user.favGenre}</div>
@@ -92,86 +176,82 @@ export default function Profile() {
               </div>
             </div>
 
-            {/* ===== محتويات جديدة ===== */}
             <div className="profile-accordion">
-              
-              {/* 1. Reading Stats (إحصائيات متقدمة) */}
               <div className="accordion-item">
                 <button className="accordion-btn" onClick={() => toggleSection("stats")}>
-                  <span><i className="fa-solid fa-chart-line"></i> Reading Stats</span>
-                  <i className={`fa-solid fa-chevron-${openSection === "stats" ? "up" : "down"}`}></i>
+                  <span>
+                    <i className="fa-solid fa-chart-line"></i> Reading Stats
+                  </span>
+                  <i
+                    className={`fa-solid fa-chevron-${
+                      openSection === "stats" ? "up" : "down"
+                    }`}
+                  ></i>
                 </button>
+
                 {openSection === "stats" && (
                   <div className="accordion-panel">
                     <div className="stats-details">
                       <div className="detail-row">
-                        <span>📄 Pages Read:</span>
-                        <strong>{user.pagesRead} pages</strong>
+                        <span>📊 Completion Rate:</span>
+                        <strong>{user.completionRate}%</strong>
                       </div>
+
                       <div className="detail-row">
-                        <span>✅ Completed Books:</span>
-                        <strong>{user.completedBooks} books</strong>
+                        <span>⭐ Average Rating:</span>
+                        <strong>{user.avgRating}/5</strong>
                       </div>
+
+                      <div className="detail-row">
+                        <span>📖 Stories In Progress:</span>
+                        <strong>{user.storiesInProgress}</strong>
+                      </div>
+
                       <div className="detail-row">
                         <span>🎯 Weekly Goal:</span>
-                        <strong>{user.weeklyGoal.current}/{user.weeklyGoal.target} stories</strong>
+                        <strong>
+                          {user.weeklyGoal.current}/{user.weeklyGoal.target} stories
+                        </strong>
                       </div>
+
                       <div className="progress-bar">
-                        <div className="progress-fill" style={{ width: `${(user.weeklyGoal.current / user.weeklyGoal.target) * 100}%` }}></div>
+                        <div
+                          className="progress-fill"
+                          style={{
+                            width: `${(user.weeklyGoal.current / user.weeklyGoal.target) * 100}%`,
+                          }}
+                        ></div>
                       </div>
                     </div>
                   </div>
                 )}
               </div>
 
-              {/* 2. Current Goals (الأهداف الحالية) */}
               <div className="accordion-item">
-                <button className="accordion-btn" onClick={() => toggleSection("goals")}>
-                  <span><i className="fa-solid fa-bullseye"></i> Current Goals</span>
-                  <i className={`fa-solid fa-chevron-${openSection === "goals" ? "up" : "down"}`}></i>
+                <button className="accordion-btn" onClick={() => toggleSection("favorites")}>
+                  <span>
+                    <i className="fa-solid fa-heart"></i> Favorite Stories
+                  </span>
+                  <i
+                    className={`fa-solid fa-chevron-${
+                      openSection === "favorites" ? "up" : "down"
+                    }`}
+                  ></i>
                 </button>
-                {openSection === "goals" && (
-                  <div className="accordion-panel">
-                    <div className="goals-container">
-                      <div className="goal-card">
-                        <div className="goal-icon">🎯</div>
-                        <div className="goal-info">
-                          <div className="goal-title">Read 5 stories this week</div>
-                          <div className="goal-progress">{user.weeklyGoal.current}/{user.weeklyGoal.target} completed</div>
-                          <div className="goal-progress-bar">
-                            <div className="goal-fill" style={{ width: `${(user.weeklyGoal.current / user.weeklyGoal.target) * 100}%` }}></div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="goal-card">
-                        <div className="goal-icon">⭐</div>
-                        <div className="goal-info">
-                          <div className="goal-title">Earn 100 reading points</div>
-                          <div className="goal-progress">{user.points}/{user.pointsTarget} points</div>
-                          <div className="goal-progress-bar">
-                            <div className="goal-fill" style={{ width: `${(user.points / user.pointsTarget) * 100}%` }}></div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
 
-              {/* 3. Favorite Characters (شخصيات مفضلة) */}
-              <div className="accordion-item">
-                <button className="accordion-btn" onClick={() => toggleSection("characters")}>
-                  <span><i className="fa-solid fa-face-smile"></i> Favorite Characters</span>
-                  <i className={`fa-solid fa-chevron-${openSection === "characters" ? "up" : "down"}`}></i>
-                </button>
-                {openSection === "characters" && (
+                {openSection === "favorites" && (
                   <div className="accordion-panel">
-                    <div className="characters-container">
-                      {user.favoriteCharacters.map((char, i) => (
-                        <div key={i} className="character-card">
-                          <div className="character-emoji">{char.emoji}</div>
-                          <div className="character-name">{char.name}</div>
-                          <div className="character-story">{char.story}</div>
+                    <div className="favorite-stories-container">
+                      {user.favoriteStories.map((story, index) => (
+                        <div key={index} className="favorite-story-card">
+                          <div className="favorite-story-cover">
+                            <img src={story.cover} alt={story.title} />
+                          </div>
+
+                          <div className="favorite-story-info">
+                            <div className="favorite-story-title">{story.title}</div>
+                            <div className="favorite-story-genre">{story.genre}</div>
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -179,40 +259,73 @@ export default function Profile() {
                 )}
               </div>
 
-              {/* 4. Reading Journal (يوميات القراءة) */}
               <div className="accordion-item">
-                <button className="accordion-btn" onClick={() => toggleSection("journal")}>
-                  <span><i className="fa-regular fa-bookmark"></i> Reading Journal</span>
-                  <i className={`fa-solid fa-chevron-${openSection === "journal" ? "up" : "down"}`}></i>
+                <button className="accordion-btn" onClick={() => toggleSection("insights")}>
+                  <span>
+                    <i className="fa-solid fa-lightbulb"></i> Story Insights
+                  </span>
+                  <i
+                    className={`fa-solid fa-chevron-${
+                      openSection === "insights" ? "up" : "down"
+                    }`}
+                  ></i>
                 </button>
-                {openSection === "journal" && (
+
+                {openSection === "insights" && (
                   <div className="accordion-panel">
-                    <div className="journal-entry">
-                      <div className="journal-mood">
-                        <span>Today's mood:</span>
-                        <span className="mood-emoji">
-                          {user.readingMood === "happy" ? "😊" : user.readingMood === "excited" ? "🤩" : "😴"}
-                        </span>
+                    <div className="insights-grid">
+                      <div className="insight-card">
+                        <div className="insight-label">Popular Theme</div>
+                        <div className="insight-value">{user.popularTheme}</div>
                       </div>
-                      <div className="journal-thought">
-                        <i className="fa-regular fa-message"></i>
-                        <p>{user.recentThoughts}</p>
+
+                      <div className="insight-card">
+                        <div className="insight-label">Suggested Moral</div>
+                        <div className="insight-value">{user.suggestedMoral}</div>
                       </div>
-                      <button className="journal-btn">
-                        <i className="fa-regular fa-pen-to-square"></i> Write new thought
-                      </button>
+
+                      <div className="insight-card">
+                        <div className="insight-label">Safe Content Filter</div>
+                        <div className="insight-value">{user.safeContent}</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="accordion-item">
+                <button className="accordion-btn" onClick={() => toggleSection("activity")}>
+                  <span>
+                    <i className="fa-solid fa-clock-rotate-left"></i> Latest Activity
+                  </span>
+                  <i
+                    className={`fa-solid fa-chevron-${
+                      openSection === "activity" ? "up" : "down"
+                    }`}
+                  ></i>
+                </button>
+
+                {openSection === "activity" && (
+                  <div className="accordion-panel">
+                    <div className="latest-activity-card">
+                      <div className="latest-activity-header">
+                        <span className="activity-badge">Recent</span>
+                        <span className="activity-time">{user.latestActivity.time}</span>
+                      </div>
+
+                      <h3 className="latest-activity-title">{user.latestActivity.title}</h3>
+                      <p className="latest-activity-description">
+                        {user.latestActivity.description}
+                      </p>
+
+                    
                     </div>
                   </div>
                 )}
               </div>
             </div>
 
-            {/* Share Button */}
-            <div className="profile-share">
-              <button className="share-btn">
-                <i className="fa-solid fa-share-alt"></i> Share My Profile
-              </button>
-            </div>
+          
           </div>
         </div>
       </main>

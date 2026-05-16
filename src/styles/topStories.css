@@ -44,10 +44,16 @@
   overflow: hidden;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
   transition: 0.25s ease;
+  cursor: pointer;
 }
 
 .top-story-card:hover {
   transform: translateY(-6px);
+}
+
+.top-story-card:focus-visible {
+  outline: 3px solid rgba(139, 92, 246, 0.32);
+  outline-offset: 3px;
 }
 
 .top-story-image-wrap {

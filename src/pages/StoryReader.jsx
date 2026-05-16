@@ -1,21 +1,23 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
 import Sidebar from "../components/Sidebar";
+import ChildSidebar from "../components/ChildSidebar";
 import "../styles/StoryReader.css";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 
 export default function StoryReader() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { id } = useParams();
   const story = location.state?.story;
-
-  useEffect(() => {
-    if (!story) {
-      navigate("/stories");
-    }
-  }, [story, navigate]);
+  const selectedChildId = id || localStorage.getItem("selectedChildId") || 1;
+  const isChildReader = Boolean(id);
+  const [child, setChild] = useState(() => {
+    const stored = localStorage.getItem("childUser");
+    return stored ? JSON.parse(stored) : null;
+  });
 
   const [currentPage, setCurrentPage] = useState(0);
   const [speaking, setSpeaking] = useState(false);
@@ -23,19 +25,134 @@ export default function StoryReader() {
   const [recordedAudio, setRecordedAudio] = useState(null);
   const [downloadLoading, setDownloadLoading] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [readingSeconds, setReadingSeconds] = useState(0);
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedText, setEditedText] = useState("");
+  const [savedProgress, setSavedProgress] = useState(null);
+  const [showProgressChoice, setShowProgressChoice] = useState(false);
+  const [progressPercentage, setProgressPercentage] = useState(0);
+  const [autoPlay, setAutoPlay] = useState(false);
+  const [canUseCartoonVoice, setCanUseCartoonVoice] = useState(false);
 
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
   const audioRef = useRef(null);
   const bookRef = useRef(null);
+  const autoPlayRef = useRef(false);
+
+  useEffect(() => {
+    if (!story) {
+      navigate(id ? `/child/${id}/stories` : "/stories");
+    }
+  }, [story, navigate, id]);
+
+  useEffect(() => {
+    if (!id || child?.name) {
+      return;
+    }
+
+    fetch(`http://127.0.0.1:8000/api/children/${id}/dashboard`)
+      .then((res) => res.json())
+      .then((json) => {
+        const name = json.data?.hero_section?.title?.replace("Welcome ", "") || "Child";
+
+        setChild({
+          id,
+          name,
+          avatar: "ðŸ‘¶",
+        });
+      })
+      .catch((err) => {
+        console.error("Child info error:", err);
+      });
+  }, [id, child?.name]);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setReadingSeconds((prev) => prev + 1);
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const storedUser = localStorage.getItem("user");
+
+    const isPaidPlan = (user) => {
+      const plan = String(user?.plan || "").toLowerCase();
+      return ["premium", "unlimited"].includes(plan) && user?.payment_status !== "expired";
+    };
+
+    if (storedUser) {
+      try {
+        setCanUseCartoonVoice(isPaidPlan(JSON.parse(storedUser)));
+      } catch {
+        setCanUseCartoonVoice(false);
+      }
+    }
+
+    if (!token) return;
+
+    fetch("http://127.0.0.1:8000/api/user", {
+      headers: {
+        Accept: "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((user) => {
+        if (!user) return;
+        localStorage.setItem("user", JSON.stringify(user));
+        setCanUseCartoonVoice(isPaidPlan(user));
+      })
+      .catch((error) => {
+        console.error("Plan check error:", error);
+      });
+  }, []);
+
+  const saveRating = async (ratingValue) => {
+    if (!story) return;
+
+    try {
+      await fetch("http://127.0.0.1:8000/api/story-ratings", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          child_id: selectedChildId,
+          story_id: story.id,
+          rating: ratingValue,
+        }),
+      });
+
+      alert(`You rated this story ${ratingValue} stars ⭐`);
+    } catch (error) {
+      console.error("Rating error:", error);
+    }
+  };
+
+  useEffect(() => {
+  if (!story?.id) return;
+
+fetch(`http://127.0.0.1:8000/api/favorites/check/${selectedChildId}/${story.id}`) 
+     .then((res) => res.json())
+    .then((data) => {
+      setIsFavorite(data.is_favorite);
+    })
+    .catch((error) => console.error("Check favorite error:", error));
+}, [story?.id, selectedChildId]);
 
   const pagesData = useMemo(() => {
     if (story?.chapters && story.chapters.length > 0) {
-      return story.chapters.map((chapter) => ({
-        title: chapter.title,
-        content: chapter.content,
-        image: chapter.image || story.image,
-      }));
+    return story.chapters.map((chapter) => ({
+  id: chapter.id,
+  title: chapter.title,
+  content: chapter.content,
+  image: chapter.image || story.image,
+}));
     }
 
     return [
@@ -54,32 +171,72 @@ export default function StoryReader() {
     ];
   }, [story]);
 
-  const currentStory = useMemo(() => pagesData[currentPage], [pagesData, currentPage]);
-
+    
   useEffect(() => {
-    if ("speechSynthesis" in window) {
-      window.speechSynthesis.getVoices();
+  if (!story?.id || pagesData.length === 0) return;
+
+  const fetchProgress = async () => {
+    try {
+      setCurrentPage(0);
+      setReadingSeconds(0);
+      setSavedProgress(null);
+      setShowProgressChoice(false);
+
+      const res = await fetch(
+        `http://127.0.0.1:8000/api/progress/${selectedChildId}/${story.id}`
+      );
+
+      const data = await res.json();
+
+      if (data.success && data.data) {
+        const savedPercentage = Number(data.data.progress_percentage || 0);
+        const savedMinutes = Number(data.data.reading_time_minutes || 0);
+
+        if (savedPercentage > 0 || savedMinutes > 0) {
+          setSavedProgress(data.data);
+          setShowProgressChoice(true);
+        }
+      }
+    } catch (error) {
+      console.error("Fetch progress error:", error);
     }
+  };
 
-    const handleKeyDown = (e) => {
-      if (e.key === "ArrowRight") nextPage();
-      if (e.key === "ArrowLeft") prevPage();
-      if (e.key === "Escape") setIsExpanded(false);
-    };
+  fetchProgress();
+}, [story?.id, pagesData.length, selectedChildId]);
 
-    document.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-      stopSpeaking();
-    };
-  }, [currentPage, pagesData.length]);
+  const currentStory = useMemo(() => {
+    return pagesData[currentPage];
+  }, [pagesData, currentPage]);
 
   useEffect(() => {
-    document.body.style.overflow = isExpanded ? "hidden" : "hidden";
+  if (currentStory?.content) {
+    setEditedText(currentStory.content);
+  }
+}, [currentStory]);
+
+
+  useEffect(() => {
+  if ("speechSynthesis" in window) {
+    window.speechSynthesis.getVoices();
+  }
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Escape") setIsExpanded(false);
+  };
+
+  document.addEventListener("keydown", handleKeyDown);
+
+  return () => {
+    document.removeEventListener("keydown", handleKeyDown);
+  };
+}, []);
+
+  useEffect(() => {
+    document.body.style.overflow = isExpanded ? "hidden" : "auto";
 
     return () => {
-      document.body.style.overflow = "hidden";
+      document.body.style.overflow = "auto";
     };
   }, [isExpanded]);
 
@@ -97,23 +254,186 @@ export default function StoryReader() {
     }, 260);
   };
 
-  const nextPage = () => {
-    if (currentPage < pagesData.length - 1) {
-      stopSpeaking();
-      setCurrentPage((prev) => prev + 1);
-      animateStoryCard("next");
-    } else {
-      alert("🎉 Congratulations! You finished the story!");
-    }
-  };
+  const continueReading = () => {
+  if (!savedProgress) return;
 
-  const prevPage = () => {
-    if (currentPage > 0) {
-      stopSpeaking();
-      setCurrentPage((prev) => prev - 1);
-      animateStoryCard("prev");
+  const savedPercentage = Number(savedProgress.progress_percentage || 0);
+  const savedMinutes = Number(savedProgress.reading_time_minutes || 0);
+
+  if (savedPercentage >= 100) {
+    alert("You already finished this story 🎉");
+    setCurrentPage(pagesData.length - 1);
+    setReadingSeconds(savedMinutes * 60);
+    setProgressPercentage(100);
+    setShowProgressChoice(false);
+    return;
+  }
+
+  setReadingSeconds(savedMinutes * 60);
+  setProgressPercentage(savedPercentage);
+
+  const savedPage =
+    Math.round((savedPercentage / 100) * pagesData.length) - 1;
+
+  if (savedPage >= 0 && savedPage < pagesData.length) {
+    setCurrentPage(savedPage);
+  } else {
+    setCurrentPage(0);
+  }
+
+  setShowProgressChoice(false);
+};
+
+const startStoryOver = async () => {
+  try {
+    setCurrentPage(0);
+    setReadingSeconds(0);
+    setShowProgressChoice(false);
+    setSavedProgress(null);
+
+    await fetch("http://127.0.0.1:8000/api/progress/reset", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        child_id: selectedChildId,
+        story_id: story.id,
+      }),
+    });
+  } catch (error) {
+    console.error("Reset progress error:", error);
+  }
+};
+
+const saveProgress = async (pageIndex) => {
+  try {
+    const progressPercentage = Math.round(
+      ((pageIndex + 1) / pagesData.length) * 100
+    );
+
+    setProgressPercentage(progressPercentage);
+
+    const res = await fetch("http://127.0.0.1:8000/api/progress", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        child_id: selectedChildId,
+        story_id: story.id,
+        progress_percentage: progressPercentage,
+        reading_time_minutes: Math.ceil(readingSeconds / 60),
+      }),
+    });
+
+    const data = await res.json();
+    console.log("Progress response:", data);
+  } catch (error) {
+    console.error("Progress error:", error);
+  }
+};
+
+const saveEditedText = async () => {
+  try {
+    console.log("Current story:", currentStory);
+    console.log("Page ID:", currentStory?.id);
+
+    if (!currentStory?.id) {
+      alert("Cannot edit this page because page ID is missing.");
+      return;
     }
-  };
+
+    const res = await fetch(
+      `http://127.0.0.1:8000/api/story-pages/${currentStory.id}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          content: editedText,
+        }),
+      }
+    );
+
+    const data = await res.json();
+
+    console.log("Update status:", res.status);
+    console.log("Update response:", data);
+
+    if (!res.ok) {
+      alert(data.message || "Failed to update text.");
+      return;
+    }
+
+    currentStory.content = editedText;
+    setIsEditing(false);
+    alert("Text updated successfully ✨");
+  } catch (error) {
+    console.error("Edit text error:", error);
+    alert("Error while updating text.");
+  }
+};
+
+
+
+  const nextPage = () => {
+  if (currentPage < pagesData.length - 1) {
+    stopSpeaking();
+
+    const newPage = currentPage + 1;
+
+    setCurrentPage(newPage);
+    saveProgress(newPage);
+
+    animateStoryCard("next");
+  } else {
+    alert("🎉 Congratulations! You finished the story!");
+    saveProgress(currentPage);
+  }
+};
+
+ const prevPage = () => {
+  if (currentPage > 0) {
+    stopSpeaking();
+
+    const newPage = currentPage - 1;
+
+    setCurrentPage(newPage);
+    saveProgress(newPage);
+
+    animateStoryCard("prev");
+  }
+};
+
+const toggleFavorite = async () => {
+  try {
+    if (isFavorite) {
+    await fetch(`http://127.0.0.1:8000/api/favorites/${selectedChildId}/${story.id}`, {
+  method: "DELETE",
+});
+
+      setIsFavorite(false);
+    } else {
+      await fetch("http://127.0.0.1:8000/api/favorites", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          child_id: selectedChildId,
+          story_id: story.id,
+        }),
+      });
+
+      setIsFavorite(true);
+    }
+  } catch (error) {
+    console.error("Favorite error:", error);
+  }
+};
 
   const stopSpeaking = () => {
     if ("speechSynthesis" in window) {
@@ -161,127 +481,776 @@ export default function StoryReader() {
   };
 
   const selectVoiceType = async (type) => {
+    if (type === "cartoon" && !canUseCartoonVoice) {
+      alert("Cartoon voice is available for Premium or Unlimited plans only.");
+      return;
+    }
+
     setSelectedVoiceType(type);
     if (type === "recorded") {
       await startRecording();
     }
   };
 
-  const speakCurrentPage = () => {
-    const textToSpeak = `${currentStory.title}. ${currentStory.content}`;
+const playCartoonVoice = async (text, onEnded = null) => {
+  try {
 
-    if (speaking) {
-      stopSpeaking();
-      return;
+    stopSpeaking();
+
+    setSpeaking(true);
+
+    const response = await fetch(
+      "http://127.0.0.1:8000/api/cartoon-voice",
+      {
+        method: "POST",
+        headers:{
+          "Content-Type":"application/json",
+          Accept: "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({
+          text:text
+        })
+      }
+    );
+
+    const data = await response.json();
+
+    if(!response.ok || !data.audio_url){
+      throw new Error(data.error || "No audio URL returned");
     }
 
-    if (selectedVoiceType === "recorded" && recordedAudio) {
-      const audio = new Audio(URL.createObjectURL(recordedAudio));
-      audioRef.current = audio;
-      setSpeaking(true);
-      audio.play();
-      audio.onended = () => setSpeaking(false);
-      return;
+    const audio = new Audio(data.audio_url);
+
+    audioRef.current = audio;
+
+    audio.onended=()=>{
+      setSpeaking(false);
+      if (typeof onEnded === "function") {
+        onEnded();
+      }
+    };
+
+    audio.onerror=()=>{
+      setSpeaking(false);
+      if (autoPlayRef.current) {
+        autoPlayRef.current = false;
+        setAutoPlay(false);
+      }
+      alert("Cartoon voice audio could not be played.");
+    };
+
+    await audio.play();
+
+  } catch(error){
+
+    console.error(error);
+
+    setSpeaking(false);
+
+    alert(error.message || "Cartoon voice error");
+  }
+};
+
+const pickBrowserVoice = (voices, type) => {
+  const byName = (name) =>
+    voices.find((voice) => voice.name.toLowerCase().includes(name.toLowerCase()));
+
+  if (type === "male") {
+    return (
+      byName("Adam Multilingual") ||
+      byName("Adam Dragon HD Latest") ||
+      byName("Adam") ||
+      byName("Google UK English Male") ||
+      byName("Microsoft David") ||
+      voices.find((voice) => voice.name.toLowerCase().includes("male"))
+    );
+  }
+
+  if (type === "female") {
+    return (
+      byName("Ava") ||
+      byName("Microsoft Ava") ||
+      byName("Google US English") ||
+      byName("Microsoft Zira") ||
+      voices.find((voice) => voice.name.toLowerCase().includes("female"))
+    );
+  }
+
+  return null;
+};
+
+const speakCurrentPage = async () => {
+  const textToSpeak = `${currentStory.title}. ${currentStory.content}`;
+
+  if (speaking) {
+    stopSpeaking();
+    return;
+  }
+
+  // 🔥 CARTOON FIRST (IMPORTANT)
+  if (selectedVoiceType === "cartoon") {
+    playCartoonVoice(textToSpeak);
+    return;
+  }
+
+  if (selectedVoiceType === "recorded" && recordedAudio) {
+    const audio = new Audio(URL.createObjectURL(recordedAudio));
+    audioRef.current = audio;
+    setSpeaking(true);
+    audio.play();
+    audio.onended = () => setSpeaking(false);
+    return;
+  }
+
+  if (!("speechSynthesis" in window)) {
+    alert("❌ Your browser does not support text-to-speech.");
+    return;
+  }
+
+  window.speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(textToSpeak);
+  const voices = window.speechSynthesis.getVoices();
+  const preferredVoice = pickBrowserVoice(voices, selectedVoiceType);
+
+  if (preferredVoice) utterance.voice = preferredVoice;
+
+  utterance.rate = 0.9;
+  utterance.pitch = 1.5;
+  utterance.volume = 1;
+
+  utterance.onstart = () => setSpeaking(true);
+  utterance.onend = () => setSpeaking(false);
+  utterance.onerror = () => setSpeaking(false);
+
+  window.speechSynthesis.speak(utterance);
+};
+
+const autoPlayStory = () => {
+  if (selectedVoiceType !== "cartoon" && !("speechSynthesis" in window)) {
+    alert("Your browser does not support text-to-speech.");
+    return;
+  }
+
+  if (selectedVoiceType === "cartoon" && !canUseCartoonVoice) {
+    alert("Cartoon voice is available for Premium or Unlimited plans only.");
+    return;
+  }
+
+  if (autoPlayRef.current) {
+    autoPlayRef.current = false;
+    if ("speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
     }
-
-    if (!("speechSynthesis" in window)) {
-      alert("❌ Your browser does not support text-to-speech.");
-      return;
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
     }
+    setAutoPlay(false);
+    setSpeaking(false);
+    return;
+  }
 
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(textToSpeak);
-    const voices = window.speechSynthesis.getVoices();
+  autoPlayRef.current = true;
+  setAutoPlay(true);
+  playPage(currentPage);
+};
 
-    if (selectedVoiceType === "male") {
-      const maleVoice = voices.find(
-        (voice) =>
-          voice.name.includes("Google UK English Male") ||
-          voice.name.includes("Microsoft David") ||
-          voice.name.includes("Male")
-      );
-      if (maleVoice) utterance.voice = maleVoice;
-    } else if (selectedVoiceType === "female") {
-      const femaleVoice = voices.find(
-        (voice) =>
-          voice.name.includes("Google US English") ||
-          voice.name.includes("Microsoft Zira") ||
-          voice.name.includes("Female")
-      );
-      if (femaleVoice) utterance.voice = femaleVoice;
+const playPage = (pageIndex) => {
+  if (!autoPlayRef.current) return;
+
+  if (pageIndex >= pagesData.length) {
+    autoPlayRef.current = false;
+    setAutoPlay(false);
+    setSpeaking(false);
+    alert("🎉 Story finished!");
+    return;
+  }
+
+  const page = pagesData[pageIndex];
+  const textToSpeak = `${page.title}. ${page.content}`;
+
+if(selectedVoiceType==="cartoon"){
+   setCurrentPage(pageIndex);
+   playCartoonVoice(textToSpeak, () => {
+    if (!autoPlayRef.current) return;
+
+    saveProgress(pageIndex);
+
+    const nextPageIndex = pageIndex + 1;
+
+    if (nextPageIndex < pagesData.length) {
+      setTimeout(() => {
+        if (!autoPlayRef.current) return;
+
+        setCurrentPage(nextPageIndex);
+        playPage(nextPageIndex);
+      }, 700);
+    } else {
+      autoPlayRef.current = false;
+      setAutoPlay(false);
+      setSpeaking(false);
+      saveProgress(pageIndex);
+      alert("ðŸŽ‰ Story finished!");
     }
+   });
+   return;
+}
 
-    utterance.rate = 0.9;
-    utterance.pitch = 1;
-    utterance.volume = 1;
-    utterance.onstart = () => setSpeaking(true);
-    utterance.onend = () => setSpeaking(false);
-    utterance.onerror = () => setSpeaking(false);
+  window.speechSynthesis.cancel();
 
-    window.speechSynthesis.speak(utterance);
+  const utterance = new SpeechSynthesisUtterance(textToSpeak);
+  const voices = window.speechSynthesis.getVoices();
+  const preferredVoice = pickBrowserVoice(voices, selectedVoiceType);
+
+  if (preferredVoice) utterance.voice = preferredVoice;
+
+  utterance.rate = selectedVoiceType === "cartoon" ? 0.82 : 0.9;
+  utterance.pitch = selectedVoiceType === "cartoon" ? 1.6 : 1;
+  utterance.volume = 1;
+
+  utterance.onstart = () => {
+    setSpeaking(true);
+    setCurrentPage(pageIndex);
   };
 
-  const downloadPDF = async () => {
-    if (!bookRef.current) return;
+  utterance.onend = () => {
+    if (!autoPlayRef.current) return;
 
-    try {
-      setDownloadLoading(true);
+    setSpeaking(false);
+    saveProgress(pageIndex);
 
-      const pdf = new jsPDF({
-        orientation: "portrait",
-        unit: "px",
-        format: "a4",
+    const nextPageIndex = pageIndex + 1;
+
+    if (nextPageIndex < pagesData.length) {
+      setTimeout(() => {
+        if (!autoPlayRef.current) return;
+
+        setCurrentPage(nextPageIndex);
+        playPage(nextPageIndex);
+      }, 700);
+    } else {
+      autoPlayRef.current = false;
+      setAutoPlay(false);
+      setSpeaking(false);
+      saveProgress(pageIndex);
+      alert("🎉 Story finished!");
+    }
+  };
+
+  utterance.onerror = () => {
+    autoPlayRef.current = false;
+    setAutoPlay(false);
+    setSpeaking(false);
+  };
+
+  window.speechSynthesis.speak(utterance);
+};
+
+ const downloadPDF = async () => {
+  try {
+    setDownloadLoading(true);
+
+    const pdf = new jsPDF({
+      orientation: "landscape",
+      unit: "mm",
+      format: "a4",
+    });
+
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+
+    const sanitizeText = (text = "") => {
+      return text
+        .replace(/[^\u0000-\u007F]/g, "")
+        .replace(/\s+/g, " ")
+        .trim();
+    };
+
+    const loadImage = (src) =>
+      new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = src;
       });
 
-      const originalPage = currentPage;
+    const themes = [
+      {
+        pageBg: [252, 244, 248],
+        blob1: [245, 232, 250],
+        blob2: [255, 239, 213],
+        blob3: [232, 244, 255],
+        cardBorder: [236, 220, 241],
+        badge: [224, 196, 238],
+        badgeText: [88, 58, 108],
+        pageBadge: [241, 228, 245],
+        pageBadgeText: [106, 82, 128],
+        sky: [246, 239, 255],
+        titleBanner: [255, 242, 204],
+        titleBannerBorder: [245, 214, 160],
+        titleText: [92, 52, 120],
+        divider: [226, 204, 236],
+        textBoxBg: [252, 248, 255],
+        textBoxBorder: [220, 201, 232],
+        footerBg: [244, 235, 248],
+        footerText: [130, 102, 150],
+      },
+      {
+        pageBg: [242, 248, 255],
+        blob1: [223, 240, 255],
+        blob2: [255, 242, 214],
+        blob3: [237, 230, 255],
+        cardBorder: [210, 226, 243],
+        badge: [188, 222, 255],
+        badgeText: [53, 86, 126],
+        pageBadge: [226, 240, 252],
+        pageBadgeText: [69, 97, 136],
+        sky: [237, 246, 255],
+        titleBanner: [255, 234, 214],
+        titleBannerBorder: [242, 195, 154],
+        titleText: [70, 77, 134],
+        divider: [200, 220, 240],
+        textBoxBg: [248, 252, 255],
+        textBoxBorder: [206, 224, 242],
+        footerBg: [231, 242, 252],
+        footerText: [94, 116, 145],
+      },
+      {
+        pageBg: [248, 245, 255],
+        blob1: [235, 228, 255],
+        blob2: [255, 239, 221],
+        blob3: [231, 248, 238],
+        cardBorder: [224, 215, 241],
+        badge: [214, 198, 248],
+        badgeText: [86, 63, 126],
+        pageBadge: [239, 232, 248],
+        pageBadgeText: [103, 84, 132],
+        sky: [245, 240, 255],
+        titleBanner: [255, 244, 200],
+        titleBannerBorder: [236, 213, 142],
+        titleText: [98, 64, 132],
+        divider: [221, 208, 239],
+        textBoxBg: [251, 248, 255],
+        textBoxBorder: [220, 208, 236],
+        footerBg: [239, 232, 248],
+        footerText: [121, 98, 148],
+      },
+    ];
 
-      for (let i = 0; i < pagesData.length; i++) {
-        setCurrentPage(i);
-        await new Promise((resolve) => setTimeout(resolve, 400));
+    const drawCircle = (x, y, r, color) => {
+      pdf.setFillColor(...color);
+      pdf.circle(x, y, r, "F");
+    };
 
-        const canvas = await html2canvas(bookRef.current, {
-          scale: 2,
-          backgroundColor: "#ffffff",
-          logging: false,
-          allowTaint: true,
-          useCORS: true,
+    const drawCloud = (x, y, scale = 1, color = [255, 255, 255]) => {
+      pdf.setFillColor(...color);
+      pdf.circle(x, y, 4 * scale, "F");
+      pdf.circle(x + 5 * scale, y - 2 * scale, 5 * scale, "F");
+      pdf.circle(x + 10 * scale, y, 4.5 * scale, "F");
+      pdf.roundedRect(x - 2 * scale, y, 14 * scale, 5 * scale, 2, 2, "F");
+    };
+
+    const drawStars = () => {
+      const dots = [
+        [18, 16, 1.1, [255, 214, 102]],
+        [28, 23, 0.8, [255, 193, 204]],
+        [190, 20, 1.0, [255, 214, 102]],
+        [197, 28, 0.8, [196, 181, 253]],
+        [22, 276, 1.0, [255, 193, 204]],
+        [188, 274, 1.0, [255, 214, 102]],
+      ];
+
+      dots.forEach(([x, y, r, c]) => drawCircle(x, y, r, c));
+    };
+
+    const drawPageDecorations = (theme) => {
+      pdf.setFillColor(...theme.pageBg);
+      pdf.rect(0, 0, pageWidth, pageHeight, "F");
+
+      pdf.setFillColor(...theme.blob1);
+      pdf.circle(26, 24, 19, "F");
+
+      pdf.setFillColor(...theme.blob2);
+      pdf.circle(190, 34, 16, "F");
+
+      pdf.setFillColor(...theme.blob3);
+      pdf.circle(182, 255, 20, "F");
+
+      drawStars();
+      drawCloud(24, 36, 0.7, [255, 255, 255]);
+      drawCloud(168, 30, 0.6, [255, 255, 255]);
+    };
+
+    const drawStoryPage = async ({
+      page,
+      index,
+      pageNumberLabel,
+      showContinuation = false,
+      contentOverride = null,
+    }) => {
+      const theme = themes[index % themes.length];
+      const cleanTitle = sanitizeText(page.title || `Chapter ${index + 1}`);
+      const cleanContent = sanitizeText(contentOverride ?? page.content ?? "");
+
+      {
+        drawPageDecorations(theme);
+
+        const cardX = 10;
+        const cardY = 10;
+        const cardW = pageWidth - 20;
+        const cardH = pageHeight - 20;
+        const textX = cardX + 16;
+        const textW = 130;
+        const imageX = cardX + cardW - 129;
+        const imageY = cardY + 20;
+        const imageW = 113;
+        const imageH = cardH - 40;
+
+        pdf.setFillColor(255, 248, 253);
+        pdf.roundedRect(cardX, cardY, cardW, cardH, 12, 12, "F");
+        pdf.setDrawColor(...theme.cardBorder);
+        pdf.setLineWidth(0.7);
+        pdf.roundedRect(cardX, cardY, cardW, cardH, 12, 12, "S");
+
+        pdf.setFillColor(255, 255, 255);
+        pdf.roundedRect(imageX - 3, imageY - 3, imageW + 6, imageH + 6, 10, 10, "F");
+        pdf.setDrawColor(...theme.textBoxBorder);
+        pdf.roundedRect(imageX - 3, imageY - 3, imageW + 6, imageH + 6, 10, 10, "S");
+
+        if (page.image) {
+          try {
+            const img = await loadImage(page.image);
+            let imgW = imageW;
+            let imgH = (img.height * imgW) / img.width;
+
+            if (imgH > imageH) {
+              imgH = imageH;
+              imgW = (img.width * imgH) / img.height;
+            }
+
+            const imgX = imageX + (imageW - imgW) / 2;
+            const imgY = imageY + (imageH - imgH) / 2;
+            pdf.addImage(img, "JPEG", imgX, imgY, imgW, imgH);
+          } catch (error) {
+            console.error("Image load failed:", error);
+          }
+        }
+
+        pdf.setFillColor(...theme.badge);
+        pdf.roundedRect(textX, cardY + 14, 43, 12, 6, 6, "F");
+        pdf.setFont("helvetica", "bold");
+        pdf.setFontSize(10);
+        pdf.setTextColor(...theme.badgeText);
+        pdf.text(
+          showContinuation ? `Chapter ${index + 1} cont.` : `Chapter ${index + 1}`,
+          textX + 5,
+          cardY + 21.5
+        );
+
+        pdf.setFillColor(...theme.pageBadge);
+        pdf.roundedRect(textX + textW - 36, cardY + 14, 36, 12, 6, 6, "F");
+        pdf.setDrawColor(...theme.textBoxBorder);
+        pdf.roundedRect(textX + textW - 36, cardY + 14, 36, 12, 6, 6, "S");
+        pdf.setFontSize(9.5);
+        pdf.setTextColor(...theme.pageBadgeText);
+        pdf.text(pageNumberLabel, textX + textW - 30, cardY + 21.4);
+
+        pdf.setFont("helvetica", "bold");
+        pdf.setFontSize(22);
+        pdf.setTextColor(...theme.titleText);
+        const titleText = showContinuation ? `${cleanTitle} (continued)` : cleanTitle;
+        const titleLines = pdf.splitTextToSize(titleText, textW);
+        pdf.text(titleLines.slice(0, 2), textX, cardY + 43);
+
+        const titleBlockHeight = Math.min(titleLines.length, 2) * 9;
+        const textBoxX = textX;
+        const textBoxY = cardY + 48 + titleBlockHeight;
+        const textBoxW = textW;
+        const textBoxH = cardY + cardH - textBoxY - 25;
+        const horizontalPadding = 8;
+        const topPadding = 12;
+        const lineHeight = 7.2;
+
+        pdf.setFillColor(...theme.textBoxBg);
+        pdf.setDrawColor(...theme.textBoxBorder);
+        pdf.setLineWidth(0.6);
+        pdf.roundedRect(textBoxX, textBoxY, textBoxW, textBoxH, 9, 9, "FD");
+
+        drawCircle(textBoxX + 8, textBoxY + 8, 1.4, [255, 196, 196]);
+        drawCircle(textBoxX + 13, textBoxY + 8, 1.4, [255, 223, 128]);
+        drawCircle(textBoxX + 18, textBoxY + 8, 1.4, [196, 181, 253]);
+
+        pdf.setFont("helvetica", "normal");
+        pdf.setFontSize(12.5);
+        pdf.setTextColor(60, 48, 95);
+        pdf.setLineHeightFactor(1.55);
+
+        const wrappedText = pdf.splitTextToSize(cleanContent, textBoxW - horizontalPadding * 2);
+        const maxLines = Math.floor((textBoxH - topPadding - 8) / lineHeight);
+        const firstChunk = wrappedText.slice(0, maxLines);
+        const remainingChunk = wrappedText.slice(maxLines);
+
+        pdf.text(firstChunk, textBoxX + horizontalPadding, textBoxY + topPadding);
+
+        pdf.setFillColor(...theme.footerBg);
+        pdf.roundedRect(textX + 15, cardY + cardH - 16, textW - 30, 8, 4, 4, "F");
+        pdf.setFont("helvetica", "bold");
+        pdf.setFontSize(8.5);
+        pdf.setTextColor(...theme.footerText);
+        pdf.text("TaleBot AI storybook reader", textX + textW / 2, cardY + cardH - 10.8, {
+          align: "center",
         });
 
-        const imgData = canvas.toDataURL("image/png");
-        const imgWidth = pdf.internal.pageSize.getWidth();
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-        if (i > 0) pdf.addPage();
-        pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
+        return remainingChunk;
       }
 
-      pdf.save(`${story?.title || "story"}.pdf`);
-      setCurrentPage(originalPage);
-      alert("✅ Story downloaded successfully!");
-    } catch (error) {
-      console.error("PDF error:", error);
-      alert("❌ Sorry, an error occurred. Please try again.");
-    } finally {
-      setDownloadLoading(false);
+      drawPageDecorations(theme);
+
+      const cardX = 10;
+      const cardY = 12;
+      const cardW = pageWidth - 20;
+      const cardH = pageHeight - 24;
+
+      pdf.setFillColor(255, 255, 255);
+      pdf.roundedRect(cardX, cardY, cardW, cardH, 10, 10, "F");
+
+      pdf.setDrawColor(...theme.cardBorder);
+      pdf.setLineWidth(0.6);
+      pdf.roundedRect(cardX, cardY, cardW, cardH, 10, 10, "S");
+
+      pdf.setFillColor(...theme.badge);
+      pdf.roundedRect(cardX + 6, cardY + 7, 40, 12, 5, 5, "F");
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(12);
+      pdf.setTextColor(...theme.badgeText);
+      pdf.text(
+        showContinuation ? `Chapter ${index + 1} - Continue` : `Chapter ${index + 1}`,
+        cardX + 8,
+        cardY + 14.8
+      );
+
+      pdf.setFillColor(...theme.pageBadge);
+      pdf.roundedRect(cardX + cardW - 34, cardY + 7, 28, 12, 5, 5, "F");
+      pdf.setFontSize(11);
+      pdf.setTextColor(...theme.pageBadgeText);
+      pdf.text(pageNumberLabel, cardX + cardW - 28.5, cardY + 14.8);
+
+      let currentY = cardY + 24;
+
+      if (!showContinuation) {
+        pdf.setFillColor(...theme.sky);
+        pdf.roundedRect(cardX + 8, currentY, cardW - 16, 96, 8, 8, "F");
+
+        drawCloud(cardX + 26, currentY + 14, 0.65, [255, 255, 255]);
+        drawCloud(cardX + cardW - 48, currentY + 18, 0.55, [255, 255, 255]);
+
+        if (page.image) {
+          try {
+            const img = await loadImage(page.image);
+
+            const frameX = cardX + 22;
+            const frameY = currentY + 6;
+            const frameW = cardW - 44;
+            const frameH = 84;
+
+            pdf.setFillColor(242, 236, 247);
+            pdf.roundedRect(frameX + 1.8, frameY + 1.8, frameW, frameH, 5, 5, "F");
+
+            pdf.setFillColor(255, 255, 255);
+            pdf.roundedRect(frameX, frameY, frameW, frameH, 5, 5, "F");
+            pdf.setDrawColor(...theme.cardBorder);
+            pdf.setLineWidth(0.8);
+            pdf.roundedRect(frameX, frameY, frameW, frameH, 5, 5, "S");
+
+            let imgW = frameW - 6;
+            let imgH = (img.height * imgW) / img.width;
+
+            if (imgH > frameH - 6) {
+              imgH = frameH - 6;
+              imgW = (img.width * imgH) / img.height;
+            }
+
+            const imgX = frameX + (frameW - imgW) / 2;
+            const imgY = frameY + (frameH - imgH) / 2;
+
+            pdf.addImage(img, "JPEG", imgX, imgY, imgW, imgH);
+          } catch (error) {
+            console.error("Image load failed:", error);
+          }
+        }
+
+        currentY += 104;
+      }
+
+      const titleBannerX = cardX + 16;
+      const titleBannerY = currentY;
+      const titleBannerW = cardW - 32;
+      const titleBannerH = showContinuation ? 16 : 18;
+
+      pdf.setFillColor(...theme.titleBanner);
+      pdf.roundedRect(titleBannerX, titleBannerY, titleBannerW, titleBannerH, 6, 6, "F");
+      pdf.setDrawColor(...theme.titleBannerBorder);
+      pdf.roundedRect(titleBannerX, titleBannerY, titleBannerW, titleBannerH, 6, 6, "S");
+
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(showContinuation ? 16 : 20);
+      pdf.setTextColor(...theme.titleText);
+
+      const titleText = showContinuation ? `${cleanTitle} (continued)` : cleanTitle;
+      const centeredTitle = pdf.splitTextToSize(titleText, titleBannerW - 12);
+      pdf.text(centeredTitle, pageWidth / 2, titleBannerY + (showContinuation ? 10.5 : 11.8), {
+        align: "center",
+      });
+
+      currentY += showContinuation ? 22 : 26;
+
+      pdf.setDrawColor(...theme.divider);
+      pdf.setLineWidth(0.7);
+      pdf.line(cardX + 14, currentY, cardX + cardW - 14, currentY);
+      currentY += 8;
+
+      // ===== صندوق النص المعدل =====
+      const textBoxX = cardX + 10;
+      const textBoxY = currentY;
+      const textBoxW = cardW - 20;
+
+      const horizontalPadding = 5;
+      const topPadding = 16;
+      const bottomPadding = 10;
+      const lineHeight = 7;
+
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(13);
+      pdf.setTextColor(78, 78, 78);
+      pdf.setCharSpace(0);
+
+      const usableTextWidth = textBoxW - (horizontalPadding * 2);
+      const wrappedText = pdf.splitTextToSize(cleanContent, usableTextWidth);
+
+      const maxTextHeight = showContinuation ? 165 : 82;
+      const maxLines = Math.floor((maxTextHeight - topPadding - bottomPadding) / lineHeight);
+
+      const firstChunk = wrappedText.slice(0, maxLines);
+      const remainingChunk = wrappedText.slice(maxLines);
+
+      const actualTextHeight = Math.max(
+        64,
+        topPadding + bottomPadding + (firstChunk.length * lineHeight)
+      );
+
+      const textBoxH = Math.min(maxTextHeight, actualTextHeight);
+
+      pdf.setFillColor(...theme.textBoxBg);
+      pdf.setDrawColor(...theme.textBoxBorder);
+      pdf.roundedRect(textBoxX, textBoxY, textBoxW, textBoxH, 8, 8, "FD");
+
+      drawCircle(textBoxX + 8, textBoxY + 8, 1.4, [255, 196, 196]);
+      drawCircle(textBoxX + 13, textBoxY + 8, 1.4, [255, 223, 128]);
+      drawCircle(textBoxX + 18, textBoxY + 8, 1.4, [196, 181, 253]);
+
+      pdf.text(firstChunk, textBoxX + horizontalPadding, textBoxY + topPadding);
+
+      pdf.setFillColor(...theme.footerBg);
+      pdf.roundedRect(cardX + 45, pageHeight - 23, cardW - 90, 9, 4, 4, "F");
+
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(9.2);
+      pdf.setTextColor(...theme.footerText);
+      pdf.text("A magical little story for happy readers", pageWidth / 2, pageHeight - 17.2, {
+        align: "center",
+      });
+
+      return remainingChunk;
+    };
+
+    let visualPageCounter = 1;
+
+    for (let i = 0; i < pagesData.length; i++) {
+      const page = pagesData[i];
+
+      if (i > 0) pdf.addPage();
+
+      let remaining = await drawStoryPage({
+        page,
+        index: i,
+        pageNumberLabel: `Page ${visualPageCounter}`,
+        showContinuation: false,
+      });
+
+      visualPageCounter += 1;
+
+      while (remaining.length > 0) {
+        pdf.addPage();
+
+        remaining = await drawStoryPage({
+          page,
+          index: i,
+          pageNumberLabel: `Page ${visualPageCounter}`,
+          showContinuation: true,
+          contentOverride: remaining.join(" "),
+        });
+
+        visualPageCounter += 1;
+      }
     }
-  };
+
+   pdf.save(`${sanitizeText(story?.title || "storybook")}.pdf`);
+alert("✅ PDF has been generated successfully!");
+
+} catch (error) {
+  console.error("PDF error:", error);
+  alert("❌ An error occurred while generating the PDF.");
+} finally {
+  setDownloadLoading(false);
+}
+};
 
   if (!story) return null;
 
   return (
     <>
       <div className="main-container">
-        <Sidebar activeItem="stories" />
+        {isChildReader ? (
+          <ChildSidebar child={child} activeItem="stories" />
+        ) : (
+          <Sidebar activeItem="stories" />
+        )}
 
         <main className="reader-page">
           <div className="reader-shell">
             <div className="reader-breadcrumb">
-              <span>Sarah's Adventures</span>
+              <span>{child?.name || "Child"}'s Adventures</span>
               <span className="crumb-separator">›</span>
               <span className="active-crumb">{story.title}</span>
             </div>
 
             <div className="reader-card">
+                {showProgressChoice && savedProgress && (
+    <div className="resume-progress-card">
+      <div>
+        <h3>Welcome back! ✨</h3>
+
+        <p>
+          You already started this story.
+          You reached {savedProgress.progress_percentage}% and spent about{" "}
+          {savedProgress.reading_time_minutes} min reading.
+        </p>
+      </div>
+
+      <div className="resume-progress-actions">
+        <button onClick={continueReading}>
+          Continue Reading
+        </button>
+
+        <button onClick={startStoryOver}>
+          Start Over
+        </button>
+      </div>
+    </div>
+  )}
+              
               <div className="sparkle sparkle-1">✦</div>
               <div className="sparkle sparkle-2">✦</div>
               <div className="sparkle sparkle-3">✦</div>
@@ -316,9 +1285,25 @@ export default function StoryReader() {
 
                     <h3 className="storybook-title">{currentStory.title}</h3>
 
-                    <div className="storybook-text-box">
-                      <p>{currentStory.content}</p>
-                    </div>
+                   <div className="storybook-text-box">
+  {isEditing ? (
+    <textarea
+      value={editedText}
+      onChange={(e) => setEditedText(e.target.value)}
+      style={{
+        width: "100%",
+        minHeight: "140px",
+        border: "none",
+        outline: "none",
+        resize: "vertical",
+        fontSize: "15px",
+        background: "transparent",
+      }}
+    />
+  ) : (
+    <p>{currentStory.content}</p>
+  )}
+</div>
 
                     <div className="storybook-actions">
                       <button
@@ -370,6 +1355,14 @@ export default function StoryReader() {
                       <i className="fa-solid fa-file-pdf"></i>
                       <span>{downloadLoading ? "Loading..." : "Download PDF"}</span>
                     </button>
+
+                    <button
+  className={`control-btn primary ${autoPlay ? "active" : ""}`}
+  onClick={autoPlayStory}
+>
+  <i className="fa-solid fa-play"></i>
+  <span>{autoPlay ? "Stop Auto Play" : "Auto Play Story"}</span>
+</button>
                   </div>
 
                   <div className="voice-group">
@@ -387,12 +1380,18 @@ export default function StoryReader() {
                       <i className="fa-solid fa-user-nurse"></i> Female
                     </button>
 
+                    
+
                     <button
-                      className={`voice-chip ${selectedVoiceType === "recorded" ? "active" : ""}`}
-                      onClick={() => selectVoiceType("recorded")}
-                    >
-                      <i className="fa-solid fa-microphone"></i> My Voice
-                    </button>
+  className={`voice-chip ${selectedVoiceType === "cartoon" ? "active" : ""} ${!canUseCartoonVoice ? "locked" : ""}`}
+  onClick={() => selectVoiceType("cartoon")}
+  disabled={!canUseCartoonVoice}
+  title={!canUseCartoonVoice ? "Premium or Unlimited plan required" : "Cartoon voice"}
+>
+  <i className="fa-solid fa-wand-magic-sparkles"></i> Cartoon
+  {!canUseCartoonVoice && <span className="voice-lock">Premium</span>}
+</button> 
+
                   </div>
                 </div>
 
@@ -402,15 +1401,16 @@ export default function StoryReader() {
                     <h3>Rate this Story</h3>
                   </div>
 
-                  <div className="rating-stars">
-                    <i className="fa-solid fa-star"></i>
-                    <i className="fa-solid fa-star"></i>
-                    <i className="fa-solid fa-star"></i>
-                    <i className="fa-solid fa-star"></i>
-                    <i className="fa-regular fa-star"></i>
-                  </div>
-
-                  <div className="rating-text">4.5 (234 reviews)</div>
+                 <div className="rating-stars">
+                 {[1, 2, 3, 4, 5].map((star) => (
+                  <i
+                   key={star}
+                   className="fa-solid fa-star"
+                   onClick={() => saveRating(star)}
+                   style={{ cursor: "pointer" }}
+                   ></i>
+                   ))}
+                 </div>
                 </div>
 
                 <div className="control-card">
@@ -420,17 +1420,27 @@ export default function StoryReader() {
                   </div>
 
                   <div className="insight-time">
-                    <span className="time-number">48</span>
+                    <span className="time-number">{Math.ceil(readingSeconds / 60)}</span>
                     <span className="time-unit">min</span>
                   </div>
 
                   <div className="progress-bar">
-                    <div className="progress-fill" style={{ width: "75%" }}></div>
-                  </div>
+<div
+  className="progress-fill"
+  style={{
+    width: `${progressPercentage}%`
+  }}
+></div>       
+           </div>
 
                   <div className="progress-labels">
-                    <span>75% completed</span>
-                    <span>12/16 chapters</span>
+                    <span>
+  {progressPercentage}% completed
+</span>
+
+<span>
+  {currentPage + 1}/{pagesData.length} pages
+</span>
                   </div>
                 </div>
 
@@ -441,27 +1451,31 @@ export default function StoryReader() {
                   </div>
 
                   <div className="control-buttons vertical">
-                    <button className="control-btn outline" onClick={() => alert("Edit Text ✏️")}>
-                      <i className="fa-regular fa-pen-to-square"></i> Edit Text
-                    </button>
+             <button
+  className="control-btn outline"
+  onClick={() => {
+    if (isEditing) {
+      saveEditedText();
+    } else {
+      setEditedText(currentStory.content);
+      setIsEditing(true);
+    }
+  }}
+>
+  <i className="fa-regular fa-pen-to-square"></i>
+  {isEditing ? " Save Text" : " Quick Edit"}
+</button>
 
-                    <button
-                      className="control-btn outline"
-                      onClick={() => alert("Added to favorites ❤️")}
-                    >
-                      <i className="fa-regular fa-heart"></i> Add to Favorites
-                    </button>
+                    <button className="control-btn outline" onClick={toggleFavorite}>
+  <i
+    className={isFavorite ? "fa-solid fa-heart" : "fa-regular fa-heart"}
+    style={{ color: isFavorite ? "red" : undefined }}
+  ></i>
+  {isFavorite ? " In Favorites" : " Add to Favorites"}
+</button>
                   </div>
                 </div>
 
-                <div className="control-card ai-status">
-                  <div className="status-row">
-                    <span className="status-dot green"></span>
-                    <span className="status-label">AI Engine Status</span>
-                  </div>
-
-                  <div className="status-badge">Story Complete ✅</div>
-                </div>
               </div>
             </div>
           </div>
@@ -496,10 +1510,10 @@ export default function StoryReader() {
         {/* شريط التقدم */}
         <div className="fullscreen-progress">
           <div className="fullscreen-progress-bar">
-            <div className="fullscreen-progress-fill" style={{ width: `${Math.round(((currentPage + 1) / pagesData.length) * 100)}%` }}></div>
+            <div className="fullscreen-progress-fill" style={{ width: `${progressPercentage}%` }}></div>
           </div>
           <span className="fullscreen-progress-text">
-            Page {currentPage + 1} of {pagesData.length} · {Math.round(((currentPage + 1) / pagesData.length) * 100)}% complete
+            Page {progressPercentage}% complete
           </span>
         </div>
 

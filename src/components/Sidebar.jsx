@@ -1,9 +1,51 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 
 export default function Sidebar() {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const [account, setAccount] = useState(() => {
+    const storedUser = localStorage.getItem("user");
+    try {
+      return storedUser ? JSON.parse(storedUser) : null;
+    } catch {
+      return null;
+    }
+  });
+  const accountName = account?.name || account?.full_name || account?.email || "User";
+
+  const initials = useMemo(() => {
+    const parts = accountName.trim().split(/\s+/).filter(Boolean);
+
+    if (parts.length >= 2) {
+      return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+    }
+
+    return accountName.slice(0, 2).toUpperCase();
+  }, [accountName]);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    if (!token) return;
+
+    fetch("http://127.0.0.1:8000/api/user", {
+      headers: {
+        Accept: "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!data) return;
+
+        setAccount(data);
+        localStorage.setItem("user", JSON.stringify(data));
+      })
+      .catch((error) => {
+        console.error("Sidebar user error:", error);
+      });
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -79,12 +121,12 @@ export default function Sidebar() {
             }}
           >
             <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center text-white font-bold text-lg shadow-md border-2 border-white/60">
-              SJ
+              {initials}
             </div>
             <div>
-              <h4 className="font-bold text-gray-800">Sarah Johnson</h4>
+              <h4 className="font-bold text-gray-800">{accountName}</h4>
               <p className="text-xs text-purple-600 font-semibold bg-white/60 px-2 py-0.5 rounded-full inline-block mt-1 border border-white/80">
-                Premium Plan
+                {account?.plan ? `${account.plan.charAt(0).toUpperCase()}${account.plan.slice(1)} Plan` : "Free Plan"}
               </p>
             </div>
           </button>
