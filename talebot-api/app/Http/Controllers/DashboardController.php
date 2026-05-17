@@ -54,6 +54,14 @@ class DashboardController extends Controller
             ->latest()
             ->get();
 
+        $rejectedImagesByStory = DB::table('story_pages')
+            ->whereIn('story_id', $stories->pluck('id'))
+            ->where('status', 'Rejected')
+            ->whereNotNull('image_url')
+            ->where('image_url', '!=', '')
+            ->get(['story_id', 'image_url'])
+            ->groupBy('story_id');
+
         $progress = DB::table('story_progress')
             ->where('child_id', $child->id)
             ->get();
@@ -102,14 +110,16 @@ class DashboardController extends Controller
                 return $percentage > 0 && $percentage < 100;
             })
             ->values()
-            ->map(function ($story) use ($progress, $child) {
+            ->map(function ($story) use ($progress, $child, $rejectedImagesByStory) {
             $storyProgress = $progress->firstWhere('story_id', $story->id);
+            $rejectedImages = $rejectedImagesByStory->get($story->id, collect())->pluck('image_url');
+            $coverImage = $rejectedImages->contains($story->cover_image) ? null : $story->cover_image;
 
             return [
                 'id' => $story->id,
                 'title' => $story->title,
                 'genre' => $story->genre,
-                'cover_image' => $story->cover_image,
+                'cover_image' => $coverImage,
                 'child_name' => $child->name,
                 'progress_percentage' => $storyProgress->progress_percentage ?? 0,
             ];

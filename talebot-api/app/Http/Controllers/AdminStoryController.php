@@ -219,6 +219,7 @@ class AdminStoryController extends Controller
         $storyPage->update([
             'status' => $status,
             'moderation_status' => $moderationStatus,
+            'image_url' => $status === 'Rejected' ? null : $storyPage->image_url,
         ]);
 
         return response()->json([

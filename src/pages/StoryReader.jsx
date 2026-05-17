@@ -145,13 +145,25 @@ fetch(`http://127.0.0.1:8000/api/favorites/check/${selectedChildId}/${story.id}`
     .catch((error) => console.error("Check favorite error:", error));
 }, [story?.id, selectedChildId]);
 
+  const resolvePageImage = (page, fallbackImage = null) => {
+    if (Object.prototype.hasOwnProperty.call(page, "image")) {
+      return page.image || null;
+    }
+
+    if (Object.prototype.hasOwnProperty.call(page, "image_url")) {
+      return page.image_url || null;
+    }
+
+    return fallbackImage;
+  };
+
   const pagesData = useMemo(() => {
     if (story?.chapters && story.chapters.length > 0) {
       return story.chapters.map((chapter, index) => ({
         id: chapter.id,
         title: chapter.title || `Page ${index + 1}`,
         content: chapter.content || chapter.text || "",
-        image: chapter.image || story.image,
+        image: resolvePageImage(chapter),
       }));
     }
 
@@ -160,7 +172,7 @@ fetch(`http://127.0.0.1:8000/api/favorites/check/${selectedChildId}/${story.id}`
         id: page.id,
         title: page.title || story.title || `Page ${page.page_number || index + 1}`,
         content: page.content || page.text || page.text_content || "",
-        image: page.image || page.image_url || story.image || story.cover_image,
+        image: resolvePageImage(page, story.image || story.cover_image),
       }));
     }
 
@@ -1279,7 +1291,9 @@ alert("✅ PDF has been generated successfully!");
                   <div className="storybook-float star-c">🌙</div>
 
                   <div className="storybook-media">
-                    <img src={currentStory.image} alt={currentStory.title} />
+                    {currentStory.image && (
+                      <img src={currentStory.image} alt={currentStory.title} />
+                    )}
                     <div className="storybook-cloud cloud-1"></div>
                     <div className="storybook-cloud cloud-2"></div>
                   </div>
@@ -1501,12 +1515,14 @@ alert("✅ PDF has been generated successfully!");
 
       <div className="fullscreen-content">
         {/* الصورة - كاملة بدون تقطيع */}
-        <div className="fullscreen-image">
-          <img src={currentStory.image} alt={currentStory.title} />
-          <div className="fullscreen-chapter-badge">
-            <i className="fa-regular fa-star"></i> Chapter {currentPage + 1}
+        {currentStory.image && (
+          <div className="fullscreen-image">
+            <img src={currentStory.image} alt={currentStory.title} />
+            <div className="fullscreen-chapter-badge">
+              <i className="fa-regular fa-star"></i> Chapter {currentPage + 1}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* العنوان */}
         <h1 className="fullscreen-title">{currentStory.title}</h1>

@@ -43,11 +43,21 @@ class ProfileController extends Controller
     $aiInsight = AiInsight::where('user_id', $user->id)->where('child_id', $child->id)->latest()->first();
     $completionRate = $aiInsight?->completion_rate ?? 0;
     $avgRating = $aiInsight?->avg_rating ?? 0;
-    $favoriteStories = Favorite::where('child_id',$child->id)->with('story')->take(3)->get()->map(function ($favorite) {
+    $favoriteStories = Favorite::where('child_id',$child->id)
+        ->with('story.pages')
+        ->take(3)
+        ->get()
+        ->map(function ($favorite) {
+        $story = $favorite->story;
+        $coverPage = $story?->pages?->firstWhere('image_url', $story->cover_image);
+        $cover = $coverPage?->status === 'Rejected'
+            ? null
+            : ($story?->cover_image ?? 'default.jpg');
+
         return [
-            'title' => $favorite->story?->title,
-            'genre' => $favorite->story?->genre,
-            'cover' => $favorite->story?->cover_image ?? 'default.jpg',
+            'title' => $story?->title,
+            'genre' => $story?->genre,
+            'cover' => $cover,
         ];
     });
     $latestActivity = Activity::where('user_id', $user->id)->where('child_id', $child->id)->latest()->first();
