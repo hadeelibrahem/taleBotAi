@@ -34,32 +34,39 @@ class SettingsController extends Controller
         return $request->user();
     }
 
-    private function addNotification(User $user, string $title, string $message): void
-    {
-        $settings = UserSetting::firstOrCreate(
-            ['user_id' => $user->id],
-            [
-                'new_story_suggestions' => false,
-                'reading_reminders' => false,
-                'account_updates' => false,
-                'disable_story_sharing' => false,
-                'reading_time_limits' => false,
-            ]
-        );
+    private function addNotification(
+    User $user,
+    string $title,
+    string $message,
+    string $type = 'general'
+): void {
+    $settings = UserSetting::firstOrCreate(
+        ['user_id' => $user->id],
+        [
+            'new_story_suggestions' => false,
+            'reading_reminders' => false,
+            'account_updates' => false,
+            'disable_story_sharing' => false,
+            'reading_time_limits' => false,
+        ]
+    );
 
-        if (!$settings->account_updates) {
-            return;
-        }
-
-        DB::table('notifications')->insert([
-            'user_id' => $user->id,
-            'title' => $title,
-            'message' => $message,
-            'is_read' => 0,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+    if (
+        $type === 'story'
+        && !$settings->new_story_suggestions
+    ) {
+        return;
     }
+
+    DB::table('notifications')->insert([
+        'user_id' => $user->id,
+        'title' => $title,
+        'message' => $message,
+        'is_read' => 0,
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+}
 
     public function index(Request $request): JsonResponse
     {
@@ -225,11 +232,12 @@ class SettingsController extends Controller
             'allow_photo_usage' => $request->boolean('allow_photo_usage'),
         ]);
 
-        $this->addNotification(
-            $user,
-            'Child Profile Added 👶',
-            'Added new child profile: ' . $child->name
-        );
+       $this->addNotification(
+    $user,
+    'Child Profile Added 👶',
+    'Added new child profile: ' . $child->name,
+    'general'
+);
 
         return response()->json([
             'message' => 'Child profile created successfully',

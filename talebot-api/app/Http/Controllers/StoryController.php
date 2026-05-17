@@ -133,6 +133,15 @@ class StoryController extends Controller
             return $story;
         });
 
+        DB::table('notifications')->insert([
+    'user_id' => $user->id,
+    'title' => 'New Story Created 📖',
+    'message' => 'A new story "' . $story->title . '" was created successfully.',
+    'is_read' => 0,
+    'created_at' => now(),
+    'updated_at' => now(),
+]);
+
         return response()->json([
             'success' => true,
             'message' => 'Story generated successfully',
