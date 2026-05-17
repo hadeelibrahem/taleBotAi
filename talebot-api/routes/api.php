@@ -48,7 +48,7 @@ Route::middleware(['auth:sanctum', 'admin.token'])->group(function () {
 
 
 Route::get('/password/reset/{token}', function ($token) {
-    return redirect('http://localhost:3000/?token=' . $token . '&email=' . request('email'));
+    return redirect('http://localhost:5173/?token=' . $token . '&email=' . request('email'));
 })->name('password.reset');
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) { return $request->user(); });
