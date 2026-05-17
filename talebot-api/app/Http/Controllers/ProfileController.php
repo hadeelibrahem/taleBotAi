@@ -12,6 +12,7 @@ use App\Models\Favorite;
 use App\Models\Activity;
 use App\Models\AiInsight;
 use App\Models\PremiumSetting;
+use App\Models\StoryRating;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 
@@ -41,8 +42,11 @@ class ProfileController extends Controller
     $storiesInProgress = StoryProgress::where('child_id',$child->id)->where('progress_percentage','>',0)->where('progress_percentage','<',100)->count();
     $weeklyGoalCurrent = StoryProgress::where('child_id', $child->id)->whereBetween('last_read_at', [Carbon::now()->startOfWeek(),Carbon::now()->endOfWeek()])->count();
     $aiInsight = AiInsight::where('user_id', $user->id)->where('child_id', $child->id)->latest()->first();
-    $completionRate = $aiInsight?->completion_rate ?? 0;
-    $avgRating = $aiInsight?->avg_rating ?? 0;
+    $progressCount = StoryProgress::where('child_id', $child->id)->count();
+    $completionRate = $progressCount > 0
+        ? round(StoryProgress::where('child_id', $child->id)->where('progress_percentage', '>=', 100)->count() / $progressCount * 100)
+        : 0;
+    $avgRating = round(StoryRating::where('child_id', $child->id)->avg('rating') ?? 0, 1);
     $favoriteStories = Favorite::where('child_id',$child->id)
         ->with('story.pages')
         ->take(3)
@@ -71,8 +75,18 @@ class ProfileController extends Controller
     $safeContent = $premiumSetting && $premiumSetting->safe_content_filter ? 'Enabled': 'Disabled';
     $avatar = $child->avatar ?? 'default-avatar.jpg';
     $memberSince = $user->created_at?->format('F Y') ?? 'Not available';
-    $popularTheme = $aiInsight?->popular_theme ?? 'Not available';
-    $suggestedMoral = $aiInsight?->suggested_moral ?? 'Not available';
+    $popularTheme = Story::where('child_id', $child->id)
+        ->where('status', 'Approved')
+        ->selectRaw('genre, COUNT(*) as total')
+        ->groupBy('genre')
+        ->orderByDesc('total')
+        ->value('genre') ?? $aiInsight?->popular_theme ?? 'Not available';
+    $suggestedMoral = Story::where('child_id', $child->id)
+        ->where('status', 'Approved')
+        ->selectRaw('moral_lesson, COUNT(*) as total')
+        ->groupBy('moral_lesson')
+        ->orderByDesc('total')
+        ->value('moral_lesson') ?? $aiInsight?->suggested_moral ?? 'Not available';
 
 
   $weeklyGoalTarget = 5;

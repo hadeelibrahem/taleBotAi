@@ -284,10 +284,6 @@ export default function Profile() {
                         <div className="insight-value">{user.suggestedMoral}</div>
                       </div>
 
-                      <div className="insight-card">
-                        <div className="insight-label">Safe Content Filter</div>
-                        <div className="insight-value">{user.safeContent}</div>
-                      </div>
                     </div>
                   </div>
                 )}
